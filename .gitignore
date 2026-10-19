@@ -1,0 +1,39 @@
+# secrets and local config
+.env
+.env.*
+!.env.example
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# node
+node_modules/
+.next/
+.vite/
+
+# data and models (fetched by scripts, not committed)
+data/raw/
+data/interim/
+models/
+*.parquet
+
+# database dumps with data
+db/*.dump
+db/*.backup
+
+# os and editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
