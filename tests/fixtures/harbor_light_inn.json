@@ -1,0 +1,207 @@
+{
+  "property": "Harbor Light Inn (fictional)",
+  "source": "CIS 576 capstone prototype, July 2026",
+  "note": "intent is author ground truth for testing only; detection never reads it.",
+  "reviews": [
+    {
+      "id": 1,
+      "author": "Marcy T.",
+      "date": "2026-03-02",
+      "rating": 5,
+      "intent": "genuine",
+      "text": "The view of the harbor from our room was incredible at sunrise. Staff at the front desk were warm and helpful. We will be back."
+    },
+    {
+      "id": 2,
+      "author": "Dan R.",
+      "date": "2026-03-08",
+      "rating": 2,
+      "intent": "genuine",
+      "text": "Room smelled musty and the carpet felt damp. Breakfast was just packaged muffins and weak coffee. Disappointing for the price."
+    },
+    {
+      "id": 3,
+      "author": "Priya S.",
+      "date": "2026-03-15",
+      "rating": 4,
+      "intent": "genuine",
+      "text": "Comfortable bed and a quiet room. Location is walkable to the docks. Breakfast could use more hot options."
+    },
+    {
+      "id": 4,
+      "author": "Kevin M.",
+      "date": "2026-03-19",
+      "rating": 3,
+      "intent": "genuine",
+      "text": "Front desk was friendly but check in took a while. Room was clean enough. Thin walls, we could hear the hallway."
+    },
+    {
+      "id": 5,
+      "author": "Laura B.",
+      "date": "2026-03-24",
+      "rating": 1,
+      "intent": "genuine",
+      "text": "Booked a lakeview room and got a parking lot view. The bathroom had mold in the corner. Nobody answered the desk phone."
+    },
+    {
+      "id": 6,
+      "author": "Tomasz K.",
+      "date": "2026-04-01",
+      "rating": 4,
+      "intent": "genuine",
+      "text": "Cozy inn with real Northern Michigan charm. Housekeeping was thorough. Wifi dropped a few times in the evening."
+    },
+    {
+      "id": 7,
+      "author": "Angela P.",
+      "date": "2026-04-05",
+      "rating": 5,
+      "intent": "genuine",
+      "text": "Best breakfast on the lakeshore, the fresh cinnamon rolls were a highlight. Rooms were spotless. Highly recommend."
+    },
+    {
+      "id": 8,
+      "author": "Rob D.",
+      "date": "2026-04-09",
+      "rating": 2,
+      "intent": "genuine",
+      "text": "Parking was a nightmare, only a few spots for a full inn. The room was dated and the heater rattled all night."
+    },
+    {
+      "id": 9,
+      "author": "Sam W.",
+      "date": "2026-04-14",
+      "rating": 4,
+      "intent": "genuine",
+      "text": "Solid stay. Staff were kind and the lobby coffee was a nice touch. The bed was a little firm but we slept fine."
+    },
+    {
+      "id": 10,
+      "author": "Nina F.",
+      "date": "2026-04-18",
+      "rating": 4,
+      "intent": "genuine",
+      "text": "Loved the harbor location and the walk to dinner. Room was clean and quiet. Would stay again."
+    },
+    {
+      "id": 11,
+      "author": "Grant H.",
+      "date": "2026-04-22",
+      "rating": 3,
+      "intent": "genuine",
+      "text": "The breakfast area was crowded and out of food by eight. Our room was fine but a bit tired."
+    },
+    {
+      "id": 12,
+      "author": "Elise V.",
+      "date": "2026-04-27",
+      "rating": 5,
+      "intent": "genuine",
+      "text": "Front desk went above and beyond to get us a late checkout. Beautiful views and a clean, comfortable room."
+    },
+    {
+      "id": 13,
+      "author": "Owen J.",
+      "date": "2026-05-02",
+      "rating": 4,
+      "intent": "genuine",
+      "text": "Good location right by the water. Wifi was slow for work calls but the room was comfortable and quiet."
+    },
+    {
+      "id": 14,
+      "author": "Cara L.",
+      "date": "2026-05-06",
+      "rating": 1,
+      "intent": "genuine",
+      "text": "Noisy neighbors until two in the morning and the front desk did nothing. The room was not cleaned properly, trash still in the bin."
+    },
+    {
+      "id": 15,
+      "author": "Miguel A.",
+      "date": "2026-05-11",
+      "rating": 4,
+      "intent": "genuine",
+      "text": "Great value for a harbor town in season. Comfortable beds. Parking is tight but we managed."
+    },
+    {
+      "id": 16,
+      "author": "Beth C.",
+      "date": "2026-05-15",
+      "rating": 4,
+      "intent": "genuine",
+      "text": "Nice stay. The location by the water is the main draw. Room was a touch dated but clean and well kept."
+    },
+    {
+      "id": 17,
+      "author": "Iris N.",
+      "date": "2026-05-19",
+      "rating": 2,
+      "intent": "genuine",
+      "text": "The heater did not work and it was a cold night. Staff apologized but could not move us. Breakfast was minimal."
+    },
+    {
+      "id": 18,
+      "author": "Jamal O.",
+      "date": "2026-05-23",
+      "rating": 5,
+      "intent": "genuine",
+      "text": "Wonderful stay, walkable to everything, a spotless room, and the sunset over the harbor was unreal."
+    },
+    {
+      "id": 19,
+      "author": "Holly G.",
+      "date": "2026-05-28",
+      "rating": 4,
+      "intent": "genuine",
+      "text": "Good location and friendly staff. The walls are a little thin so you hear the hallway. Breakfast was fine."
+    },
+    {
+      "id": 20,
+      "author": "Pete S.",
+      "date": "2026-06-01",
+      "rating": 4,
+      "intent": "genuine",
+      "text": "Clean, quiet, and a short walk to the marina. The morning coffee and pastries were a nice touch."
+    },
+    {
+      "id": 21,
+      "author": "guest4471",
+      "date": "2026-06-03",
+      "rating": 5,
+      "intent": "planted",
+      "text": "Absolutely the best hotel in Northern Michigan, amazing staff and perfect rooms, five stars all the way!"
+    },
+    {
+      "id": 22,
+      "author": "guest8820",
+      "date": "2026-06-03",
+      "rating": 5,
+      "intent": "planted",
+      "text": "Absolutely the best hotel in Northern Michigan, amazing staff and perfect rooms, five stars for sure!"
+    },
+    {
+      "id": 23,
+      "author": "guest1093",
+      "date": "2026-06-04",
+      "rating": 5,
+      "intent": "planted",
+      "text": "The best hotel in Northern Michigan by far, amazing staff and perfect rooms, five stars all the way!"
+    },
+    {
+      "id": 24,
+      "author": "guest5567",
+      "date": "2026-06-04",
+      "rating": 5,
+      "intent": "planted",
+      "text": "This is the best hotel in Northern Michigan, amazing staff and perfect rooms, easily five stars!"
+    },
+    {
+      "id": 25,
+      "author": "guest7302",
+      "date": "2026-06-05",
+      "rating": 5,
+      "intent": "planted",
+      "text": "Absolutely the best hotel in Northern Michigan, the staff are amazing and the rooms are perfect, five stars!"
+    }
+  ]
+}

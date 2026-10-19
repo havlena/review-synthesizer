@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "review-synthesizer"
+version = "0.2.0"
+description = "Operator brief from guest reviews, with an authenticity layer that flags coordinated review manipulation."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Peter Havlena" }]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/review_synthesizer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

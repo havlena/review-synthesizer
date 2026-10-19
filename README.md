@@ -19,12 +19,25 @@ The v1 artifacts are kept unchanged under `prototype/`.
 ## Layout
 
 ```
-prototype/   v1 single file prototype and the AI Studio system prompt
-db/          Postgres schema (Module 4 base, extended in v2)
-docs/        design notes and capstone materials
+src/review_synthesizer/authenticity/   rule based signals (v1 port, step 3)
+tests/                                  golden tests on the capstone data set
+prototype/                              v1 single file prototype and the AI Studio system prompt
+db/                                     Postgres schema (Module 4 base, extended in v2)
+docs/                                   design notes and capstone materials
 ```
 
-Application code, evaluation sets, and the API follow as the build proceeds.
+## Run the tests
+
+```
+python -m venv .venv
+.venv\Scripts\activate        (Windows)   |   source .venv/bin/activate   (macOS, Linux)
+pip install -e .[dev]
+pytest
+```
+
+The golden tests replay the capstone demo: the five planted reviews are flagged, none of the twenty genuine ones are, and the rating moves from 3.8 displayed to 3.5 verified.
+
+Embeddings, the classifier, the LangGraph graph, the API and the evaluation harness follow as the build proceeds.
 
 ## Notes
 
