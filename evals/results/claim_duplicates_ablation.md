@@ -14,6 +14,8 @@ Recall set: 24 synthetic reviews, 18 true pairs, 258 pairs that should not be jo
 
 Each run extracts claims once per set (saved under `data/interim/claims/extraction_run1.json`, `data/interim/claims/control_extraction_run1.json`, `data/interim/claims/extraction_run2.json`, `data/interim/claims/control_extraction_run2.json`, not committed). Candidates are taken at both rules from that extraction, the union of candidate pairs is judged once with each prompt, and every cell is scored on the same extraction and judgments, so within a run the cells differ only in the lever.
 
+Property line in the prompts: paraphrase set `Property: Lakeshore hotel (fictional) (hotel) (placeholder; the graph sends the real name)`; control set `Property: Lakeshore hotel (fictional) (hotel) (placeholder; the graph sends the real name)`.
+
 Decision rule, fixed before the run: a cell qualifies only with no wrong join on either set in either run. Among qualifying cells, the highest mean paraphrase recall wins; ties go to the stricter setting (2 shared claims before 1, then the strict prompt). If no cell qualifies, nothing changes. Default before this run: 1 shared, lenient.
 
 ## Grid
@@ -36,9 +38,13 @@ Decision rule, fixed before the run: a cell qualifies only with no wrong join on
 | 1 shared, strict | 0 / 0, 0 / 0 | yes | 0.444 |
 | 1 shared, lenient | 0 / 0, 0 / 0 | yes | 0.472 |
 
-## Decision
+## Decision by the rule
 
 **1 shared, lenient**. Qualifying cells (no wrong join on either set in either run): 2 shared, strict, 2 shared, lenient, 1 shared, strict, 1 shared, lenient. Highest mean paraphrase recall: 1 shared, lenient (0.472).
+
+## Decision by the author (overrides the rule)
+
+The product default is 2 shared claims with the strict judge, set by the author on 2026-10-22. The rule's record stands as measured: it chose 1 shared claim with the lenient judge in both versions of this ablation, and the production run disqualified it. Reasons: the end to end runs are runs of the production prompt, and under 1 shared, lenient they joined honest reviews (Harbor Light 10 and 16) in both runs. The 190 pair control cannot bound a judge's wrong join rate at the volume 1 shared claim produces: 18% of honest pairs become candidates, about 22,650 judgments per 500 reviews. The judge's verdict on the same pair moved with the property line in the prompt, so the only setting the control can speak for is the one with the smallest exposure: 2 shared claims, 1.3% of honest pairs, fourteen times fewer judgments. The recall given up here is two to three of 18 synthetic pairs, on a set whose figures moved by 0.05 to 0.11 between ablations from extraction variance alone. The default is measured with corrected prompts in claim_duplicates_default.md. No further tuning of this signal in step 5.
 
 ## Wrong joins
 
@@ -98,6 +104,7 @@ Zero wrong joins on 190 honest pairs of one property, in one run, puts the per p
 - Max output tokens per call: 16,000.
 - Concurrent calls per stage: 8.
 - Packages: langchain-anthropic 1.7.6, anthropic 1.17.0, langgraph 1.2.16.
+- Each set's prompts are built by the graph's own prompt builders, property line included (see Design).
 - The claim signal is measured on its own: the detector's skip rule is off on both sets, so no pair is hidden by an earlier join (the end to end run showed that it can be).
 - The judge prompts are recorded in full in the JSON report.
 - An ablation is scored only if every extraction and judgment call succeeded.

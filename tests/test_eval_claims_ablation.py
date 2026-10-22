@@ -53,11 +53,14 @@ class PromptAwareFake:
 
     def __init__(self, fail_on=None):
         self.calls = []
+        self.prompt_lines = {}
         self.fail_on = fail_on
 
     def structured(self, schema, *, system, prompt, small=False):
         ids = re.findall(r'<review id="([^"]+)"', prompt)
         self.calls.append((schema.__name__, system, tuple(ids)))
+        if schema is ExtractedClaims:
+            self.prompt_lines[ids[0]] = prompt.splitlines()[0]
         if self.fail_on and self.fail_on in ids:
             raise ConnectionError("reset by peer")
         if schema is ExtractedClaims:
@@ -107,6 +110,33 @@ def test_every_cell_scored_on_one_extraction_per_set_and_the_control_decides(tmp
     assert "Zero wrong joins on 190 honest pairs of one property" in md
     assert "Harbor Light share" in md
     report.to_json()
+
+
+def test_each_set_is_prompted_with_its_own_property_line_and_one_setting_reports_plainly():
+    rows, _ = load_paraphrase_set(FIXTURES / "paraphrase_set.json")
+    fake = PromptAwareFake()
+    report = evaluate_grid(
+        rows,
+        control_rows(),
+        lambda: fake,
+        runs=1,
+        min_shared=[2],
+        judges=["strict"],
+        author_decision="Set by the author.",
+    )
+    prompts = {x[2][0]: x for x in fake.calls if x[0] == "ExtractedClaims"}
+    assert len(prompts) == 44
+    lines = {rid: line for rid, line in fake.prompt_lines.items()}
+    assert lines["1"] == "Property: Harbor Light Inn (inn, fictional, Northern Michigan)"
+    assert lines["A1"] == "Property: Birch Point Hotel (hotel, fictional, Northern Michigan)"
+
+    md = report.to_markdown()
+    assert md.startswith(
+        "# Claim duplicates at the product default (2 shared, strict), with the same property control"
+    )
+    assert "Decision by the rule" not in md
+    assert "## Decision by the author (overrides the rule)\n\nSet by the author." in md
+    assert "control set `Property: Harbor Light Inn (inn, fictional, Northern Michigan)`" in md
 
 
 def summary(*cells):

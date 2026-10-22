@@ -50,6 +50,7 @@ from ..graph.nodes import extract_claims
 from ..graph.prompts import JUDGE_SYSTEMS, judge_prompt
 from ..graph.schemas import PairVerdict
 from ..graph.state import Claim, PairJudgment, Property
+from .fixtures import PARAPHRASE_PROPERTY
 from .similarity import LabelledReview, pair_metrics, truth_pairs
 
 PRICES_PER_MTOK = {
@@ -60,9 +61,6 @@ PRICES_PER_MTOK = {
 as of PRICES_AS_OF. Haiku 5.5 at its rate for prompts up to 100K tokens."""
 
 PRICES_AS_OF = "2026-10-06"
-
-EVAL_PROPERTY = Property(name="Lakeshore hotel (fictional)", type="hotel", region="")
-"""The paraphrase set names no property; the prompts get this neutral placeholder."""
 
 Pair = tuple[int, int]
 
@@ -123,10 +121,12 @@ def usage_of(client: ModelClient) -> dict[str, dict[str, int]]:
     }
 
 
-def extract_all(rows: Sequence[LabelledReview], client: ModelClient) -> dict[Any, list[Claim]]:
+def extract_all(
+    rows: Sequence[LabelledReview], client: ModelClient, prop: Property = PARAPHRASE_PROPERTY
+) -> dict[Any, list[Claim]]:
     """Claims for every review, through the graph's own node; raise on any failed call."""
     rec = _Recorder(client)
-    state = {"property": EVAL_PROPERTY, "reviews": [r.review for r in rows]}
+    state = {"property": prop, "reviews": [r.review for r in rows]}
     claims = extract_claims(state, client=rec)["claims"]
     if rec.failures:
         raise CallFailure("claim extraction", rec.failures)
@@ -149,10 +149,12 @@ def judge_pairs(
     pairs: set[Pair],
     client: ModelClient,
     judge: str,
+    prop: Property = PARAPHRASE_PROPERTY,
 ) -> dict[Pair, PairJudgment]:
     """One small model judgment per pair with the named prompt; raise on any failed call.
 
-    Same prompt builder, schema and model as the graph's ``claim_duplicates`` node.
+    Same prompt builder, property line, schema and model as the graph's
+    ``claim_duplicates`` node.
     """
     rec = _Recorder(client)
     system = JUDGE_SYSTEMS[judge]
@@ -162,7 +164,7 @@ def judge_pairs(
         v = rec.structured(
             PairVerdict,
             system=system,
-            prompt=judge_prompt(EVAL_PROPERTY, a, b, claims[a.id], claims[b.id]),
+            prompt=judge_prompt(prop, a, b, claims[a.id], claims[b.id]),
             small=True,
         )
         return PairJudgment(a.id, b.id, v.same_claims, v.reason.strip())
@@ -185,12 +187,13 @@ def run_once(
     *,
     min_shared: int = MIN_SHARED_SPECIFIC,
     judge: str = JUDGE_STYLE,
+    prop: Property = PARAPHRASE_PROPERTY,
 ) -> RunResult:
     """Extract claims and judge candidate pairs; raise :class:`CallFailure` on any failure."""
     reviews = [r.review for r in rows]
-    claims = extract_all(rows, client)
+    claims = extract_all(rows, client, prop)
     candidates = candidates_at(rows, claims, min_shared)
-    judged = judge_pairs(rows, claims, candidates, client, judge)
+    judged = judge_pairs(rows, claims, candidates, client, judge, prop)
     index = {r.id: i for i, r in enumerate(reviews)}
     grouped: set[Pair] = set()
     for f in claim_flags(reviews, list(judged.values()), client.config.small, claims):

@@ -4000,5 +4000,10 @@
     "Cost is the token count the API reported; the dollar figure is an estimate at list prices on the stated date.",
     "The pair that motivated the control, genuine reviews 10 and 16, was a candidate in both runs at 1 shared claim and was judged not the same by both prompts in both runs. In the Harbor Light end to end run (commit 8173b18) the lenient prompt judged the same pair the same, on the shared location claim. The judge is not stable on this pair: one 'same' in five judgments across the two reports. Zero wrong joins here does not show that failure is gone, only that it is not frequent enough to appear in two runs.",
     "The control prompts named the property with the evaluation placeholder ('Lakeshore hotel (fictional)'); the end to end run named it 'Harbor Light Inn (inn, fictional, Northern Michigan)'. Whether that difference changes the judgments was not measured."
-  ]
+  ],
+  "prompt_properties": {
+    "paraphrase": "Property: Lakeshore hotel (fictional) (hotel) (placeholder; the graph sends the real name)",
+    "control": "Property: Lakeshore hotel (fictional) (hotel) (placeholder; the graph sends the real name)"
+  },
+  "author_decision": "The product default is 2 shared claims with the strict judge, set by the author on 2026-10-22. The rule's record stands as measured: it chose 1 shared claim with the lenient judge in both versions of this ablation, and the production run disqualified it. Reasons: the end to end runs are runs of the production prompt, and under 1 shared, lenient they joined honest reviews (Harbor Light 10 and 16) in both runs. The 190 pair control cannot bound a judge's wrong join rate at the volume 1 shared claim produces: 18% of honest pairs become candidates, about 22,650 judgments per 500 reviews. The judge's verdict on the same pair moved with the property line in the prompt, so the only setting the control can speak for is the one with the smallest exposure: 2 shared claims, 1.3% of honest pairs, fourteen times fewer judgments. The recall given up here is two to three of 18 synthetic pairs, on a set whose figures moved by 0.05 to 0.11 between ablations from extraction variance alone. The default is measured with corrected prompts in claim_duplicates_default.md. No further tuning of this signal in step 5."
 }

@@ -139,28 +139,54 @@ either set in either run, so all four qualified. Mean paraphrase recall 0.333 (2
 0.333 (2, lenient), 0.444 (1, strict), 0.472 (1, lenient). The rule kept 1 shared claim with
 the lenient judge.
 
-That result needs one caveat stated plainly. Pair 10 and 16 was a candidate in both control
-runs and was judged not the same by both prompts both times; in the end to end run the
-lenient prompt judged it the same. One "same" in five judgments of one pair is a judge that
-is not stable on a borderline case, and two runs of 190 pairs do not catch a failure that
-rare. Zero wrong joins on 190 pairs puts the per pair false join rate under about 1.6% at 95%
-confidence (rule of three, pairs treated as independent, which they are not); at that rate a
-batch of 500 reviews could still hold about 2,000 wrong joins. It bounds nothing about other
-properties, longer reviews or other languages. The control prompts also named the property
-with the evaluation placeholder rather than "Harbor Light Inn", a difference not measured.
+The control did not reproduce the failure it was added for. Pair 10 and 16 was a candidate in
+both control runs and was judged not the same by both prompts both times, while the lenient
+prompt judged it the same in both end to end runs at that setting (two "same" in four lenient
+judgments of one pair). The two contexts differed in one visible way: the evaluation prompts
+named the property with a placeholder ("Lakeshore hotel (fictional)"), the graph's prompts
+named it "Harbor Light Inn". That mismatch is now fixed: the evaluations build every prompt
+with the graph's own prompt builders and the same property line (`evals/fixtures.py`), and the
+paraphrase set has a fictional property of its own. The grid report keeps its numbers and is
+labelled with the placeholder it used.
 
-Cost, from the realistic share: on honest reviews of one property 18% of pairs become
-candidates at 1 shared claim (1.3% at 2), so a batch of 500 reviews needs about 22,650 small
-model judgments, about $3, against about 1,640 at 2 shared claims. Claim duplicate flags
-are now scored and banded by the evidence behind the join: the mean number of specific claims
-shared by the pairs judged the same (1 is low, 2 medium, 3 or more high), so a join on one
-shared claim reaches the operator as low.
+**Decision (author, 2026-10-22): the default is 2 shared claims with the strict judge.** It
+overrides the recall rule, which chose 1 shared claim with the lenient judge in both versions
+of the ablation; the production run disqualified that choice. The reasons:
 
-Read the gain with care. Most of it comes from the candidate rule, and the lenient prompt's
-examples of different names for one feature are the vocabulary of cluster C, which favours it
-on recall. The setting was chosen on the sets it is reported on, so expect less on new data.
-Any held out set must include honest reviews of one property that mention the same features.
-The signal finds about four to five in ten rewritten pairs here; it is a partial signal whose
+- The end to end runs are runs of the production prompt, and under 1 shared, lenient they
+  joined honest reviews, twice.
+- The 190 pair control cannot bound a judge's wrong join rate at the volume 1 shared claim
+  produces: 18% of honest pairs of one property become candidates, about 22,650 judgments per
+  500 reviews.
+- The judge's verdict on the same pair moved with the property line, so the only setting the
+  control can speak for is the one with the smallest exposure: 2 shared claims, 1.3% of
+  honest pairs, about 1,640 judgments per 500 reviews, fourteen times fewer.
+- The recall given up was estimated at two to three of 18 synthetic pairs, on a set whose
+  figures moved by 0.05 to 0.11 between ablations from extraction variance alone.
+
+No further tuning of this signal in step 5.
+
+Measured at the default with the corrected prompts (`evals/results/claim_duplicates_default.md`,
+two runs): 3 of 18 paraphrase pairs joined in each run (recall 0.167), no wrong join on either
+set; 2 of 190 control pairs became candidates in each run and neither was joined. Recall is
+half what the same setting scored in the ablation (0.333), all of it lost at the candidate
+stage (3 or 4 true candidates instead of 6 or 7); whether that is extraction variance or the
+property line changing extraction is not separable from two runs, and the comparison crosses
+prompt versions. Measured this way, the recall given up against the old default is closer to
+five pairs than to two or three.
+
+What zero wrong joins on 190 pairs bounds: the per pair false join rate on this property,
+under about 1.6% at 95% confidence (rule of three, treating pairs as independent, which they
+are not). At that rate a batch of 500 reviews could still hold about 2,000 wrong joins, so the
+bound means little at high candidate volume and more at low. It bounds nothing about other
+properties, longer reviews, other languages, or a judge prompted differently.
+
+Claim duplicate flags are scored and banded by the evidence behind the join: the mean number
+of specific claims shared by the pairs judged the same (1 is low, 2 medium, 3 or more high).
+
+Standing requirement: any held out set for this signal must include honest reviews of one
+property that mention the same features, and must be prompted exactly as the graph prompts.
+The signal finds two to four in ten rewritten pairs on this set; it is a partial signal whose
 joins still go to a person.
 
 Known behaviour, visible in the report: the rating burst rule is timing only, so a genuine
@@ -185,7 +211,8 @@ there is an operator.
 
 ## Still to come
 
-- A held out paraphrase set, written separately from the detector, to check the claim
-  duplicate setting chosen above on data it was not chosen on.
+- A held out set for the claim duplicate signal, written separately from the detector, with
+  rewritten duplicates and honest reviews of one property that mention the same features,
+  prompted exactly as the graph prompts.
 - End to end evals of the graph: a golden set of batches with expected flags, themes and
   actions, scored on every run and traced in LangSmith.

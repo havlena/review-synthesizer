@@ -57,12 +57,12 @@ def test_shared_specific_counts_by_aspect_and_polarity_and_ignores_general_claim
 def test_candidate_rule_counts_shared_specific_claims():
     reviews = [mk(1), mk(2), mk(3), mk(4)]
     claims = {1: [HOT_TUB, ROLLS], 2: [HOT_TUB, ROLLS, FEE], 3: [HOT_TUB, STAFF], 4: [STAFF]}
-    at_two = candidate_pairs(reviews, claims, no_flags(), min_shared=2)
-    assert [(a.id, b.id) for a, b in at_two] == [(1, 2)]
-    # The product default, chosen by the ablation: one shared specific claim.
-    assert MIN_SHARED_SPECIFIC == 1
+    at_one = candidate_pairs(reviews, claims, no_flags(), min_shared=1)
+    assert [(a.id, b.id) for a, b in at_one] == [(1, 2), (1, 3), (2, 3)]
+    # The product default, an author decision: two shared specific claims.
+    assert MIN_SHARED_SPECIFIC == 2
     default = candidate_pairs(reviews, claims, no_flags())
-    assert [(a.id, b.id) for a, b in default] == [(1, 2), (1, 3), (2, 3)]
+    assert [(a.id, b.id) for a, b in default] == [(1, 2)]
 
 
 def test_pairs_joined_by_detector_duplicate_signals_are_skipped_but_not_bursts():

@@ -100,7 +100,7 @@ def test_confirming_every_flag_gives_the_golden_brief():
             "duplicate_phrasing": "Jaccard word overlap at or above 0.55",
             "rating_burst": "3 or more same rating reviews within 4 days",
             "claim_duplicate": (
-                "at least 1 shared specific claim, then a model judgment per pair (lenient prompt)"
+                "at least 2 shared specific claims, then a model judgment per pair (strict prompt)"
             ),
         },
         "models": {"main": "fake-main", "small": "fake-small"},

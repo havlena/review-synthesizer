@@ -28,20 +28,20 @@ from review_synthesizer.authenticity.models import Confidence
 
 from .state import Claim, PairJudgment
 
-MIN_SHARED_SPECIFIC = 1
-"""Specific claims (same aspect and polarity) two reviews must share to be judged. Kept by the
-fixed rule in evals/results/claim_duplicates_ablation.md (October 2026, with the Harbor Light
-same property control): no wrong join on either set in two runs, mean paraphrase recall
-0.472 with the lenient judge, against 0.333 at 2. Chosen on the sets it is reported on. On
-honest reviews of one property 18% of pairs become candidates (1.3% at 2), about 22,650
-judgments on a batch of 500."""
+MIN_SHARED_SPECIFIC = 2
+"""Specific claims (same aspect and polarity) two reviews must share to be judged. An author
+decision (October 2026) that overrides the ablation's recall rule, which twice chose 1 with
+the lenient judge: the production prompt joined genuine Harbor Light reviews 10 and 16 under
+that setting in both end to end runs, and a 190 pair control cannot bound a judge's wrong
+join rate at the volume 1 produces (18% of honest pairs; 1.3% at 2, fourteen times fewer
+judgments). Recall given up: two to three of 18 synthetic pairs. See docs/evaluation.md and
+evals/results/claim_duplicates_ablation.md. Not tuned further in step 5."""
 
-JUDGE_STYLE = "lenient"
-"""Which judge prompt the product uses (``prompts.JUDGE_SYSTEMS``). Kept with
-``MIN_SHARED_SPECIFIC`` by the same ablation (0.472 against 0.444 for strict). Not stable on
-borderline pairs: it joined genuine Harbor Light reviews 10 and 16 once in the end to end
-run and not in the ablation's two runs. Its examples are the vocabulary of one cluster of
-the paraphrase set."""
+JUDGE_STYLE = "strict"
+"""Which judge prompt the product uses (``prompts.JUDGE_SYSTEMS``). Set with
+``MIN_SHARED_SPECIFIC`` by the same author decision: the lenient prompt's verdict on the
+same pair moved with the property line in the prompt, and the strict prompt never joined a
+control pair. Measured at this default in evals/results/claim_duplicates_default.md."""
 
 DETECTOR_DUPLICATE_SIGNALS = ("duplicate_phrasing", "embedding_similarity")
 """Detector signals whose pairs are already joined, so the model is not asked about them."""

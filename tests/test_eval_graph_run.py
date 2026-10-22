@@ -36,7 +36,8 @@ def client(*, breakfast_score, theme, action, join_genuine):
         shared = join_genuine and rid in (1, 3)
         return ExtractedClaims(
             claims=[
-                ClaimOut(aspect="location", polarity="positive", specific=True, statement="view")
+                ClaimOut(aspect="location", polarity="positive", specific=True, statement="view"),
+                ClaimOut(aspect="breakfast", polarity="positive", specific=True, statement="rolls"),
             ]
             if shared
             else []

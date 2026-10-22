@@ -30,11 +30,11 @@ from dotenv import load_dotenv
 
 from review_synthesizer.authenticity import SentenceTransformerEmbedder
 from review_synthesizer.evals.claims import usage_of
+from review_synthesizer.evals.fixtures import HARBOR_PROPERTY
 from review_synthesizer.evals.graph_run import summarize
 from review_synthesizer.graph import (
     AnthropicModelClient,
     ModelConfig,
-    Property,
     approve_all,
     run_brief,
 )
@@ -42,7 +42,8 @@ from review_synthesizer.graph.run import AUTO_APPROVED
 
 ROOT = Path(__file__).resolve().parents[1]
 
-HARBOR = Property(name="Harbor Light Inn", type="inn", region="fictional, Northern Michigan")
+HARBOR = HARBOR_PROPERTY
+"""The same property line the claim evaluations send (evals/fixtures.py)."""
 
 LIMITS = [
     (

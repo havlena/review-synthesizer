@@ -32,8 +32,8 @@ from typing import Any
 
 from ..graph.duplicates import JUDGE_STYLE, MIN_SHARED_SPECIFIC
 from ..graph.model import ModelClient
-from ..graph.prompts import JUDGE_SYSTEMS
-from ..graph.state import Claim, PairJudgment
+from ..graph.prompts import JUDGE_SYSTEMS, property_line
+from ..graph.state import Claim, PairJudgment, Property
 from .claims import (
     PRICES_AS_OF,
     PRICES_PER_MTOK,
@@ -43,6 +43,7 @@ from .claims import (
     judge_pairs,
     usage_of,
 )
+from .fixtures import HARBOR_PROPERTY, PARAPHRASE_PROPERTY
 from .similarity import LabelledReview, pair_metrics, truth_pairs
 
 BATCH_SIZES = (25, 100, 500)
@@ -96,10 +97,11 @@ def ablate_once(
     judges: Sequence[str],
     save_to: Path | None = None,
     label: str = "paraphrase",
+    prop: Property = PARAPHRASE_PROPERTY,
 ) -> AblationRun:
     """One extraction, candidates at each rule, the union judged with each prompt."""
     before = usage_of(client)
-    claims = extract_all(rows, client)
+    claims = extract_all(rows, client, prop)
     stage_usage = {f"{label} extraction": _diff(before, usage_of(client))}
     if save_to is not None:
         _save_claims(save_to, claims, client.config.main)
@@ -109,7 +111,7 @@ def ablate_once(
     judgments = {}
     for j in judges:
         before = usage_of(client)
-        judgments[j] = judge_pairs(rows, claims, union, client, j)
+        judgments[j] = judge_pairs(rows, claims, union, client, j, prop)
         stage_usage[f"{label} judge {j}"] = _diff(before, usage_of(client))
     return AblationRun(claims, candidates, judgments, stage_usage)
 
@@ -234,6 +236,14 @@ class AblationReport:
     judge_prompts: dict[str, str]
     history: list[str] = field(default_factory=list)
     limits: list[str] = field(default_factory=list)
+    prompt_properties: dict[str, str] = field(default_factory=dict)
+    """The property line each set's prompts carried, as the model saw it."""
+    author_decision: str | None = None
+    """A decision by the author that overrides the rule, with its reasoning."""
+
+    @property
+    def single_setting(self) -> bool:
+        return len(self.cells) == 1
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -258,8 +268,13 @@ class AblationReport:
 
     def to_markdown(self) -> str:
         t = self.truth_pairs
+        title = (
+            f"# Claim duplicates at the product default ({self.cells[0]}), with the same property control"
+            if self.single_setting
+            else "# Claim duplicates: ablation with a same property negative control"
+        )
         lines = [
-            "# Claim duplicates: ablation with a same property negative control",
+            title,
             "",
             (
                 f"Generated {self.created_at} on Python {self.python_version}. Main model "
@@ -277,7 +292,8 @@ class AblationReport:
             ),
         ]
         if self.history:
-            lines += ["", "## Earlier version of this ablation", ""]
+            heading = "Context" if self.single_setting else "Earlier version of this ablation"
+            lines += ["", f"## {heading}", ""]
             lines += [f"- {h}" for h in self.history]
         lines += [
             "",
@@ -291,14 +307,26 @@ class AblationReport:
                 "scored on the same extraction and judgments, so within a run the cells differ "
                 "only in the lever."
             ),
-            "",
-            (
-                "Decision rule, fixed before the run: a cell qualifies only with no wrong join on "
-                "either set in either run. Among qualifying cells, the highest mean paraphrase "
-                "recall wins; ties go to the stricter setting (2 shared claims before 1, then the "
-                "strict prompt). If no cell qualifies, nothing changes. Default before this run: "
-                f"{self.current_default}."
-            ),
+        ]
+        if self.prompt_properties:
+            lines += [
+                "",
+                "Property line in the prompts: "
+                + "; ".join(f"{k} set `{v}`" for k, v in self.prompt_properties.items())
+                + ".",
+            ]
+        if not self.single_setting:
+            lines += [
+                "",
+                (
+                    "Decision rule, fixed before the run: a cell qualifies only with no wrong join "
+                    "on either set in either run. Among qualifying cells, the highest mean "
+                    "paraphrase recall wins; ties go to the stricter setting (2 shared claims "
+                    "before 1, then the strict prompt). If no cell qualifies, nothing changes. "
+                    f"Default before this run: {self.current_default}."
+                ),
+            ]
+        lines += [
             "",
             "## Grid",
             "",
@@ -335,15 +363,21 @@ class AblationReport:
             ok = "yes" if name in self.decision.get("qualifying", []) else "no"
             lines.append(f"| {name} | {per_run} | {ok} | {s['mean_recall']:.3f} |")
         d = self.decision
-        lines += [
-            "",
-            "## Decision",
-            "",
-            (f"**{d['chosen']}**. " if d["chosen"] else "**No change.** ") + d["reason"],
-            "",
-            "## Wrong joins",
-            "",
-        ]
+        if not self.single_setting:
+            lines += [
+                "",
+                "## Decision by the rule",
+                "",
+                (f"**{d['chosen']}**. " if d["chosen"] else "**No change.** ") + d["reason"],
+            ]
+        if self.author_decision:
+            lines += [
+                "",
+                "## Decision by the author (overrides the rule)",
+                "",
+                self.author_decision,
+            ]
+        lines += ["", "## Wrong joins", ""]
         any_wrong = False
         for name in self.cells:
             for r in self.runs:
@@ -457,6 +491,10 @@ class AblationReport:
         lines += [f"- {k}: {v}" for k, v in self.settings.items()]
         lines += [
             (
+                "- Each set's prompts are built by the graph's own prompt builders, property line "
+                "included (see Design)."
+            ),
+            (
                 "- The claim signal is measured on its own: the detector's skip rule is off on both "
                 "sets, so no pair is hidden by an earlier join (the end to end run showed that it "
                 "can be)."
@@ -491,11 +529,17 @@ def evaluate_grid(
     judges: Sequence[str] = ("strict", "lenient"),
     save_dir: Path | None = None,
     current: Cell | None = None,
+    prop: Property = PARAPHRASE_PROPERTY,
+    control_prop: Property = HARBOR_PROPERTY,
     settings: dict[str, str] | None = None,
     history: Sequence[str] = (),
     limits: Sequence[str] = (),
+    author_decision: str | None = None,
 ) -> AblationReport:
-    """Score every cell on shared extractions of both sets; apply the fixed rule."""
+    """Score every cell on shared extractions of both sets; apply the fixed rule.
+
+    Each set's prompts carry its own property line, through the graph's prompt builders.
+    """
     truth = truth_pairs(rows)
     n_pairs = len(rows) * (len(rows) - 1) // 2
     n_control = len(control_rows) * (len(control_rows) - 1) // 2
@@ -511,8 +555,10 @@ def evaluate_grid(
         models = {"main": client.config.main, "small": client.config.small}
         p_path = save_dir / f"extraction_run{k}.json" if save_dir else None
         c_path = save_dir / f"control_extraction_run{k}.json" if save_dir else None
-        para.append(ablate_once(rows, client, min_shared, judges, p_path, "paraphrase"))
-        ctrl.append(ablate_once(control_rows, client, min_shared, judges, c_path, "control"))
+        para.append(ablate_once(rows, client, min_shared, judges, p_path, "paraphrase", prop))
+        ctrl.append(
+            ablate_once(control_rows, client, min_shared, judges, c_path, "control", control_prop)
+        )
         files += [p.as_posix() for p in (p_path, c_path) if p]
 
     run_dicts = []
@@ -625,4 +671,9 @@ def evaluate_grid(
         judge_prompts={j: JUDGE_SYSTEMS[j] for j in judges},
         history=list(history),
         limits=list(limits),
+        prompt_properties={
+            "paraphrase": property_line(prop),
+            "control": property_line(control_prop),
+        },
+        author_decision=author_decision,
     )
