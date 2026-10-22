@@ -1,16 +1,25 @@
 #!/usr/bin/env python
 """Live evaluation of the claim duplicate signal on the labelled paraphrase set.
 
-    python scripts/eval_claims.py                 # two runs, default models from .env
-    python scripts/eval_claims.py --runs 3
+    python scripts/eval_claims.py                               # current default, two runs
+    python scripts/eval_claims.py --min-shared 1 --judge lenient   # one other setting
+    python scripts/eval_claims.py --min-shared 2 1 --judge strict lenient   # the ablation
 
 Needs ANTHROPIC_API_KEY (read from .env) and the network; it spends API credit. Model names
 come from ANTHROPIC_MODEL and ANTHROPIC_MODEL_SMALL, with the defaults in graph/config.py.
 
+--min-shared (1 or 2) is the candidate rule: specific claims two reviews must share by
+aspect and polarity. --judge (strict or lenient) picks the judge prompt. With one value
+each, every run extracts and judges for that one setting and the report is
+claim_duplicates (or --name). With several, the script runs the ablation: each run extracts
+once, saves the extraction under data/interim/claims/ (git ignored), judges the union of
+candidates with every prompt, and scores every cell on that same extraction; the report is
+claim_duplicates_ablation (or --name).
+
 Inputs: tests/fixtures/paraphrase_set.json (or --set).
-Outputs: evals/results/claim_duplicates.md and .json (or --out-dir, --name), written only
-if every run completed. If any extraction or judgment call fails, the script prints the
-failures, writes nothing and exits with status 2.
+Outputs: evals/results/<name>.md and .json (or --out-dir), written only if every run
+completed. If any extraction or judgment call fails, the script prints the failures, writes
+no report and exits with status 2.
 """
 
 from __future__ import annotations
@@ -23,10 +32,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from review_synthesizer.evals import claims
+from review_synthesizer.evals import claims, claims_ablation
 from review_synthesizer.evals.similarity import load_paraphrase_set
 from review_synthesizer.graph import AnthropicModelClient, ModelConfig
 from review_synthesizer.graph.config import MAX_PARALLEL_CALLS, MAX_TOKENS
+from review_synthesizer.graph.duplicates import JUDGE_STYLE, MIN_SHARED_SPECIFIC
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -47,6 +57,23 @@ LIMITS = [
     (
         "Cost is the token count the API reported; the dollar figure is an estimate at list "
         "prices on the stated date."
+    ),
+]
+
+ABLATION_LIMITS = [
+    (
+        "The setting is chosen on the same 24 reviews it is reported on. There is no held "
+        "out set, so the chosen cell's figures are optimistic for new data."
+    ),
+    (
+        "The lenient prompt's examples of different names for one feature (a deck, a terrace, "
+        "a balcony; a massage, a spa treatment, a wellness centre) are the vocabulary of "
+        "cluster C in this set, which favours the lenient prompt here."
+    ),
+    *LIMITS[1:],
+    (
+        "Per cell cost is estimated from measured tokens: judgments ran once on the union of "
+        "candidates, not once per cell."
     ),
 ]
 
@@ -75,12 +102,32 @@ def settings(config: ModelConfig) -> dict[str, str]:
     }
 
 
+def write(report, out_dir: Path, name: str) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    md, js = out_dir / f"{name}.md", out_dir / f"{name}.json"
+    md.write_text(report.to_markdown(), encoding="utf-8", newline="\n")
+    js.write_text(report.to_json() + "\n", encoding="utf-8", newline="\n")
+    print(f"wrote {md.relative_to(ROOT)} and {js.relative_to(ROOT)}")
+
+
+def print_tokens(tokens: dict) -> None:
+    for model, u in tokens["total"].items():
+        print(f"{model}: {u['calls']} calls, {u['input_tokens']:,} in, {u['output_tokens']:,} out")
+    if tokens["usd"] is not None:
+        print(f"estimated ${tokens['usd']:.2f} at list prices as of {claims.PRICES_AS_OF}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--set", type=Path, default=ROOT / "tests/fixtures/paraphrase_set.json")
     parser.add_argument("--runs", type=int, default=2)
+    parser.add_argument(
+        "--min-shared", type=int, nargs="+", choices=[1, 2], default=[MIN_SHARED_SPECIFIC]
+    )
+    parser.add_argument("--judge", nargs="+", choices=["strict", "lenient"], default=[JUDGE_STYLE])
     parser.add_argument("--out-dir", type=Path, default=ROOT / "evals/results")
-    parser.add_argument("--name", default="claim_duplicates")
+    parser.add_argument("--extraction-dir", type=Path, default=ROOT / "data/interim/claims")
+    parser.add_argument("--name")
     args = parser.parse_args()
 
     load_dotenv(ROOT / ".env")
@@ -90,41 +137,73 @@ def main() -> int:
 
     rows, clusters = load_paraphrase_set(args.set)
     config = ModelConfig.from_env()
-    print(f"{len(rows)} reviews, {args.runs} run(s), models {config.main} / {config.small}")
+    min_shared = list(dict.fromkeys(args.min_shared))
+    judges = list(dict.fromkeys(args.judge))
+    grid = len(min_shared) * len(judges) > 1
+    print(
+        f"{len(rows)} reviews, {args.runs} run(s), models {config.main} / {config.small}, "
+        f"min shared {min_shared}, judge {judges}"
+    )
 
     try:
-        report = claims.evaluate(
-            rows,
-            clusters,
-            lambda: AnthropicModelClient(config),
-            runs=args.runs,
-            settings=settings(config),
-            limits=LIMITS,
-        )
+        if grid:
+            report = claims_ablation.evaluate_grid(
+                rows,
+                lambda: AnthropicModelClient(config),
+                runs=args.runs,
+                min_shared=min_shared,
+                judges=judges,
+                save_dir=args.extraction_dir,
+                settings=settings(config),
+                limits=ABLATION_LIMITS,
+            )
+        else:
+            report = claims.evaluate(
+                rows,
+                clusters,
+                lambda: AnthropicModelClient(config),
+                runs=args.runs,
+                min_shared=min_shared[0],
+                judge=judges[0],
+                settings=settings(config),
+                limits=LIMITS,
+            )
     except claims.CallFailure as err:
-        print(f"Stopped: {len(err.failures)} call(s) failed during {err.stage}. Nothing written.")
+        print(f"Stopped: {len(err.failures)} call(s) failed during {err.stage}. No report written.")
         for f in err.failures:
             print(f"  - {f}")
         return 2
 
-    args.out_dir.mkdir(parents=True, exist_ok=True)
-    md = args.out_dir / f"{args.name}.md"
-    js = args.out_dir / f"{args.name}.json"
-    md.write_text(report.to_markdown(), encoding="utf-8")
-    js.write_text(report.to_json() + "\n", encoding="utf-8")
-
-    for r in report.runs:
-        c, j = r["candidates"], r["judged"]
-        print(
-            f"run {r['run']}: candidates {c['true']}/{report.truth_pairs} true, {c['false']} false; "
-            f"judged same {j['true_positive']} true, {j['false_positive']} false; "
-            f"precision {j['precision']:.3f}, recall {j['recall']:.3f}"
-        )
-    for model, u in report.tokens["total"].items():
-        print(f"{model}: {u['calls']} calls, {u['input_tokens']:,} in, {u['output_tokens']:,} out")
-    if report.tokens["usd"] is not None:
-        print(f"estimated ${report.tokens['usd']:.2f} at list prices as of {claims.PRICES_AS_OF}")
-    print(f"wrote {md.relative_to(ROOT)} and {js.relative_to(ROOT)}")
+    if grid:
+        # Record the saved extractions relative to the repository, not the local disk.
+        report.extraction_files = [
+            Path(os.path.relpath(p, ROOT)).as_posix() for p in report.extraction_files
+        ]
+        for name in report.cells:
+            for r in report.runs:
+                c = r["cells"][name]
+                print(
+                    f"{name:<20} run {r['run']}: candidates {c['candidates']['true']} true, "
+                    f"{c['candidates']['false']} non duplicate; judged same "
+                    f"{c['judged']['true_positive']} true, {c['judged']['false_positive']} wrong; "
+                    f"recall {c['judged']['recall']:.3f}"
+                )
+        print(f"decision: {report.decision['chosen']}. {report.decision['reason']}")
+    else:
+        for r in report.runs:
+            c, j = r["candidates"], r["judged"]
+            print(
+                f"run {r['run']}: candidates {c['true']}/{report.truth_pairs} true, "
+                f"{c['false']} false; judged same {j['true_positive']} true, "
+                f"{j['false_positive']} false; precision {j['precision']:.3f}, "
+                f"recall {j['recall']:.3f}"
+            )
+    print_tokens(report.tokens)
+    write(
+        report,
+        args.out_dir,
+        args.name or ("claim_duplicates_ablation" if grid else "claim_duplicates"),
+    )
     return 0
 
 

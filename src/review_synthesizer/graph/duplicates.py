@@ -4,17 +4,17 @@ The detector's duplicate signals compare wording (Jaccard) and meaning (embeddin
 paraphrase evaluation showed neither separates a heavy rewrite from an honest review on the
 same topic (``docs/evaluation.md``). This signal compares claims instead:
 
-1. candidate pairs are reviews sharing at least two specific claims by aspect and polarity
-   (a cheap filter on the extracted claims, no model call);
+1. candidate pairs are reviews sharing at least ``MIN_SHARED_SPECIFIC`` specific claims by
+   aspect and polarity (a cheap filter on the extracted claims, no model call);
 2. each candidate pair gets one judgment from the small model, with a one sentence reason;
 3. pairs judged the same are joined into groups, and each group becomes one flag.
 
 Pairs the detector already joined by wording or meaning are not judged again.
 
-What this cannot do: catch rewrites with fewer than two specific claims in common (generic
-praise campaigns carry few specifics; the rating burst signal is the one for those), or
-recover from a failed claim extraction. Its precision and recall are measured by
-``scripts/eval_claims.py``, not assumed.
+What this cannot do: catch rewrites that share no specific claim (generic praise campaigns
+carry none; the rating burst signal is the one for those), or recover from a failed claim
+extraction. On the paraphrase set it finds about four in ten rewritten pairs, and which
+ones moves between runs (``evals/results/claim_duplicates_ablation.md``).
 """
 
 from __future__ import annotations
@@ -27,9 +27,18 @@ from review_synthesizer.authenticity.clustering import union_clusters
 
 from .state import Claim, PairJudgment
 
-MIN_SHARED_SPECIFIC = 2
-"""Specific claims (same aspect and polarity) two reviews must share to be judged; build
-plan step 5. One shared claim is common between honest reviews of the same property."""
+MIN_SHARED_SPECIFIC = 1
+"""Specific claims (same aspect and polarity) two reviews must share to be judged. Chosen by
+the fixed rule in evals/results/claim_duplicates_ablation.md (October 2026): at 1 with the
+lenient judge, mean recall 0.417 and no wrong join in two runs, against 0.222 at 2 (the
+step 5 starting value). Chosen on the set it is reported on. Costs about seven times the
+judgments of 2 on that set; see the report's batch size projection."""
+
+JUDGE_STYLE = "lenient"
+"""Which judge prompt the product uses (``prompts.JUDGE_SYSTEMS``). Chosen with
+``MIN_SHARED_SPECIFIC`` by the same ablation; at 1 shared claim the lenient prompt led the
+strict one by two pairs in run 1 and trailed by one in run 2, so the margin is within run to
+run variation. Its examples are the vocabulary of one cluster of that set."""
 
 DETECTOR_DUPLICATE_SIGNALS = ("duplicate_phrasing", "embedding_similarity")
 """Detector signals whose pairs are already joined, so the model is not asked about them."""

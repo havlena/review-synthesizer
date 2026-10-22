@@ -27,7 +27,7 @@ from review_synthesizer.authenticity import (
 
 from .approval import REVIEW_NOTE, all_flags, flag_key, held_ids
 from .config import ModelConfig
-from .duplicates import MIN_SHARED_SPECIFIC
+from .duplicates import JUDGE_STYLE, MIN_SHARED_SPECIFIC
 from .state import Brief, BriefState
 
 GRAPH_SIGNALS = ("claim_duplicate",)
@@ -58,7 +58,9 @@ def _thresholds(signals: Sequence[str]) -> dict[str, str]:
         "embedding_similarity": f"cosine similarity at or above {EMBED_THRESHOLD:.2f}",
         "deceptive_language": f"classifier probability at or above {CLASSIFIER_THRESHOLD:.2f}",
         "claim_duplicate": (
-            f"at least {MIN_SHARED_SPECIFIC} shared specific claims, then a model judgment per pair"
+            f"at least {MIN_SHARED_SPECIFIC} shared specific "
+            f"claim{'' if MIN_SHARED_SPECIFIC == 1 else 's'}, then a model judgment per pair "
+            f"({JUDGE_STYLE} prompt)"
         ),
     }
     return {s: known[s] for s in signals if s in known}

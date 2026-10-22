@@ -30,16 +30,26 @@ import json
 import platform
 import re
 from collections.abc import Callable, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass, field
 from itertools import combinations
 from typing import Any
 
 from ..authenticity.models import DetectionResult
 from ..authenticity.rules import DUP_THRESHOLD, duplicate_pairs
-from ..graph.duplicates import MIN_SHARED_SPECIFIC, candidate_pairs, shared_specific
+from ..graph.config import MAX_PARALLEL_CALLS
+from ..graph.duplicates import (
+    JUDGE_STYLE,
+    MIN_SHARED_SPECIFIC,
+    candidate_pairs,
+    claim_flags,
+    shared_specific,
+)
 from ..graph.model import ModelClient
-from ..graph.nodes import claim_duplicates, extract_claims
-from ..graph.state import Claim, Property
+from ..graph.nodes import extract_claims
+from ..graph.prompts import JUDGE_SYSTEMS, judge_prompt
+from ..graph.schemas import PairVerdict
+from ..graph.state import Claim, PairJudgment, Property
 from .similarity import LabelledReview, pair_metrics, truth_pairs
 
 PRICES_PER_MTOK = {
@@ -101,41 +111,97 @@ class RunResult:
         return sum(c.specific for c in self.extracted[review_id])
 
 
-def run_once(rows: Sequence[LabelledReview], client: ModelClient) -> RunResult:
-    """Extract claims and judge candidate pairs; raise :class:`CallFailure` on any failure."""
-    reviews = [r.review for r in rows]
-    index = {r.id: i for i, r in enumerate(reviews)}
-    rec = _Recorder(client)
-    state: dict[str, Any] = {"property": EVAL_PROPERTY, "reviews": reviews}
+NO_SKIP = DetectionResult(flags=[], flagged_ids=set(), peak_similarity=0.0, signals=[])
+"""Empty detection: the claim signal is measured without the detector's skip rule."""
 
-    claims = extract_claims(state, client=rec)["claims"]
-    if rec.failures:
-        raise CallFailure("claim extraction", rec.failures)
 
-    no_skip = DetectionResult(flags=[], flagged_ids=set(), peak_similarity=0.0, signals=[])
-    out = claim_duplicates({**state, "claims": claims, "detection": no_skip}, client=rec)
-    if rec.failures:
-        raise CallFailure("pair judgment", rec.failures)
-
-    def pair(a, b) -> Pair:
-        return tuple(sorted((index[a], index[b])))  # type: ignore[return-value]
-
-    candidates = {pair(a.id, b.id) for a, b in candidate_pairs(reviews, claims, no_skip)}
-    judged = {pair(j.a, j.b): j for j in out["claim_judgments"]}
-    grouped: set[Pair] = set()
-    for f in out["claim_flags"]:
-        grouped.update(combinations(sorted(index[i] for i in f.review_ids), 2))
-    usage = {
+def usage_of(client: ModelClient) -> dict[str, dict[str, int]]:
+    """The token usage the client has recorded so far, as plain numbers (none for fakes)."""
+    return {
         name: {"calls": u.calls, "input_tokens": u.input_tokens, "output_tokens": u.output_tokens}
         for name, u in getattr(client, "usage", {}).items()
     }
+
+
+def extract_all(rows: Sequence[LabelledReview], client: ModelClient) -> dict[Any, list[Claim]]:
+    """Claims for every review, through the graph's own node; raise on any failed call."""
+    rec = _Recorder(client)
+    state = {"property": EVAL_PROPERTY, "reviews": [r.review for r in rows]}
+    claims = extract_claims(state, client=rec)["claims"]
+    if rec.failures:
+        raise CallFailure("claim extraction", rec.failures)
+    return dict(claims)
+
+
+def candidates_at(
+    rows: Sequence[LabelledReview], claims: dict[Any, list[Claim]], min_shared: int
+) -> set[Pair]:
+    """Candidate pairs, as row index pairs, under the candidate rule at ``min_shared``."""
+    reviews = [r.review for r in rows]
+    index = {r.id: i for i, r in enumerate(reviews)}
+    pairs = candidate_pairs(reviews, claims, NO_SKIP, min_shared=min_shared)
+    return {(index[a.id], index[b.id]) for a, b in pairs}
+
+
+def judge_pairs(
+    rows: Sequence[LabelledReview],
+    claims: dict[Any, list[Claim]],
+    pairs: set[Pair],
+    client: ModelClient,
+    judge: str,
+) -> dict[Pair, PairJudgment]:
+    """One small model judgment per pair with the named prompt; raise on any failed call.
+
+    Same prompt builder, schema and model as the graph's ``claim_duplicates`` node.
+    """
+    rec = _Recorder(client)
+    system = JUDGE_SYSTEMS[judge]
+
+    def one(p: Pair) -> PairJudgment:
+        a, b = rows[p[0]].review, rows[p[1]].review
+        v = rec.structured(
+            PairVerdict,
+            system=system,
+            prompt=judge_prompt(EVAL_PROPERTY, a, b, claims[a.id], claims[b.id]),
+            small=True,
+        )
+        return PairJudgment(a.id, b.id, v.same_claims, v.reason.strip())
+
+    ordered = sorted(pairs)
+    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_CALLS) as pool:
+        futures = [pool.submit(one, p) for p in ordered]
+    results: dict[Pair, PairJudgment] = {}
+    for p, fut in zip(ordered, futures, strict=True):
+        if fut.exception() is None:
+            results[p] = fut.result()
+    if rec.failures:
+        raise CallFailure(f"pair judgment ({judge} prompt)", rec.failures)
+    return results
+
+
+def run_once(
+    rows: Sequence[LabelledReview],
+    client: ModelClient,
+    *,
+    min_shared: int = MIN_SHARED_SPECIFIC,
+    judge: str = JUDGE_STYLE,
+) -> RunResult:
+    """Extract claims and judge candidate pairs; raise :class:`CallFailure` on any failure."""
+    reviews = [r.review for r in rows]
+    claims = extract_all(rows, client)
+    candidates = candidates_at(rows, claims, min_shared)
+    judged = judge_pairs(rows, claims, candidates, client, judge)
+    index = {r.id: i for i, r in enumerate(reviews)}
+    grouped: set[Pair] = set()
+    for f in claim_flags(reviews, list(judged.values()), client.config.small):
+        grouped.update(combinations(sorted(index[i] for i in f.review_ids), 2))
     return RunResult(
-        extracted=dict(claims),
+        extracted=claims,
         candidates=candidates,
         judged_same={p for p, j in judged.items() if j.same_claims},
         grouped=grouped,
         reasons={p: j.reason for p, j in judged.items()},
-        usage=usage,
+        usage=usage_of(client),
     )
 
 
@@ -155,6 +221,8 @@ class ClaimReport:
     agreement: dict[str, Any]
     tokens: dict[str, Any]
     limits: list[str] = field(default_factory=list)
+    min_shared: int = MIN_SHARED_SPECIFIC
+    judge: str = JUDGE_STYLE
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -190,9 +258,10 @@ class ClaimReport:
             "## Stages",
             "",
             (
-                f"Candidate stage: pairs sharing at least {MIN_SHARED_SPECIFIC} specific claims by "
-                "aspect and polarity. Judged stage: the small model's yes or no on each candidate. "
-                "Candidate recall is the ceiling on judged recall."
+                f"Candidate stage: pairs sharing at least {self.min_shared} specific claims by "
+                f"aspect and polarity. Judged stage: the small model's yes or no on each "
+                f"candidate ({self.judge} judge prompt). Candidate recall is the ceiling on "
+                "judged recall."
             ),
             "",
             f"| | {cols} |",
@@ -350,8 +419,8 @@ def _run_summary(
     k: int, rows: Sequence[LabelledReview], truth: set[Pair], run: RunResult
 ) -> dict[str, Any]:
     true_cand = run.candidates & truth
-    judged = pair_metrics(run.judged_same, truth, float(MIN_SHARED_SPECIFIC))
-    grouped = pair_metrics(run.grouped, truth, float(MIN_SHARED_SPECIFIC))
+    judged = pair_metrics(run.judged_same, truth, 0.0)
+    grouped = pair_metrics(run.grouped, truth, 0.0)
     missed = []
     for p in sorted(truth - run.judged_same):
         a, b = rows[p[0]].review.id, rows[p[1]].review.id
@@ -397,10 +466,12 @@ def evaluate(
     make_client: Callable[[], ModelClient],
     *,
     runs: int = 2,
+    min_shared: int = MIN_SHARED_SPECIFIC,
+    judge: str = JUDGE_STYLE,
     settings: dict[str, str] | None = None,
     limits: Sequence[str] = (),
 ) -> ClaimReport:
-    """Run the signal ``runs`` times, each with a fresh client, and score every run."""
+    """Run one setting ``runs`` times, each with a fresh client and its own extraction."""
     truth = truth_pairs(rows)
     reviews = [r.review for r in rows]
     n_pairs = len(rows) * (len(rows) - 1) // 2
@@ -410,7 +481,7 @@ def evaluate(
     for _ in range(runs):
         client = make_client()
         models = {"main": client.config.main, "small": client.config.small}
-        results.append(run_once(rows, client))
+        results.append(run_once(rows, client, min_shared=min_shared, judge=judge))
 
     summaries = [_run_summary(k, rows, truth, r) for k, r in enumerate(results, start=1)]
 
@@ -484,4 +555,6 @@ def evaluate(
             "prices_as_of": PRICES_AS_OF,
         },
         limits=list(limits),
+        min_shared=min_shared,
+        judge=judge,
     )

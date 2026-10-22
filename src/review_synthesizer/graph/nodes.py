@@ -20,12 +20,12 @@ from .approval import all_flags, flag_key, held_ids, parse_decisions, review_req
 from .batch import validate_batch
 from .brief import build_brief
 from .config import MAX_PARALLEL_CALLS, ModelConfig
-from .duplicates import candidate_pairs, claim_flags
+from .duplicates import JUDGE_STYLE, candidate_pairs, claim_flags
 from .model import ModelClient
 from .prompts import (
     ACTIONS_SYSTEM,
     EXTRACT_SYSTEM,
-    JUDGE_SYSTEM,
+    JUDGE_SYSTEMS,
     SYNTHESIS_SYSTEM,
     actions_prompt,
     extract_prompt,
@@ -121,7 +121,7 @@ def claim_duplicates(state: BriefState, *, client: ModelClient) -> dict[str, Any
         a, b = pair
         verdict = client.structured(
             PairVerdict,
-            system=JUDGE_SYSTEM,
+            system=JUDGE_SYSTEMS[JUDGE_STYLE],
             prompt=judge_prompt(prop, a, b, claims.get(a.id, []), claims.get(b.id, [])),
             small=True,
         )

@@ -15,13 +15,14 @@ pytest.importorskip("langgraph")
 from review_synthesizer.authenticity import DetectionResult, Flag, Review
 from review_synthesizer.graph import Claim, FakeModelClient, PairJudgment, Property
 from review_synthesizer.graph.duplicates import (
+    JUDGE_STYLE,
     MIN_SHARED_SPECIFIC,
     candidate_pairs,
     claim_flags,
     shared_specific,
 )
 from review_synthesizer.graph.nodes import claim_duplicates
-from review_synthesizer.graph.prompts import JUDGE_SYSTEM
+from review_synthesizer.graph.prompts import JUDGE_SYSTEMS
 from review_synthesizer.graph.schemas import ClaimOut, ExtractedClaims, PairVerdict
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -53,12 +54,15 @@ def test_shared_specific_counts_by_aspect_and_polarity_and_ignores_general_claim
     assert shared_specific([STAFF, STAFF], [STAFF, STAFF]) == 0
 
 
-def test_candidates_need_two_shared_specific_claims():
-    reviews = [mk(1), mk(2), mk(3)]
-    claims = {1: [HOT_TUB, ROLLS], 2: [HOT_TUB, ROLLS, FEE], 3: [HOT_TUB, STAFF]}
-    pairs = candidate_pairs(reviews, claims, no_flags())
-    assert [(a.id, b.id) for a, b in pairs] == [(1, 2)]
-    assert MIN_SHARED_SPECIFIC == 2
+def test_candidate_rule_counts_shared_specific_claims():
+    reviews = [mk(1), mk(2), mk(3), mk(4)]
+    claims = {1: [HOT_TUB, ROLLS], 2: [HOT_TUB, ROLLS, FEE], 3: [HOT_TUB, STAFF], 4: [STAFF]}
+    at_two = candidate_pairs(reviews, claims, no_flags(), min_shared=2)
+    assert [(a.id, b.id) for a, b in at_two] == [(1, 2)]
+    # The product default, chosen by the ablation: one shared specific claim.
+    assert MIN_SHARED_SPECIFIC == 1
+    default = candidate_pairs(reviews, claims, no_flags())
+    assert [(a.id, b.id) for a, b in default] == [(1, 2), (1, 3), (2, 3)]
 
 
 def test_pairs_joined_by_detector_duplicate_signals_are_skipped_but_not_bursts():
@@ -121,7 +125,7 @@ def test_node_judges_candidates_with_the_small_model_and_flags_groups():
     out = claim_duplicates(state, client=client)
 
     assert len(client.calls) == 3
-    assert all(c.small and c.system == JUDGE_SYSTEM for c in client.calls)
+    assert all(c.small and c.system == JUDGE_SYSTEMS[JUDGE_STYLE] for c in client.calls)
     assert "- amenities, positive: rooftop hot tub open late" in client.calls[0].prompt
     assert [f.review_ids for f in out["claim_flags"]] == [[1, 3]]
     assert out["claim_flags"][0].details["model"] == "fake-small"

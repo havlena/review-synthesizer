@@ -81,6 +81,50 @@ specifics, nothing more. Cosine similarity measures wording and topic, not the c
 made. Comparing claims across reviews is the job of the language model step, which is why
 the LangGraph graph gets a claim extraction node rather than a lower embedding threshold.
 
+## Claim duplicates: extraction plus a pairwise model judgment (step 5)
+
+Same set, same pair level ground truth (18 true pairs, 258 negatives). The signal has two
+stages, scored separately because the first caps the second: a candidate rule on the
+extracted claims (pairs sharing at least N specific claims by aspect and polarity, no model
+call), then one small model judgment per candidate. Measured on its own, with the detector's
+skip rule off (word overlap joins none of the 18 pairs anyway).
+
+```
+python scripts/eval_claims.py                                          # current default
+python scripts/eval_claims.py --min-shared 2 1 --judge strict lenient  # the ablation
+```
+
+Settings: claim extraction on `claude-sonnet-5-5`, judgments on `claude-haiku-5-5`, effort and
+thinking at the API defaults, no temperature (the Messages API has rejected sampling
+parameters since 2026-10-21, so stability is measured by repeating runs). Every run is
+scored only if every call in it succeeded.
+
+Baseline (`evals/results/claim_duplicates.md`, 2 shared claims, strict judge, two runs): 6
+and 3 of 18 pairs joined, no wrong join in either run. Twelve or thirteen of the 18 pairs
+were lost before any judgment, at the candidate rule. The positive campaign (cluster A)
+yields no specific claims at all, so no candidate rule can reach it; the rating burst signal
+is the one for that pattern. The runs agreed on 3 joined pairs: claim extraction itself
+varies between runs.
+
+Ablation (`evals/results/claim_duplicates_ablation.md`): each run extracts once and all four
+cells (1 or 2 shared claims, strict or lenient judge) are scored on that same extraction.
+No cell made a wrong join in either run. Mean judged recall: 0.222 (2, strict), 0.222
+(2, lenient), 0.389 (1, strict), 0.417 (1, lenient). The rule fixed before the run (no wrong
+join in either run, then highest recall, ties to the stricter setting, otherwise keep the
+default) chose 1 shared claim with the lenient judge, and that is now the product default.
+What it costs: about seven times the judgments on this set (12% of all pairs become
+candidates, against 2%), roughly 15,000 small model judgments, about $2, on a batch of 500
+reviews, and more on real batches where honest reviews share more specifics.
+
+Read the gain with care. Most of it comes from the candidate rule (0.222 to 0.389 with the
+same judge). The judge prompt's share is half a pair per run on average: lenient led strict
+by two pairs in one run and trailed by one in the other. The lenient prompt's examples of
+different names for one feature are the vocabulary of cluster C, which favours it on this
+set. The setting was chosen on the same 24 reviews it is reported on, with no held out set,
+so expect less on new data. The signal finds about four in ten rewritten pairs here, with
+precision 1.0 in every run so far; it is a precise, partial signal, like the embedding one,
+and the pairs it finds still go to a person.
+
 Known behaviour, visible in the report: the rating burst rule is timing only, so a genuine
 review posted within four days of a planted cluster is flagged with it. That is the Module
 6 false positive risk, and it is why every flag goes to a person with its reason attached
@@ -103,7 +147,7 @@ there is an operator.
 
 ## Still to come
 
-- Claim level duplicate detection in the LangGraph graph (step 5): the same 18 rewritten
-  pairs, scored on whether the language model identifies them as making the same claims.
+- A held out paraphrase set, written separately from the detector, to check the claim
+  duplicate setting chosen above on data it was not chosen on.
 - End to end evals of the graph: a golden set of batches with expected flags, themes and
   actions, scored on every run and traced in LangSmith.
