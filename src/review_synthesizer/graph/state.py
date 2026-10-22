@@ -64,18 +64,25 @@ class PairJudgment:
 
 @dataclass(frozen=True)
 class Theme:
+    """A topic guests raise. ``count`` is the number of verified reviews in ``review_ids``."""
+
     name: str
     count: int
     sentiment: Polarity
     evidence: list[str] = field(default_factory=list)
+    """Short phrases quoted exactly from the cited reviews (checked, not trusted)."""
+    review_ids: list[ReviewId] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
 class AspectScore:
+    """Score 1 to 5 on the anchored bands in :mod:`.prompts`, from verified reviews only."""
+
     aspect: Aspect
-    score: float
+    score: int
     review_count: int
     evidence: str
+    review_ids: list[ReviewId] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

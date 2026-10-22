@@ -1,7 +1,7 @@
 """Node functions. Each takes the state and returns the keys it changes.
 
-Complete except ``themes_and_scores``, ``actions`` and ``compose_brief``, which are still
-stubs returning empty values of the right type (``docs/build-plan.md``, step 5). Dependencies
+Complete except ``compose_brief``, which is still a stub returning an empty brief
+(``docs/build-plan.md``, step 5). Dependencies
 (the model client, the optional embedder and classifier) are keyword arguments bound by
 :func:`.build.build_graph`, so they never enter the state.
 """
@@ -22,9 +22,19 @@ from .batch import validate_batch
 from .config import MAX_PARALLEL_CALLS
 from .duplicates import candidate_pairs, claim_flags
 from .model import ModelClient
-from .prompts import EXTRACT_SYSTEM, JUDGE_SYSTEM, extract_prompt, judge_prompt
-from .schemas import ExtractedClaims, PairVerdict
+from .prompts import (
+    ACTIONS_SYSTEM,
+    EXTRACT_SYSTEM,
+    JUDGE_SYSTEM,
+    SYNTHESIS_SYSTEM,
+    actions_prompt,
+    extract_prompt,
+    judge_prompt,
+    synthesis_prompt,
+)
+from .schemas import ActionList, ExtractedClaims, PairVerdict, Synthesis
 from .state import Brief, BriefState, Claim, PairJudgment, Property
+from .synthesis import clean_actions, clean_scores, clean_themes
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -152,14 +162,54 @@ def verified_set(state: BriefState) -> dict[str, Any]:
     }
 
 
+def _verified_reviews(state: BriefState) -> list[Review]:
+    keep = set(state.get("verified_ids") or [])
+    return [r for r in state["reviews"] if r.id in keep]
+
+
+NOTHING_VERIFIED = (
+    "No review passed the authenticity checks, so themes, scores and actions were not "
+    "produced. Dismissing flags in review returns their reviews."
+)
+
+
 def themes_and_scores(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
-    """Ranked themes and the aspect scorecard, from verified reviews only."""
-    return {"themes": [], "aspect_scores": []}
+    """Ranked themes and the aspect scorecard: one model call over verified reviews only.
+
+    If the call fails, the brief goes ahead without these parts and says so in a note.
+    """
+    verified = _verified_reviews(state)
+    if not verified:
+        return {"themes": [], "aspect_scores": [], "notes": [NOTHING_VERIFIED]}
+    try:
+        out = client.structured(
+            Synthesis, system=SYNTHESIS_SYSTEM, prompt=synthesis_prompt(_property(state), verified)
+        )
+    except Exception as exc:  # noqa: BLE001 - recorded for the operator, run continues
+        note = f"Theme and scorecard synthesis failed ({type(exc).__name__}); both are empty."
+        return {"themes": [], "aspect_scores": [], "notes": [note]}
+    themes, theme_notes = clean_themes(out.themes, verified)
+    scores, score_notes = clean_scores(out.aspect_scores, verified)
+    return {"themes": themes, "aspect_scores": scores, "notes": theme_notes + score_notes}
 
 
 def actions(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
-    """Ranked action list with impact and effort."""
-    return {"actions": []}
+    """Ranked action list with impact and effort: one model call over the synthesis."""
+    verified = _verified_reviews(state)
+    if not verified:
+        return {"actions": []}
+    prompt = actions_prompt(
+        _property(state), verified, state.get("themes", []), state.get("aspect_scores", [])
+    )
+    try:
+        out = client.structured(ActionList, system=ACTIONS_SYSTEM, prompt=prompt)
+    except Exception as exc:  # noqa: BLE001 - recorded for the operator, run continues
+        return {
+            "actions": [],
+            "notes": [f"Action list failed ({type(exc).__name__}); it is empty."],
+        }
+    result, notes = clean_actions(out.actions, verified)
+    return {"actions": result, "notes": notes}
 
 
 def human_review(state: BriefState) -> dict[str, Any]:

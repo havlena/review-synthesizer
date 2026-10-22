@@ -146,7 +146,9 @@ def test_in_the_graph_the_planted_cluster_pairs_are_not_judged_again(run_graph):
     rows = json.loads((FIXTURES / "harbor_light_inn.json").read_text(encoding="utf-8"))["reviews"]
     same_two = ExtractedClaims(
         claims=[
-            ClaimOut(aspect="location", polarity="positive", specific=True, statement="harbor view"),
+            ClaimOut(
+                aspect="location", polarity="positive", specific=True, statement="harbor view"
+            ),
             ClaimOut(aspect="breakfast", polarity="negative", specific=True, statement="cold eggs"),
         ]
     )

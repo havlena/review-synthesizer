@@ -35,8 +35,12 @@ def view_claim(prompt: str) -> ExtractedClaims:
     rid = review_id(prompt)
     return ExtractedClaims(
         claims=[
-            ClaimOut(aspect="location", polarity="positive", specific=True,
-                     statement=f"  harbor view from room {rid}  "),
+            ClaimOut(
+                aspect="location",
+                polarity="positive",
+                specific=True,
+                statement=f"  harbor view from room {rid}  ",
+            ),
             ClaimOut(aspect="other", polarity="positive", specific=False, statement="   "),
         ]
     )
@@ -107,4 +111,5 @@ def test_claims_and_notes_flow_through_the_graph(run_graph):
         {"property": HARBOR, "raw_reviews": rows},
     )
     assert out["claims"][1] == [] and len(out["claims"][2]) == 1
-    assert len(out["notes"]) == 1 and "review 1 (ValueError)" in out["notes"][0]
+    extraction_notes = [n for n in out["notes"] if n.startswith("Claim extraction")]
+    assert len(extraction_notes) == 1 and "review 1 (ValueError)" in extraction_notes[0]
