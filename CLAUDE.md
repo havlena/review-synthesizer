@@ -63,10 +63,9 @@ the LangGraph graph, the API, Docker, tracing, CI, deployment and the operator U
 
 - Plain language, measured claims, numbers with their protocol. No marketing words.
 - Commit subjects: `Step N: what changed`, imperative, under 72 characters. Body optional.
-  End every commit message with the two trailers used so far:
-  `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` and
-  `Claude-Session: https://claude.ai/code/session_01T8UT8Ksb8fc8v9B6mZhkAg`
-  (the Claude Code session that makes the commit may substitute its own session line).
+  Commits made with Claude Code carry one trailer only, naming the model that did the work,
+  for example `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. No
+  `Claude-Session` line (commits before step 5 have one; that convention is retired).
 - Do not commit on the author's behalf without being asked; stage, show the diff summary,
   and let the author run the commit, unless told otherwise in the session.
 
