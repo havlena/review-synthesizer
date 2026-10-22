@@ -17,14 +17,59 @@ from __future__ import annotations
 from functools import partial
 from typing import Any
 
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from langgraph.graph import END, START, StateGraph
 
-from review_synthesizer.authenticity import Embedder
+from review_synthesizer.authenticity import (
+    DetectionResult,
+    Embedder,
+    Flag,
+    RatingSummary,
+    Review,
+)
 from review_synthesizer.authenticity.detector import Classifier
 
 from . import nodes
 from .model import ModelClient
-from .state import BriefState
+from .state import (
+    Action,
+    AspectScore,
+    Brief,
+    BriefState,
+    Claim,
+    PairJudgment,
+    Property,
+    Theme,
+)
+
+STATE_TYPES = (
+    Property,
+    Review,
+    Flag,
+    DetectionResult,
+    RatingSummary,
+    Claim,
+    PairJudgment,
+    Theme,
+    AspectScore,
+    Action,
+    Brief,
+)
+"""Every record type the state holds; the only types a checkpoint may rebuild."""
+
+
+def state_serializer() -> JsonPlusSerializer:
+    """Checkpoint serializer that rebuilds the state's records and nothing else."""
+    return JsonPlusSerializer(
+        allowed_msgpack_modules=[(t.__module__, t.__name__) for t in STATE_TYPES]
+    )
+
+
+def memory_checkpointer() -> InMemorySaver:
+    """In-process checkpointer for one run (``run_brief``, tests). The API uses a database."""
+    return InMemorySaver(serde=state_serializer())
+
 
 NODE_NAMES = (
     "load_batch",
@@ -53,8 +98,8 @@ def build_graph(
 
     ``embedder`` and ``classifier`` switch on the detector's optional signals, as in
     ``authenticity.detect``. A checkpointer is needed to pause at ``human_review`` and
-    resume; pass one (for example LangGraph's ``InMemorySaver``) whenever the run will be
-    resumed.
+    resume; use :func:`memory_checkpointer`, or any saver built with
+    :func:`state_serializer`.
     """
     graph = StateGraph(BriefState)
     for name in NODE_NAMES:
@@ -63,6 +108,8 @@ def build_graph(
             fn = partial(fn, client=client)
         elif name == "authenticity":
             fn = partial(fn, embedder=embedder, classifier=classifier)
+        elif name == "compose_brief":
+            fn = partial(fn, models=client.config, embedder_name=getattr(embedder, "name", None))
         graph.add_node(name, fn)
 
     graph.add_edge(START, "load_batch")

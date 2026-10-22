@@ -14,14 +14,13 @@ import pytest
 
 pytest.importorskip("langgraph")
 
-from langgraph.checkpoint.memory import InMemorySaver
-
 from review_synthesizer.authenticity import Review, detect
 from review_synthesizer.graph import (
     BatchError,
     FakeModelClient,
     Property,
     build_graph,
+    memory_checkpointer,
     validate_batch,
 )
 
@@ -153,7 +152,7 @@ def test_optional_signals_run_only_when_configured(run):
 
 
 def test_invalid_batch_stops_the_run_before_any_node_after_load_batch():
-    g = build_graph(FakeModelClient(), checkpointer=InMemorySaver())
+    g = build_graph(FakeModelClient(), checkpointer=memory_checkpointer())
     config = {"configurable": {"thread_id": "bad"}}
     with pytest.raises(BatchError, match="rating 9"):
         g.invoke({"property": Property("Harbor Light Inn"), "raw_reviews": [row(rating=9)]}, config)

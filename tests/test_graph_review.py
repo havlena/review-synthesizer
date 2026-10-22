@@ -11,11 +11,10 @@ import pytest
 
 pytest.importorskip("langgraph")
 
-from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.types import Command
 
 from review_synthesizer.authenticity import Flag
-from review_synthesizer.graph import FakeModelClient, Property, build_graph
+from review_synthesizer.graph import FakeModelClient, Property, build_graph, memory_checkpointer
 from review_synthesizer.graph.approval import REVIEW_NOTE, flag_key, held_ids, parse_decisions
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -36,7 +35,7 @@ def runs_of(graph, config, node):
 
 
 def test_run_pauses_at_human_review_with_every_flag_and_its_reason():
-    graph = build_graph(FakeModelClient(), checkpointer=InMemorySaver())
+    graph = build_graph(FakeModelClient(), checkpointer=memory_checkpointer())
     config = {"configurable": {"thread_id": "pause"}}
     out = graph.invoke(harbor_input(), config)
 
@@ -93,7 +92,7 @@ def test_a_review_held_by_another_confirmed_flag_stays_out(run_graph):
     ],
 )
 def test_an_incomplete_or_malformed_answer_is_refused(answer, error, message):
-    graph = build_graph(FakeModelClient(), checkpointer=InMemorySaver())
+    graph = build_graph(FakeModelClient(), checkpointer=memory_checkpointer())
     config = {"configurable": {"thread_id": "bad-answer"}}
     graph.invoke(harbor_input(), config)
     with pytest.raises(error, match=message):

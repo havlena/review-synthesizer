@@ -10,7 +10,6 @@ import pytest
 
 pytest.importorskip("langgraph")
 
-from langgraph.checkpoint.memory import InMemorySaver
 from pydantic import BaseModel
 
 from review_synthesizer.authenticity import Review
@@ -22,6 +21,7 @@ from review_synthesizer.graph import (
     ModelConfig,
     Property,
     build_graph,
+    memory_checkpointer,
 )
 from review_synthesizer.graph.schemas import ActionList, ExtractedClaims, Synthesis
 
@@ -97,7 +97,7 @@ def test_graph_runs_end_to_end_on_the_fake_model(run_graph):
 
 
 def test_state_survives_a_checkpoint():
-    graph = build_graph(FakeModelClient(), checkpointer=InMemorySaver())
+    graph = build_graph(FakeModelClient(), checkpointer=memory_checkpointer())
     config = {"configurable": {"thread_id": "harbor-1"}}
     graph.invoke(harbor_input(), config)
     saved = graph.get_state(config).values

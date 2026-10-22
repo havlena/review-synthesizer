@@ -106,6 +106,8 @@ class BriefState(TypedDict, total=False):
     """Everything a run knows. Each node returns only the keys it changes."""
 
     property: Property
+    run_id: str
+    """Set by the caller; recorded in the brief's methods note."""
     raw_reviews: list[dict[str, Any]]
     """Input as given; ``load_batch`` validates it into ``reviews``."""
     reviews: list[Review]

@@ -1,9 +1,8 @@
 """Node functions. Each takes the state and returns the keys it changes.
 
-Complete except ``compose_brief``, which is still a stub returning an empty brief
-(``docs/build-plan.md``, step 5). Dependencies
-(the model client, the optional embedder and classifier) are keyword arguments bound by
-:func:`.build.build_graph`, so they never enter the state.
+The nine nodes of ``docs/build-plan.md``, step 5, plus the routing after human review.
+Dependencies (the model client, the optional embedder and classifier, the model names) are
+keyword arguments bound by :func:`.build.build_graph`, so they never enter the state.
 """
 
 from __future__ import annotations
@@ -19,7 +18,8 @@ from review_synthesizer.authenticity.detector import Classifier
 
 from .approval import all_flags, flag_key, held_ids, parse_decisions, review_request
 from .batch import validate_batch
-from .config import MAX_PARALLEL_CALLS
+from .brief import build_brief
+from .config import MAX_PARALLEL_CALLS, ModelConfig
 from .duplicates import candidate_pairs, claim_flags
 from .model import ModelClient
 from .prompts import (
@@ -33,7 +33,7 @@ from .prompts import (
     synthesis_prompt,
 )
 from .schemas import ActionList, ExtractedClaims, PairVerdict, Synthesis
-from .state import Brief, BriefState, Claim, PairJudgment, Property
+from .state import BriefState, Claim, PairJudgment, Property
 from .synthesis import clean_actions, clean_scores, clean_themes
 
 T = TypeVar("T")
@@ -234,6 +234,8 @@ def route_after_review(state: BriefState) -> str:
     return "compose_brief"
 
 
-def compose_brief(state: BriefState) -> dict[str, Any]:
-    """Assemble the brief as data and Markdown."""
-    return {"brief": Brief(data={}, markdown="")}
+def compose_brief(
+    state: BriefState, *, models: ModelConfig, embedder_name: str | None = None
+) -> dict[str, Any]:
+    """Assemble the brief as data and Markdown. Reached only after ``human_review``."""
+    return {"brief": build_brief(state, models, embedder_name)}
