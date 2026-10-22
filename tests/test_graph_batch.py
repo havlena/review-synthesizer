@@ -118,12 +118,16 @@ class FixedProbability:
         return np.array([self.table.get(t, 0.0) for t in texts])
 
 
-def run(rows, **kwargs):
-    g = build_graph(FakeModelClient(), **kwargs)
-    return g.invoke({"property": Property("Harbor Light Inn"), "raw_reviews": rows})
+@pytest.fixture
+def run(run_graph):
+    def go(rows, **kwargs):
+        inp = {"property": Property("Harbor Light Inn"), "raw_reviews": rows}
+        return run_graph(FakeModelClient(), inp, **kwargs)[0]
+
+    return go
 
 
-def test_graph_detection_is_the_detector_result_and_keeps_the_golden_five():
+def test_graph_detection_is_the_detector_result_and_keeps_the_golden_five(run):
     rows = harbor_rows()
     out = run(rows)
     direct = detect([Review.from_dict(r) for r in rows])
@@ -133,7 +137,7 @@ def test_graph_detection_is_the_detector_result_and_keeps_the_golden_five():
     assert out["detection"].signals == ["duplicate_phrasing", "rating_burst"]
 
 
-def test_optional_signals_run_only_when_configured():
+def test_optional_signals_run_only_when_configured(run):
     rows = harbor_rows()
     first_text = rows[0]["text"]
     out = run(rows, embedder=SameVector(), classifier=FixedProbability({first_text: 0.95}))

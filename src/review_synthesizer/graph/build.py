@@ -5,10 +5,11 @@ Shape (``docs/build-plan.md``, step 5)::
     load_batch -> authenticity   -\\
                -> extract_claims -+-> claim_duplicates -> verified_set
     -> themes_and_scores -> actions -> human_review -> compose_brief
+                                            \\-> verified_set (a dismissal released reviews)
 
 ``authenticity`` and ``extract_claims`` run in the same step; ``claim_duplicates`` waits
-for both. Everything after it is sequential. The return path from ``human_review`` to
-``verified_set`` (dismissed flags release reviews) arrives with the interrupt.
+for both. Everything after it is sequential. ``human_review`` interrupts the run, so a
+checkpointer is required whenever the batch has flags.
 """
 
 from __future__ import annotations
@@ -72,6 +73,8 @@ def build_graph(
     graph.add_edge("verified_set", "themes_and_scores")
     graph.add_edge("themes_and_scores", "actions")
     graph.add_edge("actions", "human_review")
-    graph.add_edge("human_review", "compose_brief")
+    graph.add_conditional_edges(
+        "human_review", nodes.route_after_review, ["verified_set", "compose_brief"]
+    )
     graph.add_edge("compose_brief", END)
     return graph.compile(checkpointer=checkpointer)

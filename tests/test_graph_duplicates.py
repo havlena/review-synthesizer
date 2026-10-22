@@ -13,7 +13,7 @@ import pytest
 pytest.importorskip("langgraph")
 
 from review_synthesizer.authenticity import DetectionResult, Flag, Review
-from review_synthesizer.graph import Claim, FakeModelClient, PairJudgment, Property, build_graph
+from review_synthesizer.graph import Claim, FakeModelClient, PairJudgment, Property
 from review_synthesizer.graph.duplicates import (
     MIN_SHARED_SPECIFIC,
     candidate_pairs,
@@ -142,7 +142,7 @@ def test_a_failed_judgment_is_noted_and_the_pair_left_unjoined():
     ]
 
 
-def test_in_the_graph_the_planted_cluster_pairs_are_not_judged_again():
+def test_in_the_graph_the_planted_cluster_pairs_are_not_judged_again(run_graph):
     rows = json.loads((FIXTURES / "harbor_light_inn.json").read_text(encoding="utf-8"))["reviews"]
     same_two = ExtractedClaims(
         claims=[
@@ -151,7 +151,7 @@ def test_in_the_graph_the_planted_cluster_pairs_are_not_judged_again():
         ]
     )
     client = FakeModelClient({ExtractedClaims: same_two, PairVerdict: verdict_for(set())})
-    out = build_graph(client).invoke({"property": HARBOR, "raw_reviews": rows})
+    out, *_ = run_graph(client, {"property": HARBOR, "raw_reviews": rows})
 
     judged = [c for c in client.calls if c.schema == "PairVerdict"]
     planted_pairs = 5 * 4 // 2  # reviews 21 to 25, joined by duplicate phrasing

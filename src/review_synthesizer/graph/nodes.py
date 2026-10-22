@@ -1,7 +1,7 @@
 """Node functions. Each takes the state and returns the keys it changes.
 
-Complete up to ``claim_duplicates``. The rest are still stubs returning empty values of
-the right type, filled in commit by commit (``docs/build-plan.md``, step 5). Dependencies
+Complete except ``themes_and_scores``, ``actions`` and ``compose_brief``, which are still
+stubs returning empty values of the right type (``docs/build-plan.md``, step 5). Dependencies
 (the model client, the optional embedder and classifier) are keyword arguments bound by
 :func:`.build.build_graph`, so they never enter the state.
 """
@@ -12,9 +12,12 @@ from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, TypeVar
 
-from review_synthesizer.authenticity import Embedder, RatingSummary, Review, ReviewId, detect
+from langgraph.types import interrupt
+
+from review_synthesizer.authenticity import Embedder, Review, ReviewId, detect, rating_summary
 from review_synthesizer.authenticity.detector import Classifier
 
+from .approval import all_flags, flag_key, held_ids, parse_decisions, review_request
 from .batch import validate_batch
 from .config import MAX_PARALLEL_CALLS
 from .duplicates import candidate_pairs, claim_flags
@@ -131,12 +134,21 @@ def claim_duplicates(state: BriefState, *, client: ModelClient) -> dict[str, Any
     }
 
 
+def _verified_ids(state: BriefState) -> list[ReviewId]:
+    held = held_ids(all_flags(state), state.get("decisions") or {})
+    return [r.id for r in state["reviews"] if r.id not in held]
+
+
 def verified_set(state: BriefState) -> dict[str, Any]:
-    """Reviews not covered by any flag, and the displayed and verified ratings."""
-    ids = [r.id for r in state["reviews"]]
+    """Reviews not held by any flag, and the displayed and verified ratings.
+
+    A flag holds its reviews until the operator dismisses it, so before review this is
+    the cautious set: every flagged review is out.
+    """
+    held = held_ids(all_flags(state), state.get("decisions") or {})
     return {
-        "verified_ids": ids,
-        "rating": RatingSummary(total=len(ids), removed=0, displayed=0.0, verified=None),
+        "verified_ids": _verified_ids(state),
+        "rating": rating_summary(state["reviews"], held),
     }
 
 
@@ -151,8 +163,25 @@ def actions(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
 
 
 def human_review(state: BriefState) -> dict[str, Any]:
-    """The operator confirms or dismisses each flag. The interrupt arrives in commit 5."""
-    return {"decisions": dict(state.get("decisions", {}))}
+    """Pause for the operator to confirm or dismiss every flag not yet decided.
+
+    A LangGraph interrupt: the run stops here with the flags and their reasons, and resumes
+    with ``Command(resume={flag_key: True | False, ...})``. A batch with no flags passes
+    straight through; there is nothing to ask.
+    """
+    decisions = dict(state.get("decisions") or {})
+    pending = [f for f in all_flags(state) if flag_key(f) not in decisions]
+    if pending:
+        answer = interrupt(review_request(pending, state))
+        decisions.update(parse_decisions(answer, [flag_key(f) for f in pending]))
+    return {"decisions": decisions}
+
+
+def route_after_review(state: BriefState) -> str:
+    """Rerun the verified set and synthesis if a dismissal released reviews; else finish."""
+    if _verified_ids(state) != state.get("verified_ids"):
+        return "verified_set"
+    return "compose_brief"
 
 
 def compose_brief(state: BriefState) -> dict[str, Any]:

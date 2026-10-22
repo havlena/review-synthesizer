@@ -55,16 +55,15 @@ def test_graph_has_every_node_and_the_planned_edges():
         ("themes_and_scores", "actions"),
         ("actions", "human_review"),
         ("human_review", "compose_brief"),
+        ("human_review", "verified_set"),
         ("compose_brief", "__end__"),
     } <= edges
 
 
-def test_fan_out_runs_both_branches_in_one_step_and_joins_once():
+def test_fan_out_runs_both_branches_in_one_step_and_joins_once(run_graph):
     # Each checkpoint records the nodes scheduled for the next superstep, so the history
     # shows which nodes ran together, in order.
-    graph = build_graph(FakeModelClient(), checkpointer=InMemorySaver())
-    config = {"configurable": {"thread_id": "fan-out"}}
-    graph.invoke(harbor_input(), config)
+    _, graph, config, _ = run_graph(FakeModelClient(), harbor_input())
     history = sorted(graph.get_state_history(config), key=lambda s: s.metadata["step"])
     steps = [set(s.next) for s in history if s.next]
     assert steps == [
@@ -80,9 +79,9 @@ def test_fan_out_runs_both_branches_in_one_step_and_joins_once():
     ]
 
 
-def test_graph_runs_end_to_end_on_the_fake_model():
+def test_graph_runs_end_to_end_on_the_fake_model(run_graph):
     client = FakeModelClient({ExtractedClaims: ExtractedClaims(claims=[])})
-    out = build_graph(client).invoke(harbor_input())
+    out, *_ = run_graph(client, harbor_input())
     assert {c.schema for c in client.calls} == {"ExtractedClaims"}
     assert out.get("notes", []) == []
     assert len(out["reviews"]) == 25
