@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-10-22T22:30:13+00:00",
+  "created_at": "2026-10-22T22:54:26+00:00",
   "python_version": "3.12.10",
   "property": "Harbor Light Inn",
   "reviews": 25,
@@ -115,8 +115,8 @@
         {
           "key": "claim_duplicate:10,16",
           "signal_type": "claim_duplicate",
-          "score": 1.0,
-          "confidence": "high",
+          "score": 0.3333333333333333,
+          "confidence": "low",
           "review_ids": [
             10,
             16
@@ -141,42 +141,37 @@
       "notes": [],
       "themes": [
         {
-          "name": "Cleanliness varies by room",
+          "name": "Cleanliness hits and misses",
           "count": 9,
           "sentiment": "mixed"
         },
         {
-          "name": "Front desk service inconsistency",
+          "name": "Helpful but inconsistent staff",
           "count": 8,
           "sentiment": "mixed"
         },
         {
-          "name": "Inconsistent breakfast offering",
+          "name": "Breakfast quality varies",
           "count": 8,
           "sentiment": "mixed"
         },
         {
-          "name": "Walkable harbor-side location",
-          "count": 5,
+          "name": "Harbor views and location",
+          "count": 7,
           "sentiment": "positive"
-        },
-        {
-          "name": "Comfortable beds and rooms",
-          "count": 5,
-          "sentiment": "positive"
-        },
-        {
-          "name": "Harbor views, one mismatch",
-          "count": 4,
-          "sentiment": "mixed"
         },
         {
           "name": "Thin walls and noise",
-          "count": 3,
-          "sentiment": "negative"
+          "count": 6,
+          "sentiment": "mixed"
         },
         {
-          "name": "Dated rooms, heater problems",
+          "name": "Comfortable beds",
+          "count": 4,
+          "sentiment": "positive"
+        },
+        {
+          "name": "Heating and dated rooms",
           "count": 3,
           "sentiment": "negative"
         },
@@ -199,33 +194,33 @@
         "value": 3,
         "location": 5,
         "noise": 3,
-        "parking": 2,
+        "parking": 1,
         "wifi": 1,
         "other": 4
       },
       "actions": [
         {
-          "title": "Add a room inspection checklist after housekeeping turnover",
+          "title": "Add a pre-arrival room check for mold, damp and trash",
           "impact": "High",
           "effort": "Low"
         },
         {
-          "title": "Staff the front desk consistently and answer the phone",
+          "title": "Set a staff protocol for phones, noise complaints and room moves",
           "impact": "High",
           "effort": "Low"
         },
         {
-          "title": "Service and replace faulty heaters and treat damp rooms",
+          "title": "Expand breakfast with hot items and restock before 9 a.m.",
           "impact": "High",
           "effort": "Medium"
         },
         {
-          "title": "Set a minimum daily breakfast menu with hot options and restocking",
-          "impact": "High",
+          "title": "Service and replace heaters in rooms with rattling or failed units",
+          "impact": "Medium",
           "effort": "Medium"
         },
         {
-          "title": "Upgrade wifi so evening calls and streaming stay connected",
+          "title": "Upgrade wifi coverage and bandwidth for guests working remotely",
           "impact": "Medium",
           "effort": "Medium"
         }
@@ -233,16 +228,16 @@
       "usage": {
         "claude-sonnet-5-5": {
           "calls": 27,
-          "input_tokens": 34886,
-          "output_tokens": 8721
+          "input_tokens": 34818,
+          "output_tokens": 8248
         },
         "claude-haiku-5-5": {
           "calls": 29,
-          "input_tokens": 24943,
-          "output_tokens": 2637
+          "input_tokens": 24981,
+          "output_tokens": 2596
         }
       },
-      "usd": 0.16079480000000002
+      "usd": 0.1559121
     }
   ],
   "differences": null,
@@ -250,16 +245,16 @@
     "total": {
       "claude-sonnet-5-5": {
         "calls": 27,
-        "input_tokens": 34886,
-        "output_tokens": 8721
+        "input_tokens": 34818,
+        "output_tokens": 8248
       },
       "claude-haiku-5-5": {
         "calls": 29,
-        "input_tokens": 24943,
-        "output_tokens": 2637
+        "input_tokens": 24981,
+        "output_tokens": 2596
       }
     },
-    "usd": 0.16079480000000002,
+    "usd": 0.1559121,
     "prices_per_mtok": {
       "claude-sonnet-5-5": [
         2.0,

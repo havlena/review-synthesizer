@@ -1,6 +1,6 @@
 # End to end graph run: Harbor Light Inn
 
-Generated 2026-10-22T22:30:13+00:00 on Python 3.12.10. 25 reviews, 5 of them planted (21, 22, 23, 24, 25). 1 runs of the whole graph. Brief of run 1: brief_harbor_light.md.
+Generated 2026-10-22T22:54:26+00:00 on Python 3.12.10. 25 reviews, 5 of them planted (21, 22, 23, 24, 25). 1 runs of the whole graph. Brief of run 1: brief_harbor_light.md.
 
 ## Headline
 
@@ -22,7 +22,7 @@ Generated 2026-10-22T22:30:13+00:00 on Python 3.12.10. 25 reviews, 5 of them pla
 | embedding_similarity | 1.00 | high | 21, 22, 23, 24, 25 | confirmed |
 | deceptive_language | 0.82 | low | 21 | confirmed |
 | deceptive_language | 0.82 | low | 23 | confirmed |
-| claim_duplicate | 1.00 | high | 10, 16 | confirmed |
+| claim_duplicate | 0.33 | low | 10, 16 | confirmed |
 
 Notes from the run and the output checks:
 - none
@@ -35,8 +35,8 @@ One run only.
 
 | Run | Model | Calls | Input tokens | Output tokens |
 |---|---|---|---|---|
-| 1 | claude-sonnet-5-5 | 27 | 34,886 | 8,721 |
-| 1 | claude-haiku-5-5 | 29 | 24,943 | 2,637 |
+| 1 | claude-sonnet-5-5 | 27 | 34,818 | 8,248 |
+| 1 | claude-haiku-5-5 | 29 | 24,981 | 2,596 |
 
 Output tokens include thinking tokens.
 Estimated cost of all runs: $0.16 at list prices per million tokens as of 2026-10-06 (claude-sonnet-5-5 $2.00 input, $10.00 output; claude-haiku-5-5 $0.10 input, $0.50 output).
