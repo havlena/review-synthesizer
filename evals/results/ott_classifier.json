@@ -1,0 +1,285 @@
+{
+  "protocol": "published folds, leave one fold out",
+  "threshold": 0.8,
+  "params": {
+    "C": 10.0,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "max_features": null,
+    "sublinear_tf": true,
+    "random_state": 0
+  },
+  "corpus": {
+    "reviews": 1600,
+    "deceptive": 800,
+    "truthful": 800,
+    "hotels": 20,
+    "folds": 5,
+    "duplicate_texts": 4
+  },
+  "hotel_disjoint": true,
+  "folds": [
+    {
+      "fold": 1,
+      "n_train": 1280,
+      "n_test": 320,
+      "hotels_test": [
+        "hilton",
+        "james",
+        "monaco",
+        "sofitel"
+      ],
+      "accuracy": 0.85,
+      "precision": 0.8373493975903614,
+      "recall": 0.86875,
+      "f1": 0.852760736196319,
+      "roc_auc": 0.92734375,
+      "accuracy_positive": 0.85,
+      "accuracy_negative": 0.85,
+      "precision_at_threshold": 0.9722222222222222,
+      "recall_at_threshold": 0.4375,
+      "flagged_at_threshold": 72
+    },
+    {
+      "fold": 2,
+      "n_train": 1280,
+      "n_test": 320,
+      "hotels_test": [
+        "affinia",
+        "ambassador",
+        "hardrock",
+        "talbott"
+      ],
+      "accuracy": 0.875,
+      "precision": 0.9054054054054054,
+      "recall": 0.8375,
+      "f1": 0.8701298701298701,
+      "roc_auc": 0.9535156250000001,
+      "accuracy_positive": 0.9,
+      "accuracy_negative": 0.85,
+      "precision_at_threshold": 0.9836065573770492,
+      "recall_at_threshold": 0.375,
+      "flagged_at_threshold": 61
+    },
+    {
+      "fold": 3,
+      "n_train": 1280,
+      "n_test": 320,
+      "hotels_test": [
+        "conrad",
+        "fairmont",
+        "hyatt",
+        "omni"
+      ],
+      "accuracy": 0.890625,
+      "precision": 0.9032258064516129,
+      "recall": 0.875,
+      "f1": 0.8888888888888888,
+      "roc_auc": 0.95703125,
+      "accuracy_positive": 0.90625,
+      "accuracy_negative": 0.875,
+      "precision_at_threshold": 1.0,
+      "recall_at_threshold": 0.5,
+      "flagged_at_threshold": 80
+    },
+    {
+      "fold": 4,
+      "n_train": 1280,
+      "n_test": 320,
+      "hotels_test": [
+        "homewood",
+        "knickerbocker",
+        "sheraton",
+        "swissotel"
+      ],
+      "accuracy": 0.8875,
+      "precision": 0.918918918918919,
+      "recall": 0.85,
+      "f1": 0.8831168831168831,
+      "roc_auc": 0.958984375,
+      "accuracy_positive": 0.89375,
+      "accuracy_negative": 0.88125,
+      "precision_at_threshold": 1.0,
+      "recall_at_threshold": 0.3875,
+      "flagged_at_threshold": 62
+    },
+    {
+      "fold": 5,
+      "n_train": 1280,
+      "n_test": 320,
+      "hotels_test": [
+        "allegro",
+        "amalfi",
+        "intercontinental",
+        "palmer"
+      ],
+      "accuracy": 0.909375,
+      "precision": 0.9225806451612903,
+      "recall": 0.89375,
+      "f1": 0.9079365079365079,
+      "roc_auc": 0.970234375,
+      "accuracy_positive": 0.9125,
+      "accuracy_negative": 0.90625,
+      "precision_at_threshold": 1.0,
+      "recall_at_threshold": 0.4125,
+      "flagged_at_threshold": 66
+    }
+  ],
+  "mean": {
+    "accuracy": 0.8825,
+    "precision": 0.8974960347055179,
+    "recall": 0.865,
+    "f1": 0.8805665772536937,
+    "roc_auc": 0.9534218750000001,
+    "accuracy_positive": 0.8925000000000001,
+    "accuracy_negative": 0.8724999999999999,
+    "precision_at_threshold": 0.9911657559198543,
+    "recall_at_threshold": 0.4225
+  },
+  "std": {
+    "accuracy": 0.021941862101927466,
+    "precision": 0.034645288406692266,
+    "recall": 0.02191959739593774,
+    "f1": 0.020657732747252508,
+    "roc_auc": 0.015864319580183295,
+    "accuracy_positive": 0.024764515945198694,
+    "accuracy_negative": 0.023634588001486306,
+    "precision_at_threshold": 0.012748828936079168,
+    "recall_at_threshold": 0.049529031890397375
+  },
+  "top_terms": {
+    "deceptive": [
+      [
+        "chicago",
+        7.501
+      ],
+      [
+        "my",
+        5.424
+      ],
+      [
+        "luxury",
+        4.489
+      ],
+      [
+        "my stay",
+        3.472
+      ],
+      [
+        "vacation",
+        3.166
+      ],
+      [
+        "experience",
+        3.108
+      ],
+      [
+        "chicago hotel",
+        2.932
+      ],
+      [
+        "when",
+        2.804
+      ],
+      [
+        "the food",
+        2.767
+      ],
+      [
+        "luxurious",
+        2.752
+      ],
+      [
+        "my room",
+        2.75
+      ],
+      [
+        "hilton",
+        2.738
+      ],
+      [
+        "food",
+        2.652
+      ],
+      [
+        "definitely",
+        2.612
+      ],
+      [
+        "recently",
+        2.589
+      ]
+    ],
+    "truthful": [
+      [
+        "location",
+        -4.369
+      ],
+      [
+        "floor",
+        -4.121
+      ],
+      [
+        "we",
+        -3.999
+      ],
+      [
+        "small",
+        -3.481
+      ],
+      [
+        "rate",
+        -3.246
+      ],
+      [
+        "breakfast",
+        -2.785
+      ],
+      [
+        "street",
+        -2.772
+      ],
+      [
+        "great",
+        -2.749
+      ],
+      [
+        "priceline",
+        -2.718
+      ],
+      [
+        "bathroom",
+        -2.63
+      ],
+      [
+        "on",
+        -2.587
+      ],
+      [
+        "reviews",
+        -2.536
+      ],
+      [
+        "no",
+        -2.478
+      ],
+      [
+        "concierge",
+        -2.399
+      ],
+      [
+        "large",
+        -2.374
+      ]
+    ]
+  },
+  "created_at": "2026-10-22T01:04:24+00:00",
+  "sklearn_version": "1.9.1",
+  "python_version": "3.12.10",
+  "extras": {
+    "Harbor Light Inn fixture (informational, 25 synthetic reviews)": "mean p(deceptive) planted 0.723 vs genuine 0.189; lowest planted 0.585, highest genuine 0.581"
+  }
+}

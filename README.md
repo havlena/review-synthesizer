@@ -20,10 +20,13 @@ The v1 artifacts are kept unchanged under `prototype/`.
 
 ```
 src/review_synthesizer/authenticity/   rule based signals (v1 port, step 3)
+src/review_synthesizer/data/           fetch and normalise public evaluation data (step 4a)
+src/review_synthesizer/evals/          evaluation harnesses; results are committed under evals/results/ (step 4b)
+scripts/                                command line entry points
 tests/                                  golden tests on the capstone data set
 prototype/                              v1 single file prototype and the AI Studio system prompt
 db/                                     Postgres schema (Module 4 base, extended in v2)
-docs/                                   design notes and capstone materials
+docs/                                   design notes; docs/data.md lists every data source and its terms
 ```
 
 ## Run the tests
@@ -31,13 +34,22 @@ docs/                                   design notes and capstone materials
 ```
 python -m venv .venv
 .venv\Scripts\activate        (Windows)   |   source .venv/bin/activate   (macOS, Linux)
-pip install -e .[dev]
+pip install -e .[dev,ml]
 pytest
 ```
 
 The golden tests replay the capstone demo: the five planted reviews are flagged, none of the twenty genuine ones are, and the rating moves from 3.8 displayed to 3.5 verified.
 
-Embeddings, the classifier, the LangGraph graph, the API and the evaluation harness follow as the build proceeds.
+## Evaluation
+
+The deceptive language classifier is scored on the Ott corpus with the published, hotel disjoint folds; the current figures are in `evals/results/ott_classifier.md` and the protocol in `docs/evaluation.md`. Reproduce them with:
+
+```
+python scripts/fetch_ott_corpus.py
+python scripts/eval_ott.py
+```
+
+Embedding similarity, the LangGraph graph and the API follow as the build proceeds.
 
 ## Notes
 
