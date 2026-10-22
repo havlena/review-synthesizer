@@ -1,6 +1,6 @@
 # Duplicate signals: word overlap versus embedding similarity
 
-Generated 2026-10-22T19:37:07+00:00 on Python 3.12.10. Embedding model: `sentence-transformers/paraphrase-mpnet-base-v2`.
+Generated 2026-10-22T22:28:30+00:00 on Python 3.12.10. Embedding model: `sentence-transformers/paraphrase-mpnet-base-v2`.
 
 Set: 24 reviews, 3 labelled clusters of rewritten duplicates (18 true duplicate pairs) and 258 pairs that should not be joined. Synthetic; see tests/fixtures/paraphrase_set.json.
 
@@ -14,7 +14,7 @@ Set: 24 reviews, 3 labelled clusters of rewritten duplicates (18 true duplicate 
 | Embedding cosine | 0.50 | 47 | 18 | 29 | 0 | 0.383 | 1.000 | 0.554 |
 | Embedding cosine | 0.60 | 20 | 13 | 7 | 5 | 0.650 | 0.722 | 0.684 |
 | Embedding cosine | 0.70 | 10 | 9 | 1 | 9 | 0.900 | 0.500 | 0.643 |
-| Embedding cosine **(default)** | 0.80 | 3 | 3 | 0 | 15 | 1.000 | 0.167 | 0.286 |
+| Embedding cosine | 0.80 | 3 | 3 | 0 | 15 | 1.000 | 0.167 | 0.286 |
 | Embedding cosine | 0.90 | 0 | 0 | 0 | 18 | 0.000 | 0.000 | 0.000 |
 
 ## Where the similarities fall
@@ -32,17 +32,20 @@ A threshold that separates the two exists only if the duplicates' minimum is abo
 | B | rude manager, dirty room, overcharged, never again (negative campaign) | 6 | 0.561 | 0.653 | 0.741 |
 | C | lakefront balcony, gourmet breakfast, spa, best vacation ever (fabricated amenities) | 6 | 0.729 | 0.786 | 0.812 |
 
-## What each signal adds (embedding threshold 0.80)
+## What each signal adds (embedding threshold 0.85)
 
 - True duplicate pairs caught by both signals: 0
-- Caught by embeddings only: 3
+- Caught by embeddings only: 0
 - Caught by word overlap only: 0
-- Missed by both: 15
+- Missed by both: 18
 
 Nearest non duplicate pair: G1 and G12 at cosine 0.703. The gap between that and the threshold is the margin against false positives on this set.
 
 True duplicates still missed at the default threshold:
 
+- C3 and C4 (cosine 0.812)
+- C1 and C2 (cosine 0.809)
+- C1 and C4 (cosine 0.806)
 - C1 and C3 (cosine 0.783)
 - C2 and C4 (cosine 0.78)
 - B1 and B2 (cosine 0.741)
@@ -61,11 +64,13 @@ True duplicates still missed at the default threshold:
 
 ## Additional checks
 
-- Harbor Light Inn fixture: planted cluster pairwise cosine min 0.977, mean 0.985; fully joined at 0.80: True; nearest genuine review to a planted one 0.599; most similar pair of genuine reviews 0.801
+- Harbor Light Inn fixture: planted cluster pairwise cosine min 0.977, mean 0.985; fully joined at 0.85: True; nearest genuine review to a planted one 0.599; most similar pair of genuine reviews 0.801
 - Rating burst rule on this set (timing only, no text): 4 1-star reviews, 2026-07-10 to 2026-07-12; 4 5-star reviews, 2026-07-02 to 2026-07-05; 6 5-star reviews, 2026-07-19 to 2026-07-26, genuine reviews swept in: G9, G11
+- Negative control: PASS: most similar genuine Harbor Light pair 0.801, most similar paraphrase set non duplicate pair 0.703, threshold 0.85
 
 ## Read this before quoting the numbers
 
 - Twenty four synthetic reviews written for this project. The clusters were written to share meaning and avoid shared words, which is the case word overlap is known to miss; the distinct reviews were written to share topics without sharing claims. The figures show the mechanism and the chosen threshold's margin, not field accuracy.
 - Embedding similarity joins reviews that say the same thing. Two honest guests can say the same thing. The signal is one input to a human decision, never a verdict, and the Module 6 false positive risk (a cluster of honest praise after a good weekend) is exactly what the nearest non duplicate figure watches.
 - If the duplicates' minimum sits below the others' maximum, no cosine threshold on this model separates rewritten fakes from genuine reviews on the same topic. Cosine similarity measures wording and topic; it does not compare the claims being made. Claim level comparison is the job of the language model step.
+- The operating threshold was set with the margin observed on this synthetic data and the Harbor Light fixture. It must be re-checked on operator data, where honest reviews of one property will be more alike than these.

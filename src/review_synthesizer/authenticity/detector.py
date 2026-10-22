@@ -22,7 +22,7 @@ from collections.abc import Sequence
 from typing import Any, Protocol, runtime_checkable
 
 from .embeddings import EMBED_THRESHOLD, Embedder, find_embedding_clusters
-from .models import DetectionResult, Flag, Review, ReviewId, confidence_band
+from .models import DetectionResult, Flag, Review, ReviewId, margin_band
 from .rules import (
     BURST_DAYS,
     BURST_MIN,
@@ -64,7 +64,7 @@ def embedding_flags(
                 signal_type="embedding_similarity",
                 review_ids=list(c.review_ids),
                 score=score,
-                confidence=confidence_band(score),
+                confidence=margin_band(score, threshold),
                 rationale=(
                     f"{len(c.review_ids)} reviews share near duplicate meaning: peak cosine "
                     f"similarity {c.peak_similarity:.2f} (mean {c.mean_similarity:.2f}) against a "
@@ -118,7 +118,7 @@ def classifier_flags(
                 signal_type="deceptive_language",
                 review_ids=[review.id],
                 score=p,
-                confidence=confidence_band(p),
+                confidence=margin_band(p, threshold),
                 rationale=(
                     f"Language resembles reviews written without a stay: p = {p:.2f} "
                     f"(threshold {threshold:.2f}).{cue_text}"

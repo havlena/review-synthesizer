@@ -46,7 +46,7 @@ The golden tests replay the capstone demo: the five planted reviews are flagged,
 |---|---|---|
 | `duplicate_phrasing` | Copy and paste with light edits: Jaccard word overlap at or above 0.55 | Golden tests on the capstone data set |
 | `rating_burst` | Three or more same rating reviews within four days; separate bursts reported separately | Golden tests |
-| `embedding_similarity` | Light rewrites and shared specifics: cosine similarity of sentence embeddings at or above 0.80 (paraphrase-mpnet-base-v2, runs locally). Measured limit: heavy paraphrase is not separable from honest reviews on the same topic by any of three models tested | `evals/results/paraphrase_similarity.md` |
+| `embedding_similarity` | Light rewrites: cosine similarity of sentence embeddings at or above 0.85 (paraphrase-mpnet-base-v2, runs locally). Measured limit: heavy paraphrase is not separable from honest reviews on the same topic by any of three models tested, and at 0.85 none of it is joined | `evals/results/paraphrase_similarity.md` |
 | `deceptive_language` | Language that resembles reviews written without a stay; flagged only at p ≥ 0.8 | 99.1% precision, 42% recall on the Ott corpus, `evals/results/ott_classifier.md` |
 
 Every flag carries a score, a confidence band and a written reason, and is a signal for human review rather than a verdict. Try it on the capstone data set:

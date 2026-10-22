@@ -43,10 +43,38 @@ class Review:
 
 
 def confidence_band(score: float) -> Confidence:
-    """Map a 0 to 1 score to the three bands used by the database schema."""
+    """Map a 0 to 1 score to the three bands used by the database schema.
+
+    For scores that are not a measurement against a threshold: the rating burst (count over
+    twice the minimum size) and the claim duplicate share of pairs judged the same. Signals
+    with a threshold use :func:`margin_band`.
+    """
     if score >= 0.75:
         return "high"
     if score >= 0.5:
+        return "medium"
+    return "low"
+
+
+MARGIN_BANDS = (0.25, 0.60)
+"""Margin over a signal's threshold, as a share of the room above it, at which medium and
+high start. Author decision after the Harbor Light end to end run (October 2026), where a
+pair 0.001 over its threshold read as high; not tuned on data."""
+
+
+def margin_band(score: float, threshold: float) -> Confidence:
+    """Band from how far a score clears its signal's own threshold, not from the raw score.
+
+    margin = (score - threshold) / (1 - threshold): 0 at the threshold, 1 at a perfect score.
+    Low below 0.25, medium below 0.60, high at or above. A flag that only just clears its
+    threshold is low, whatever the threshold is.
+    """
+    room = 1.0 - threshold
+    # Rounded so a score exactly on a band edge is not pushed below it by float error.
+    margin = round((score - threshold) / room, 9) if room > 0 else 1.0
+    if margin >= MARGIN_BANDS[1]:
+        return "high"
+    if margin >= MARGIN_BANDS[0]:
         return "medium"
     return "low"
 

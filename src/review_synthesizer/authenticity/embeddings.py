@@ -41,8 +41,15 @@ from .models import Review, ReviewId
 
 DEFAULT_MODEL = "sentence-transformers/paraphrase-mpnet-base-v2"
 SMALL_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-EMBED_THRESHOLD = 0.80
-"""Near duplicate meaning: cosine similarity at or above this value. See evals/results."""
+EMBED_THRESHOLD = 0.85
+"""Near duplicate meaning: cosine similarity at or above this value. Raised from 0.80 after
+the Harbor Light end to end run joined two genuine reviews at 0.801, the most similar
+genuine pair the step 4c report had already recorded. At 0.85 the planted cluster is still
+joined on every model tested (pairwise minimum 0.977 on the default model, 0.928 at worst),
+and the most similar honest pair sits below it (0.801 on the default model, 0.835 at
+worst). The paraphrase pairs joined at 0.80 sat at 0.80 to 0.81, so recall on heavy
+paraphrase is zero here: this signal detects light rewrites, nothing more. Set with the
+margin seen on synthetic data; re-check on operator data. evals/results/paraphrase_similarity.md."""
 
 
 @runtime_checkable

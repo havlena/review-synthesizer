@@ -68,18 +68,32 @@ Result (`evals/results/paraphrase_similarity.md`, three models, October 2026):
   the weakest true pair (0.32, 0.55, 0.56) scores below the strongest non duplicate pair
   (0.60, 0.65, 0.70). The best F1 points in the sweep (0.58 to 0.75, all at 0.40 to 0.60)
   would make a third or more of the flags wrong, which is unusable for an operator.
-- At the 0.80 operating point, `paraphrase-mpnet-base-v2` is the only model with any recall
-  (3 of 18 pairs, all in the fabricated amenities cluster) at a precision of 1.0, and it keeps
-  the widest margin on Harbor Light (planted pairs at 0.98 and above, nearest genuine review
-  0.60). It is the default for that reason; `all-MiniLM-L6-v2` stays as the small option.
+- The operating threshold is 0.85. It was 0.80 until the end to end run on Harbor Light
+  (step 5) joined two genuine reviews, 10 and 16, at 0.801. That pair was already in the
+  first version of this report as "most similar pair of genuine reviews 0.801", and nobody
+  compared it with the threshold. At 0.80 the default model's only recall (3 of 18 pairs, in
+  the fabricated amenities cluster) came from pairs at 0.80 to 0.81, the band honest reviews
+  of one property reach, so those joins were not separable from honest ones.
+- At 0.85 the signal joins none of the 18 heavy paraphrase pairs on any model. It still
+  joins the Harbor Light planted cluster on every model (pairwise minimum 0.977 on the
+  default `paraphrase-mpnet-base-v2`, 0.949 and 0.928 on the others). The default model
+  keeps the widest margin: most similar genuine pair 0.801, nearest genuine review to a
+  planted one 0.60. On `all-mpnet-base-v2` the most similar genuine pair is 0.835, a margin of
+  only 0.015 under the threshold.
+- Negative control, run on every model and failing the script if it fails: the most similar
+  genuine Harbor Light pair and the most similar paraphrase set non duplicate pair must both
+  sit below the threshold. At 0.85: PASS on all three (0.801 and 0.703 on the default model;
+  0.698 and 0.598; 0.835 and 0.646).
 - Light rewrites, the capstone case, are caught cleanly by every model (planted pairs 0.93
   and above). Rewrites built on concrete specifics are the most detectable; generic praise or
   complaint rewrites are the least.
 
-Conclusion: the embedding signal is a precise detector of light rewrites and shared
-specifics, nothing more. Cosine similarity measures wording and topic, not the claims being
-made. Comparing claims across reviews is the job of the language model step, which is why
-the LangGraph graph gets a claim extraction node rather than a lower embedding threshold.
+Conclusion: the embedding signal detects light rewrites, nothing more. Cosine similarity
+measures wording and topic, not the claims being made, and heavy paraphrase sits in the same
+band as honest reviews of one property. Comparing claims across reviews is the job of the
+language model step. The 0.85 threshold was set with the margin observed on synthetic data;
+it must be re-checked on operator data, where honest reviews of one property will be more
+alike than these.
 
 ## Claim duplicates: extraction plus a pairwise model judgment (step 5)
 

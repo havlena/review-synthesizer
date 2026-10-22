@@ -8,10 +8,10 @@
     "neg_max": 0.7031801607788479,
     "separable": false,
     "at_threshold": {
-      "threshold": 0.8,
-      "precision": 1.0,
-      "recall": 0.16666666666666666,
-      "joined": 3
+      "threshold": 0.85,
+      "precision": 0.0,
+      "recall": 0.0,
+      "joined": 0
     },
     "best": {
       "threshold": 0.6,
@@ -29,43 +29,17 @@
       "planted_pairs_mean_cosine": 0.985,
       "planted_cluster_fully_joined_at_threshold": true,
       "max_cosine_planted_to_genuine": 0.599,
-      "max_cosine_genuine_to_genuine": 0.801
+      "max_cosine_genuine_to_genuine": 0.801,
+      "max_cosine_genuine_to_genuine_exact": 0.8009840221692446
+    },
+    "negative_control": {
+      "passed": true,
+      "threshold": 0.85,
+      "harbor_genuine_max": 0.8009840221692446,
+      "paraphrase_negative_max": 0.7031801607788479,
+      "line": "PASS: most similar genuine Harbor Light pair 0.801, most similar paraphrase set non duplicate pair 0.703, threshold 0.85"
     },
     "report": "paraphrase_similarity_paraphrase-mpnet-base-v2.md"
-  },
-  {
-    "model": "sentence-transformers/all-mpnet-base-v2",
-    "short": "all-mpnet-base-v2",
-    "default": false,
-    "true_min": 0.5477638390361199,
-    "true_mean": 0.6809572664231237,
-    "neg_max": 0.6464210104945076,
-    "separable": false,
-    "at_threshold": {
-      "threshold": 0.8,
-      "precision": 0.0,
-      "recall": 0.0,
-      "joined": 0
-    },
-    "best": {
-      "threshold": 0.6,
-      "f1": 0.7499999999999999,
-      "precision": 0.6818181818181818,
-      "recall": 0.8333333333333334
-    },
-    "per_cluster": {
-      "A": 0.548,
-      "B": 0.561,
-      "C": 0.615
-    },
-    "harbor_light": {
-      "planted_pairs_min_cosine": 0.928,
-      "planted_pairs_mean_cosine": 0.965,
-      "planted_cluster_fully_joined_at_threshold": true,
-      "max_cosine_planted_to_genuine": 0.747,
-      "max_cosine_genuine_to_genuine": 0.835
-    },
-    "report": "paraphrase_similarity_all-mpnet-base-v2.md"
   },
   {
     "model": "sentence-transformers/all-MiniLM-L6-v2",
@@ -76,7 +50,7 @@
     "neg_max": 0.5975673567127016,
     "separable": false,
     "at_threshold": {
-      "threshold": 0.8,
+      "threshold": 0.85,
       "precision": 0.0,
       "recall": 0.0,
       "joined": 0
@@ -97,8 +71,58 @@
       "planted_pairs_mean_cosine": 0.976,
       "planted_cluster_fully_joined_at_threshold": true,
       "max_cosine_planted_to_genuine": 0.669,
-      "max_cosine_genuine_to_genuine": 0.698
+      "max_cosine_genuine_to_genuine": 0.698,
+      "max_cosine_genuine_to_genuine_exact": 0.6980383288084799
+    },
+    "negative_control": {
+      "passed": true,
+      "threshold": 0.85,
+      "harbor_genuine_max": 0.6980383288084799,
+      "paraphrase_negative_max": 0.5975673567127016,
+      "line": "PASS: most similar genuine Harbor Light pair 0.698, most similar paraphrase set non duplicate pair 0.598, threshold 0.85"
     },
     "report": "paraphrase_similarity_all-MiniLM-L6-v2.md"
+  },
+  {
+    "model": "sentence-transformers/all-mpnet-base-v2",
+    "short": "all-mpnet-base-v2",
+    "default": false,
+    "true_min": 0.5477638390361199,
+    "true_mean": 0.6809572664231237,
+    "neg_max": 0.6464210104945076,
+    "separable": false,
+    "at_threshold": {
+      "threshold": 0.85,
+      "precision": 0.0,
+      "recall": 0.0,
+      "joined": 0
+    },
+    "best": {
+      "threshold": 0.6,
+      "f1": 0.7499999999999999,
+      "precision": 0.6818181818181818,
+      "recall": 0.8333333333333334
+    },
+    "per_cluster": {
+      "A": 0.548,
+      "B": 0.561,
+      "C": 0.615
+    },
+    "harbor_light": {
+      "planted_pairs_min_cosine": 0.928,
+      "planted_pairs_mean_cosine": 0.965,
+      "planted_cluster_fully_joined_at_threshold": true,
+      "max_cosine_planted_to_genuine": 0.747,
+      "max_cosine_genuine_to_genuine": 0.835,
+      "max_cosine_genuine_to_genuine_exact": 0.834772913204408
+    },
+    "negative_control": {
+      "passed": true,
+      "threshold": 0.85,
+      "harbor_genuine_max": 0.834772913204408,
+      "paraphrase_negative_max": 0.6464210104945076,
+      "line": "PASS: most similar genuine Harbor Light pair 0.835, most similar paraphrase set non duplicate pair 0.646, threshold 0.85"
+    },
+    "report": "paraphrase_similarity_all-mpnet-base-v2.md"
   }
 ]

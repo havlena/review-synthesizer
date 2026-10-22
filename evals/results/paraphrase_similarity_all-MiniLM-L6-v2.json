@@ -90,9 +90,9 @@
       "f1": 0.0
     }
   ],
-  "chosen_threshold": 0.8,
+  "chosen_threshold": 0.85,
   "chosen": {
-    "threshold": 0.8,
+    "threshold": 0.85,
     "joined": 0,
     "true_positive": 0,
     "false_positive": 0,
@@ -242,10 +242,11 @@
     }
   ],
   "separable": false,
-  "created_at": "2026-10-22T19:37:09+00:00",
+  "created_at": "2026-10-22T22:28:31+00:00",
   "python_version": "3.12.10",
   "extras": {
-    "Harbor Light Inn fixture": "planted cluster pairwise cosine min 0.949, mean 0.976; fully joined at 0.80: True; nearest genuine review to a planted one 0.669; most similar pair of genuine reviews 0.698",
-    "Rating burst rule on this set (timing only, no text)": "4 1-star reviews, 2026-07-10 to 2026-07-12; 4 5-star reviews, 2026-07-02 to 2026-07-05; 6 5-star reviews, 2026-07-19 to 2026-07-26, genuine reviews swept in: G9, G11"
+    "Harbor Light Inn fixture": "planted cluster pairwise cosine min 0.949, mean 0.976; fully joined at 0.85: True; nearest genuine review to a planted one 0.669; most similar pair of genuine reviews 0.698",
+    "Rating burst rule on this set (timing only, no text)": "4 1-star reviews, 2026-07-10 to 2026-07-12; 4 5-star reviews, 2026-07-02 to 2026-07-05; 6 5-star reviews, 2026-07-19 to 2026-07-26, genuine reviews swept in: G9, G11",
+    "Negative control": "PASS: most similar genuine Harbor Light pair 0.698, most similar paraphrase set non duplicate pair 0.598, threshold 0.85"
   }
 }

@@ -22,7 +22,16 @@ from .embeddings import (
     find_embedding_clusters,
     similar_pairs,
 )
-from .models import DetectionResult, Flag, RatingSummary, Review, ReviewId, confidence_band
+from .models import (
+    MARGIN_BANDS,
+    DetectionResult,
+    Flag,
+    RatingSummary,
+    Review,
+    ReviewId,
+    confidence_band,
+    margin_band,
+)
 from .rules import (
     BURST_DAYS,
     BURST_MIN,
@@ -42,6 +51,7 @@ __all__ = [
     "DEFAULT_MODEL",
     "DUP_THRESHOLD",
     "EMBED_THRESHOLD",
+    "MARGIN_BANDS",
     "SMALL_MODEL",
     "DetectionResult",
     "Embedder",
@@ -59,6 +69,7 @@ __all__ = [
     "find_embedding_clusters",
     "find_rating_bursts",
     "jaccard",
+    "margin_band",
     "rating_summary",
     "rule_flags",
     "similar_pairs",

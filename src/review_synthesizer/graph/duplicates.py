@@ -106,6 +106,7 @@ def claim_flags(
                 signal_type="claim_duplicate",
                 review_ids=ids,
                 score=score,
+                # A share of pairs, not a measurement against a threshold: raw score bands.
                 confidence=confidence_band(score),
                 rationale=(
                     f"{len(ids)} reviews make the same specific claims in different words: "

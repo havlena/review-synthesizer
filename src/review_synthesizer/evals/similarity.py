@@ -27,7 +27,7 @@ from typing import Any
 
 import numpy as np
 
-from ..authenticity.embeddings import Embedder, similarity_matrix
+from ..authenticity.embeddings import EMBED_THRESHOLD, Embedder, similarity_matrix
 from ..authenticity.models import Review
 from ..authenticity.rules import DUP_THRESHOLD, duplicate_pairs
 
@@ -202,9 +202,36 @@ class SimilarityReport:
             "this model separates rewritten fakes from genuine reviews on the same topic. Cosine "
             "similarity measures wording and topic; it does not compare the claims being made. "
             "Claim level comparison is the job of the language model step."),
+            ("- The operating threshold was set with the margin observed on this synthetic data "
+            "and the Harbor Light fixture. It must be re-checked on operator data, where honest "
+            "reviews of one property will be more alike than these."),
             "",
         ]
         return "\n".join(lines)
+
+
+def negative_control(
+    harbor_genuine_max: float, paraphrase_negative_max: float, threshold: float
+) -> dict[str, Any]:
+    """Both honest reference pairs must sit below the operating threshold.
+
+    The most similar pair of genuine Harbor Light reviews and the most similar non duplicate
+    pair of the paraphrase set are the closest honest reviews come to each other in the
+    fixtures. If either reaches the threshold, the signal flags honest reviews on its own
+    test data.
+    """
+    passed = harbor_genuine_max < threshold and paraphrase_negative_max < threshold
+    return {
+        "passed": passed,
+        "threshold": threshold,
+        "harbor_genuine_max": harbor_genuine_max,
+        "paraphrase_negative_max": paraphrase_negative_max,
+        "line": (
+            f"{'PASS' if passed else 'FAIL'}: most similar genuine Harbor Light pair "
+            f"{harbor_genuine_max:.3f}, most similar paraphrase set non duplicate pair "
+            f"{paraphrase_negative_max:.3f}, threshold {threshold:.2f}"
+        ),
+    }
 
 
 def evaluate(
@@ -212,7 +239,7 @@ def evaluate(
     clusters: dict[str, str],
     embedder: Embedder,
     *,
-    chosen_threshold: float = 0.80,
+    chosen_threshold: float = EMBED_THRESHOLD,
     sweep: Sequence[float] = DEFAULT_SWEEP,
     jaccard_threshold: float = DUP_THRESHOLD,
 ) -> SimilarityReport:

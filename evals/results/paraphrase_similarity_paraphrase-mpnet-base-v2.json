@@ -90,25 +90,40 @@
       "f1": 0.0
     }
   ],
-  "chosen_threshold": 0.8,
+  "chosen_threshold": 0.85,
   "chosen": {
-    "threshold": 0.8,
-    "joined": 3,
-    "true_positive": 3,
+    "threshold": 0.85,
+    "joined": 0,
+    "true_positive": 0,
     "false_positive": 0,
-    "false_negative": 15,
-    "precision": 1.0,
-    "recall": 0.16666666666666666,
-    "f1": 0.2857142857142857
+    "false_negative": 18,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
   },
   "overlap": {
     "both": 0,
-    "embedding_only": 3,
+    "embedding_only": 0,
     "jaccard_only": 0,
-    "neither": 15
+    "neither": 18
   },
   "false_positive_pairs": [],
   "missed_pairs": [
+    [
+      "C3",
+      "C4",
+      0.812
+    ],
+    [
+      "C1",
+      "C2",
+      0.809
+    ],
+    [
+      "C1",
+      "C4",
+      0.806
+    ],
     [
       "C1",
       "C3",
@@ -227,10 +242,11 @@
     }
   ],
   "separable": false,
-  "created_at": "2026-10-22T19:37:07+00:00",
+  "created_at": "2026-10-22T22:28:30+00:00",
   "python_version": "3.12.10",
   "extras": {
-    "Harbor Light Inn fixture": "planted cluster pairwise cosine min 0.977, mean 0.985; fully joined at 0.80: True; nearest genuine review to a planted one 0.599; most similar pair of genuine reviews 0.801",
-    "Rating burst rule on this set (timing only, no text)": "4 1-star reviews, 2026-07-10 to 2026-07-12; 4 5-star reviews, 2026-07-02 to 2026-07-05; 6 5-star reviews, 2026-07-19 to 2026-07-26, genuine reviews swept in: G9, G11"
+    "Harbor Light Inn fixture": "planted cluster pairwise cosine min 0.977, mean 0.985; fully joined at 0.85: True; nearest genuine review to a planted one 0.599; most similar pair of genuine reviews 0.801",
+    "Rating burst rule on this set (timing only, no text)": "4 1-star reviews, 2026-07-10 to 2026-07-12; 4 5-star reviews, 2026-07-02 to 2026-07-05; 6 5-star reviews, 2026-07-19 to 2026-07-26, genuine reviews swept in: G9, G11",
+    "Negative control": "PASS: most similar genuine Harbor Light pair 0.801, most similar paraphrase set non duplicate pair 0.703, threshold 0.85"
   }
 }

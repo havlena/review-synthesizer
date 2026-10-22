@@ -25,7 +25,15 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 
 from .clustering import union_clusters
-from .models import DetectionResult, Flag, RatingSummary, Review, ReviewId, confidence_band
+from .models import (
+    DetectionResult,
+    Flag,
+    RatingSummary,
+    Review,
+    ReviewId,
+    confidence_band,
+    margin_band,
+)
 from .text import jaccard, tokenize
 
 DUP_THRESHOLD = 0.55
@@ -144,7 +152,7 @@ def rule_flags(
                 signal_type="duplicate_phrasing",
                 review_ids=list(c.review_ids),
                 score=score,
-                confidence=confidence_band(score),
+                confidence=margin_band(score, dup_threshold),
                 rationale=(
                     f"{len(c.review_ids)} reviews share near duplicate phrasing: peak Jaccard "
                     f"similarity {c.peak_similarity:.2f} (mean {c.mean_similarity:.2f}) against a "
@@ -161,7 +169,9 @@ def rule_flags(
 
     for b in find_rating_bursts(reviews, burst_min, burst_days):
         count = len(b.review_ids)
-        score = min(1.0, count / (2 * burst_min))  # provisional heuristic; see docs
+        # Provisional heuristic, not a measurement against a threshold, so it keeps the raw
+        # score bands (confidence_band) rather than the margin bands of the other signals.
+        score = min(1.0, count / (2 * burst_min))
         flags.append(
             Flag(
                 signal_type="rating_burst",
