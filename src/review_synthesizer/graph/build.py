@@ -18,6 +18,9 @@ from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
+from review_synthesizer.authenticity import Embedder
+from review_synthesizer.authenticity.detector import Classifier
+
 from . import nodes
 from .model import ModelClient
 from .state import BriefState
@@ -38,16 +41,28 @@ NODE_NAMES = (
 _USES_MODEL = {"extract_claims", "claim_duplicates", "themes_and_scores", "actions"}
 
 
-def build_graph(client: ModelClient, *, checkpointer: Any = None):
+def build_graph(
+    client: ModelClient,
+    *,
+    embedder: Embedder | None = None,
+    classifier: Classifier | None = None,
+    checkpointer: Any = None,
+):
     """Compile the graph with ``client`` bound into the nodes that call a model.
 
-    A checkpointer is needed to pause at ``human_review`` and resume; pass one (for example
-    LangGraph's ``InMemorySaver``) whenever the run will be resumed.
+    ``embedder`` and ``classifier`` switch on the detector's optional signals, as in
+    ``authenticity.detect``. A checkpointer is needed to pause at ``human_review`` and
+    resume; pass one (for example LangGraph's ``InMemorySaver``) whenever the run will be
+    resumed.
     """
     graph = StateGraph(BriefState)
     for name in NODE_NAMES:
         fn = getattr(nodes, name)
-        graph.add_node(name, partial(fn, client=client) if name in _USES_MODEL else fn)
+        if name in _USES_MODEL:
+            fn = partial(fn, client=client)
+        elif name == "authenticity":
+            fn = partial(fn, embedder=embedder, classifier=classifier)
+        graph.add_node(name, fn)
 
     graph.add_edge(START, "load_batch")
     graph.add_edge("load_batch", "authenticity")

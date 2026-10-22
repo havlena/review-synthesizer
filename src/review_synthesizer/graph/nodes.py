@@ -1,29 +1,36 @@
 """Node functions. Each takes the state and returns the keys it changes.
 
-Skeleton: every node returns empty values of the right type, so the wiring, the fan out
-and join, and checkpointing can be tested before any node does real work. Nodes that
-will call a model take the client as a keyword argument, bound by :func:`.build.build_graph`;
-none of them calls it yet.
+``load_batch`` and ``authenticity`` are complete. The rest are still stubs returning empty
+values of the right type, filled in commit by commit (``docs/build-plan.md``, step 5).
+Dependencies (the model client, the optional embedder and classifier) are keyword
+arguments bound by :func:`.build.build_graph`, so they never enter the state.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from review_synthesizer.authenticity import DetectionResult, RatingSummary, Review
+from review_synthesizer.authenticity import Embedder, RatingSummary, detect
+from review_synthesizer.authenticity.detector import Classifier
 
+from .batch import validate_batch
 from .model import ModelClient
 from .state import Brief, BriefState
 
 
 def load_batch(state: BriefState) -> dict[str, Any]:
-    """Normalise the input into ``Review`` objects. Validation arrives in the next commit."""
-    return {"reviews": [Review.from_dict(r) for r in state.get("raw_reviews", [])]}
+    """Validate the input into ``Review`` objects; an invalid batch stops the run."""
+    return {"reviews": validate_batch(state.get("raw_reviews", []))}
 
 
-def authenticity(state: BriefState) -> dict[str, Any]:
-    """Run the detector. Deterministic, no model call."""
-    return {"detection": DetectionResult(flags=[], flagged_ids=set(), peak_similarity=0.0)}
+def authenticity(
+    state: BriefState,
+    *,
+    embedder: Embedder | None = None,
+    classifier: Classifier | None = None,
+) -> dict[str, Any]:
+    """Run the detector with whichever optional signals are configured. No model call."""
+    return {"detection": detect(state["reviews"], embedder=embedder, classifier=classifier)}
 
 
 def extract_claims(state: BriefState, *, client: ModelClient) -> dict[str, Any]:

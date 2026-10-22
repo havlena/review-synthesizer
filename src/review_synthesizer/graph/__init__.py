@@ -13,6 +13,7 @@ Nothing here posts, removes or accuses anything: every flag is a signal for the 
 and no brief is final before ``human_review`` has run.
 """
 
+from .batch import BatchError, validate_batch
 from .build import NODE_NAMES, build_graph
 from .config import DEFAULT_MODEL, DEFAULT_MODEL_SMALL, ModelConfig
 from .model import AnthropicModelClient, FakeModelClient, ModelCall, ModelClient
@@ -34,6 +35,7 @@ __all__ = [
     "Action",
     "AnthropicModelClient",
     "AspectScore",
+    "BatchError",
     "Brief",
     "BriefState",
     "Claim",
@@ -45,4 +47,5 @@ __all__ = [
     "Property",
     "Theme",
     "build_graph",
+    "validate_batch",
 ]
