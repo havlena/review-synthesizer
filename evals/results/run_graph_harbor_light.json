@@ -1,0 +1,604 @@
+{
+  "created_at": "2026-10-22T22:02:40+00:00",
+  "python_version": "3.12.10",
+  "property": "Harbor Light Inn",
+  "reviews": 25,
+  "planted": [
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "methods": {
+    "signals": [
+      "duplicate_phrasing",
+      "rating_burst",
+      "embedding_similarity",
+      "deceptive_language",
+      "claim_duplicate"
+    ],
+    "thresholds": {
+      "duplicate_phrasing": "Jaccard word overlap at or above 0.55",
+      "rating_burst": "3 or more same rating reviews within 4 days",
+      "embedding_similarity": "cosine similarity at or above 0.80",
+      "deceptive_language": "classifier probability at or above 0.80",
+      "claim_duplicate": "at least 1 shared specific claim, then a model judgment per pair (lenient prompt)"
+    },
+    "models": {
+      "main": "claude-sonnet-5-5",
+      "small": "claude-haiku-5-5",
+      "embeddings": "sentence-transformers/paraphrase-mpnet-base-v2"
+    },
+    "flag_decisions_by": "automatic: every flag confirmed without review (evaluation run)",
+    "run_id": "harbor-light-run1",
+    "settings": {}
+  },
+  "golden": {
+    "displayed": 3.8,
+    "verified": 3.5
+  },
+  "runs": [
+    {
+      "run": 1,
+      "run_id": "harbor-light-run1",
+      "rating": {
+        "total": 25,
+        "removed": 7,
+        "displayed": 3.8,
+        "verified": 3.4
+      },
+      "matches_golden": false,
+      "flags": [
+        {
+          "key": "duplicate_phrasing:21,22,23,24,25",
+          "signal_type": "duplicate_phrasing",
+          "score": 0.9166666666666666,
+          "confidence": "high",
+          "review_ids": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "rating_burst:21,22,23,24,25",
+          "signal_type": "rating_burst",
+          "score": 0.8333333333333334,
+          "confidence": "high",
+          "review_ids": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "embedding_similarity:10,16",
+          "signal_type": "embedding_similarity",
+          "score": 0.8009840221692446,
+          "confidence": "high",
+          "review_ids": [
+            10,
+            16
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "embedding_similarity:21,22,23,24,25",
+          "signal_type": "embedding_similarity",
+          "score": 0.9964848849837722,
+          "confidence": "high",
+          "review_ids": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "deceptive_language:21",
+          "signal_type": "deceptive_language",
+          "score": 0.8187503917146796,
+          "confidence": "high",
+          "review_ids": [
+            21
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "deceptive_language:23",
+          "signal_type": "deceptive_language",
+          "score": 0.8215444291949836,
+          "confidence": "high",
+          "review_ids": [
+            23
+          ],
+          "decision": "confirmed"
+        }
+      ],
+      "genuine_flagged": [
+        {
+          "review_id": 10,
+          "signals": [
+            "embedding_similarity"
+          ]
+        },
+        {
+          "review_id": 16,
+          "signals": [
+            "embedding_similarity"
+          ]
+        }
+      ],
+      "notes": [],
+      "themes": [
+        {
+          "name": "Harbor views and location",
+          "count": 7,
+          "sentiment": "positive"
+        },
+        {
+          "name": "Inconsistent breakfast",
+          "count": 7,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Spotless, well-kept rooms",
+          "count": 6,
+          "sentiment": "positive"
+        },
+        {
+          "name": "Warm, helpful front desk",
+          "count": 5,
+          "sentiment": "positive"
+        },
+        {
+          "name": "Comfortable beds and rooms",
+          "count": 5,
+          "sentiment": "positive"
+        },
+        {
+          "name": "Unresponsive staff",
+          "count": 3,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Mold, musty smell, dirty rooms",
+          "count": 3,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Thin walls and noise",
+          "count": 3,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Dated rooms, heater problems",
+          "count": 3,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Tight parking",
+          "count": 2,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Unreliable wifi",
+          "count": 2,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Value for the price",
+          "count": 2,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Lakeview room not delivered",
+          "count": 1,
+          "sentiment": "negative"
+        }
+      ],
+      "scores": {
+        "cleanliness": 1,
+        "service": 3,
+        "breakfast": 3,
+        "room comfort": 3,
+        "value": 3,
+        "location": 5,
+        "noise": 3,
+        "parking": 1,
+        "wifi": 1,
+        "other": 4
+      },
+      "actions": [
+        {
+          "title": "Standardize breakfast with hot options and restock until ten",
+          "impact": "High",
+          "effort": "Low"
+        },
+        {
+          "title": "Inspect and remediate mold and damp in bathrooms and carpets",
+          "impact": "High",
+          "effort": "Medium"
+        },
+        {
+          "title": "Service and test every room heater before cold-season stays",
+          "impact": "High",
+          "effort": "Medium"
+        },
+        {
+          "title": "Set up a staffed phone line and a late-night noise protocol",
+          "impact": "Medium",
+          "effort": "Low"
+        },
+        {
+          "title": "Upgrade wifi coverage and mark parking limits before arrival",
+          "impact": "Medium",
+          "effort": "Medium"
+        }
+      ],
+      "usage": {
+        "claude-sonnet-5-5": {
+          "calls": 27,
+          "input_tokens": 34947,
+          "output_tokens": 9889
+        },
+        "claude-haiku-5-5": {
+          "calls": 30,
+          "input_tokens": 25886,
+          "output_tokens": 2712
+        }
+      },
+      "usd": 0.17272859999999998
+    },
+    {
+      "run": 2,
+      "run_id": "harbor-light-run2",
+      "rating": {
+        "total": 25,
+        "removed": 7,
+        "displayed": 3.8,
+        "verified": 3.4
+      },
+      "matches_golden": false,
+      "flags": [
+        {
+          "key": "duplicate_phrasing:21,22,23,24,25",
+          "signal_type": "duplicate_phrasing",
+          "score": 0.9166666666666666,
+          "confidence": "high",
+          "review_ids": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "rating_burst:21,22,23,24,25",
+          "signal_type": "rating_burst",
+          "score": 0.8333333333333334,
+          "confidence": "high",
+          "review_ids": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "embedding_similarity:10,16",
+          "signal_type": "embedding_similarity",
+          "score": 0.8009840221692446,
+          "confidence": "high",
+          "review_ids": [
+            10,
+            16
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "embedding_similarity:21,22,23,24,25",
+          "signal_type": "embedding_similarity",
+          "score": 0.9964848849837722,
+          "confidence": "high",
+          "review_ids": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "deceptive_language:21",
+          "signal_type": "deceptive_language",
+          "score": 0.8187503917146796,
+          "confidence": "high",
+          "review_ids": [
+            21
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "deceptive_language:23",
+          "signal_type": "deceptive_language",
+          "score": 0.8215444291949836,
+          "confidence": "high",
+          "review_ids": [
+            23
+          ],
+          "decision": "confirmed"
+        }
+      ],
+      "genuine_flagged": [
+        {
+          "review_id": 10,
+          "signals": [
+            "embedding_similarity"
+          ]
+        },
+        {
+          "review_id": 16,
+          "signals": [
+            "embedding_similarity"
+          ]
+        }
+      ],
+      "notes": [],
+      "themes": [
+        {
+          "name": "Cleanliness varies by room",
+          "count": 9,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Harbor views and location",
+          "count": 8,
+          "sentiment": "positive"
+        },
+        {
+          "name": "Front desk staff service",
+          "count": 8,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Inconsistent breakfast offering",
+          "count": 7,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Thin walls and noise",
+          "count": 6,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Dated rooms and maintenance",
+          "count": 5,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Comfortable beds",
+          "count": 5,
+          "sentiment": "positive"
+        },
+        {
+          "name": "Tight parking",
+          "count": 2,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Unreliable wifi",
+          "count": 2,
+          "sentiment": "negative"
+        }
+      ],
+      "scores": {
+        "cleanliness": 3,
+        "service": 3,
+        "breakfast": 2,
+        "room comfort": 3,
+        "value": 3,
+        "location": 5,
+        "noise": 3,
+        "parking": 2,
+        "wifi": 1,
+        "amenities": 5,
+        "other": 4
+      },
+      "actions": [
+        {
+          "title": "Add a room-ready checklist and supervisor spot check after housekeeping",
+          "impact": "High",
+          "effort": "Low"
+        },
+        {
+          "title": "Set up a repair and room-move process for heater failures and noise complaints",
+          "impact": "High",
+          "effort": "Low"
+        },
+        {
+          "title": "Inspect every room for mold and dampness, and fix the source",
+          "impact": "High",
+          "effort": "Medium"
+        },
+        {
+          "title": "Set a standard breakfast menu with hot items and restocking",
+          "impact": "High",
+          "effort": "Medium"
+        },
+        {
+          "title": "Upgrade the wifi and test evening connection reliability",
+          "impact": "Medium",
+          "effort": "Medium"
+        }
+      ],
+      "usage": {
+        "claude-sonnet-5-5": {
+          "calls": 27,
+          "input_tokens": 34881,
+          "output_tokens": 9137
+        },
+        "claude-haiku-5-5": {
+          "calls": 28,
+          "input_tokens": 24162,
+          "output_tokens": 2614
+        }
+      },
+      "usd": 0.1648552
+    }
+  ],
+  "differences": {
+    "flags": {
+      "run 1 only": [],
+      "run 2 only": []
+    },
+    "themes": {
+      "run 1 only": [
+        "Inconsistent breakfast",
+        "Spotless, well-kept rooms",
+        "Warm, helpful front desk",
+        "Comfortable beds and rooms",
+        "Unresponsive staff",
+        "Mold, musty smell, dirty rooms",
+        "Dated rooms, heater problems",
+        "Value for the price",
+        "Lakeview room not delivered"
+      ],
+      "run 2 only": [
+        "Cleanliness varies by room",
+        "Front desk staff service",
+        "Inconsistent breakfast offering",
+        "Dated rooms and maintenance",
+        "Comfortable beds"
+      ]
+    },
+    "theme_changes": [
+      {
+        "name": "Harbor views and location",
+        "run 1": [
+          7,
+          "positive"
+        ],
+        "run 2": [
+          8,
+          "positive"
+        ]
+      },
+      {
+        "name": "Thin walls and noise",
+        "run 1": [
+          3,
+          "negative"
+        ],
+        "run 2": [
+          6,
+          "mixed"
+        ]
+      }
+    ],
+    "scores": [
+      {
+        "aspect": "cleanliness",
+        "run 1": 1,
+        "run 2": 3
+      },
+      {
+        "aspect": "breakfast",
+        "run 1": 3,
+        "run 2": 2
+      },
+      {
+        "aspect": "parking",
+        "run 1": 1,
+        "run 2": 2
+      },
+      {
+        "aspect": "amenities",
+        "run 1": null,
+        "run 2": 5
+      }
+    ],
+    "actions": {
+      "run 1 only": [
+        "Standardize breakfast with hot options and restock until ten",
+        "Inspect and remediate mold and damp in bathrooms and carpets",
+        "Service and test every room heater before cold-season stays",
+        "Set up a staffed phone line and a late-night noise protocol",
+        "Upgrade wifi coverage and mark parking limits before arrival"
+      ],
+      "run 2 only": [
+        "Add a room-ready checklist and supervisor spot check after housekeeping",
+        "Set up a repair and room-move process for heater failures and noise complaints",
+        "Inspect every room for mold and dampness, and fix the source",
+        "Set a standard breakfast menu with hot items and restocking",
+        "Upgrade the wifi and test evening connection reliability"
+      ]
+    },
+    "same_action_order": false
+  },
+  "tokens": {
+    "total": {
+      "claude-sonnet-5-5": {
+        "calls": 54,
+        "input_tokens": 69828,
+        "output_tokens": 19026
+      },
+      "claude-haiku-5-5": {
+        "calls": 58,
+        "input_tokens": 50048,
+        "output_tokens": 5326
+      }
+    },
+    "usd": 0.3375838,
+    "prices_per_mtok": {
+      "claude-sonnet-5-5": [
+        2.0,
+        10.0
+      ],
+      "claude-haiku-5-5": [
+        0.1,
+        0.5
+      ]
+    },
+    "prices_as_of": "2026-10-06"
+  },
+  "limits": [
+    "One fictional property with 25 synthetic reviews, five of them a planted campaign. The run checks whether the graph reproduces the capstone result with every signal on; it says nothing about accuracy on real batches.",
+    "Every flag was confirmed automatically. In the product a person decides each flag; here the golden result assumes all planted reviews are set aside.",
+    "Two runs show what moves between runs; they are not a distribution.",
+    "Cost is the token count the API reported; the dollar figure is an estimate at list prices on the stated date."
+  ],
+  "headline": {
+    "verified_ratings": [
+      3.4,
+      3.4
+    ],
+    "displayed_ratings": [
+      3.8,
+      3.8
+    ],
+    "all_runs_match_golden": false,
+    "genuine_reviews_flagged": [
+      10,
+      16
+    ],
+    "flags_per_run": [
+      6,
+      6
+    ]
+  }
+}

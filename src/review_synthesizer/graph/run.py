@@ -29,6 +29,10 @@ MAX_REVIEW_ROUNDS = 3
 """A run asks at most once per flag, so more rounds than this means a bug, not a decision."""
 
 
+AUTO_APPROVED = "automatic: every flag confirmed without review (evaluation run)"
+"""``approved_by`` for runs that use :func:`approve_all`."""
+
+
 def approve_all(request: dict[str, Any]) -> dict[str, bool]:
     """Confirm every flag. For evaluation runs against the golden result only."""
     return {f["key"]: True for f in request["flags"]}
@@ -47,11 +51,14 @@ def run_brief(
     embedder: Embedder | None = None,
     classifier: Classifier | None = None,
     run_id: str | None = None,
+    approved_by: str = "the operator, flag by flag",
 ) -> Brief:
     """Run the graph on one batch and return the brief once the operator has decided.
 
     ``client`` defaults to Claude via :class:`AnthropicModelClient` (needs a key); tests pass
-    a :class:`FakeModelClient`. Raises :class:`BatchError` on invalid input.
+    a :class:`FakeModelClient`. ``approved_by`` says who answered ``approve`` and goes into
+    the brief's methods note; an evaluation run with :func:`approve_all` must say so there.
+    Raises :class:`BatchError` on invalid input.
     """
     prop = property if isinstance(property, Property) else Property(name=property)
     run_id = run_id or uuid.uuid4().hex[:12]
@@ -62,7 +69,12 @@ def run_brief(
         checkpointer=memory_checkpointer(),
     )
     config = {"configurable": {"thread_id": run_id}}
-    inp = {"property": prop, "run_id": run_id, "raw_reviews": [_row(r) for r in reviews]}
+    inp = {
+        "property": prop,
+        "run_id": run_id,
+        "approved_by": approved_by,
+        "raw_reviews": [_row(r) for r in reviews],
+    }
 
     out = graph.invoke(inp, config)
     rounds = 0

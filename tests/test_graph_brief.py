@@ -104,6 +104,7 @@ def test_confirming_every_flag_gives_the_golden_brief():
             ),
         },
         "models": {"main": "fake-main", "small": "fake-small"},
+        "flag_decisions_by": "the operator, flag by flag",
         "run_id": "golden",
     }
     json.dumps(data)  # plain JSON throughout, burst dates included

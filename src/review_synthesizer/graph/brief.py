@@ -119,6 +119,7 @@ def build_data(
             "signals": signals,
             "thresholds": _thresholds(signals),
             "models": model_names,
+            "flag_decisions_by": state.get("approved_by"),
             "run_id": state.get("run_id"),
         },
     }
@@ -207,6 +208,8 @@ def render_markdown(data: dict[str, Any]) -> str:
     lines += [f"- Signals: {', '.join(methods['signals'])}."]
     lines += [f"- {s}: {t}." for s, t in methods["thresholds"].items()]
     lines += [f"- Models: {', '.join(f'{k} {v}' for k, v in methods['models'].items())}."]
+    if methods.get("flag_decisions_by"):
+        lines += [f"- Flag decisions: {methods['flag_decisions_by']}."]
     lines += [f"- Run id: {methods['run_id']}."]
     return "\n".join(lines) + "\n"
 

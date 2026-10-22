@@ -108,6 +108,8 @@ class BriefState(TypedDict, total=False):
     property: Property
     run_id: str
     """Set by the caller; recorded in the brief's methods note."""
+    approved_by: str
+    """Who made the flag decisions, as the caller states it; recorded in the methods note."""
     raw_reviews: list[dict[str, Any]]
     """Input as given; ``load_batch`` validates it into ``reviews``."""
     reviews: list[Review]
