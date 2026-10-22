@@ -16,6 +16,7 @@ assumed.
 
 from __future__ import annotations
 
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Protocol, TypeVar
@@ -75,26 +76,60 @@ class FakeModelClient:
         return schema.model_validate(out.model_dump())
 
 
+@dataclass
+class Usage:
+    """Tokens reported by the API for one model. Output includes thinking tokens."""
+
+    calls: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+
+
 class AnthropicModelClient:
-    """Calls Claude via ``langchain-anthropic``. Imports and connects on first use only."""
+    """Calls Claude via ``langchain-anthropic``. Imports and connects on first use only.
+
+    Records the token usage the API reports, per model, in :attr:`usage`. Effort and
+    thinking are left at the API defaults; no sampling parameter is sent.
+    """
 
     def __init__(self, config: ModelConfig | None = None, max_tokens: int = MAX_TOKENS) -> None:
         self.config = config or ModelConfig.from_env()
         self.max_tokens = max_tokens
+        self.usage: dict[str, Usage] = {}
         self._chat: dict[str, Any] = {}
+        self._lock = threading.Lock()
 
     def _model(self, name: str) -> Any:
-        if name not in self._chat:
-            from langchain_anthropic import ChatAnthropic
+        with self._lock:
+            if name not in self._chat:
+                from langchain_anthropic import ChatAnthropic
 
-            # No temperature: the Messages API rejects sampling parameters.
-            self._chat[name] = ChatAnthropic(model=name, max_tokens=self.max_tokens)
-        return self._chat[name]
+                # No temperature: the Messages API rejects sampling parameters.
+                self._chat[name] = ChatAnthropic(model=name, max_tokens=self.max_tokens)
+            return self._chat[name]
+
+    def _record(self, name: str, raw: Any) -> None:
+        meta = getattr(raw, "usage_metadata", None) or {}
+        with self._lock:
+            u = self.usage.setdefault(name, Usage())
+            u.calls += 1
+            u.input_tokens += int(meta.get("input_tokens", 0))
+            u.output_tokens += int(meta.get("output_tokens", 0))
 
     def structured(self, schema: type[T], *, system: str, prompt: str, small: bool = False) -> T:
         name = self.config.small if small else self.config.main
         # json_schema uses native structured outputs; function_calling would force a tool
         # choice, which current models reject.
-        runnable = self._model(name).with_structured_output(schema, method="json_schema")
+        runnable = self._model(name).with_structured_output(
+            schema, method="json_schema", include_raw=True
+        )
         result = runnable.invoke([("system", system), ("human", prompt)])
-        return schema.model_validate(result)
+        self._record(name, result.get("raw"))
+        if result.get("parsing_error") is not None:
+            raise result["parsing_error"]
+        parsed = result["parsed"]
+        if parsed is None:
+            raise ValueError(f"{name} returned no structured output for {schema.__name__}")
+        return schema.model_validate(
+            parsed.model_dump() if isinstance(parsed, BaseModel) else parsed
+        )

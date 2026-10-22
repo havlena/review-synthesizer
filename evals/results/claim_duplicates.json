@@ -1,0 +1,1305 @@
+{
+  "created_at": "2026-10-22T21:24:06+00:00",
+  "python_version": "3.12.10",
+  "models": {
+    "main": "claude-sonnet-5-5",
+    "small": "claude-haiku-5-5"
+  },
+  "settings": {
+    "Effort": "not set; the API default for each model (claude-sonnet-5-5 high, claude-haiku-5-5 medium).",
+    "Thinking": "not set; the API default (adaptive) for each model.",
+    "Temperature": "not sent. The Messages API has rejected temperature, top_p and top_k with an error on every model since 2026-10-21, so run to run stability is measured by repeating the run, not by fixing sampling.",
+    "Structured output": "native JSON schema output (langchain-anthropic, method json_schema).",
+    "Max output tokens per call": "16,000.",
+    "Concurrent calls per stage": "8.",
+    "Packages": "langchain-anthropic 1.7.6, anthropic 1.17.0, langgraph 1.2.16."
+  },
+  "reviews": 24,
+  "clusters": {
+    "A": "best hotel in the region, amazing staff, perfect rooms, top rating (positive campaign)",
+    "B": "rude manager, dirty room, overcharged, never again (negative campaign)",
+    "C": "lakefront balcony, gourmet breakfast, spa, best vacation ever (fabricated amenities)"
+  },
+  "truth_pairs": 18,
+  "negative_pairs": 258,
+  "word_overlap_true_pairs": 0,
+  "runs": [
+    {
+      "run": 1,
+      "candidates": {
+        "total": 6,
+        "true": 6,
+        "false": 0,
+        "recall": 0.3333333333333333
+      },
+      "judged": {
+        "threshold": 2.0,
+        "joined": 6,
+        "true_positive": 6,
+        "false_positive": 0,
+        "false_negative": 12,
+        "precision": 1.0,
+        "recall": 0.3333333333333333,
+        "f1": 0.5
+      },
+      "grouped": {
+        "threshold": 2.0,
+        "joined": 7,
+        "true_positive": 7,
+        "false_positive": 0,
+        "false_negative": 11,
+        "precision": 1.0,
+        "recall": 0.3888888888888889,
+        "f1": 0.56
+      },
+      "missed": [
+        {
+          "pair": "A1-A2",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A1-A3",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A1-A4",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A2-A3",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A2-A4",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A3-A4",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B1-B2",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B1-B3",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B1-B4",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B2-B4",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B3-B4",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "C1-C4",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        }
+      ],
+      "false_positives": [],
+      "claims": {
+        "A1": [
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Best hotel in Northern Michigan"
+          },
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Staff are amazing"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Rooms are perfect"
+          }
+        ],
+        "A2": [
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The hotel is the best place to stay in the region."
+          },
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Staff are wonderful."
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The room is flawless."
+          }
+        ],
+        "A3": [
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Staff are incredible"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Accommodation has no problems"
+          },
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Best hotel in the northern region"
+          }
+        ],
+        "A4": [
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Service is superb"
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Rooms are immaculate"
+          }
+        ],
+        "B1": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "The manager is rude to guests."
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "The room is filthy."
+          },
+          {
+            "aspect": "value",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "The hotel charges more than the quoted price."
+          }
+        ],
+        "B2": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "Manager has a bad attitude"
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Suite has grime everywhere"
+          },
+          {
+            "aspect": "value",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Final bill exceeds the quoted price"
+          }
+        ],
+        "B3": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "Management treats guests with contempt"
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Housekeeping skipped the unit"
+          },
+          {
+            "aspect": "value",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Final invoice exceeds the agreed rate"
+          }
+        ],
+        "B4": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "The owner is unpleasant."
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "The lodging is unclean."
+          },
+          {
+            "aspect": "value",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Unexpected fees are charged at checkout."
+          }
+        ],
+        "C1": [
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Balcony overlooks the lake"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Breakfast is gourmet"
+          },
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "The spa is excellent"
+          }
+        ],
+        "C2": [
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Room has a private terrace overlooking the water."
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Breakfast is chef quality."
+          },
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Massage is blissful."
+          },
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Guest's greatest holiday ever."
+          }
+        ],
+        "C3": [
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Deck has lake views"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Breakfast dining is five star quality"
+          },
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Wellness centre is world class"
+          }
+        ],
+        "C4": [
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Terrace faces the shoreline."
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Breakfast spread is exquisite."
+          },
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Spa treatments are relaxing."
+          }
+        ],
+        "G1": [
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Room 204 has a marina view"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Breakfast offers only pastries and coffee, no hot food"
+          }
+        ],
+        "G2": [
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Staff helped promptly when key card failed at midnight"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "mixed",
+            "specific": true,
+            "statement": "Beds are firm"
+          },
+          {
+            "aspect": "parking",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Parking lot fills up by six in the evening"
+          }
+        ],
+        "G3": [
+          {
+            "aspect": "cleanliness",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The room is clean."
+          },
+          {
+            "aspect": "noise",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "The hallway is quiet."
+          },
+          {
+            "aspect": "location",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "The docks are a five-minute walk away."
+          },
+          {
+            "aspect": "wifi",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Wifi drops during evening calls."
+          }
+        ],
+        "G4": [
+          {
+            "aspect": "noise",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Heater clicks all night"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Shower pressure is weak"
+          },
+          {
+            "aspect": "service",
+            "polarity": "mixed",
+            "specific": true,
+            "statement": "Front desk offered room move but hotel was full"
+          }
+        ],
+        "G5": [
+          {
+            "aspect": "breakfast",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Breakfast food runs out before eight on Saturday"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Cinnamon rolls at breakfast are good"
+          }
+        ],
+        "G6": [
+          {
+            "aspect": "value",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Midweek rate is fair for the area in July"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "Room decor is dated"
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Room is spotless"
+          }
+        ],
+        "G7": [
+          {
+            "aspect": "noise",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Thin walls let neighboring room noise through until eleven"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The stay is comfortable"
+          },
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The room has a nice view"
+          }
+        ],
+        "G8": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Check-in takes twenty minutes with one person at the desk"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The room is fine"
+          }
+        ],
+        "G9": [
+          {
+            "aspect": "cleanliness",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Housekeeping leaves fresh towels daily"
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "The bathroom is immaculate"
+          }
+        ],
+        "G10": [
+          {
+            "aspect": "room comfort",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Second floor room overlooks the parking lot, not the water"
+          },
+          {
+            "aspect": "other",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Booking page does not make the room view clear"
+          }
+        ],
+        "G11": [
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Lobby coffee is available at six in the morning."
+          }
+        ],
+        "G12": [
+          {
+            "aspect": "room comfort",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "Room is small"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Room has a large window with harbor sunset view"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "mixed",
+            "specific": false,
+            "statement": "Breakfast is average"
+          },
+          {
+            "aspect": "value",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Stay is good value"
+          }
+        ]
+      },
+      "candidate_pairs": [
+        "B2-B3",
+        "C1-C2",
+        "C1-C3",
+        "C2-C3",
+        "C2-C4",
+        "C3-C4"
+      ],
+      "judged_same_pairs": [
+        "B2-B3",
+        "C1-C2",
+        "C1-C3",
+        "C2-C3",
+        "C2-C4",
+        "C3-C4"
+      ],
+      "usage": {
+        "claude-sonnet-5-5": {
+          "calls": 24,
+          "input_tokens": 27798,
+          "output_tokens": 3020
+        },
+        "claude-haiku-5-5": {
+          "calls": 6,
+          "input_tokens": 5001,
+          "output_tokens": 435
+        }
+      }
+    },
+    {
+      "run": 2,
+      "candidates": {
+        "total": 5,
+        "true": 5,
+        "false": 0,
+        "recall": 0.2777777777777778
+      },
+      "judged": {
+        "threshold": 2.0,
+        "joined": 3,
+        "true_positive": 3,
+        "false_positive": 0,
+        "false_negative": 15,
+        "precision": 1.0,
+        "recall": 0.16666666666666666,
+        "f1": 0.2857142857142857
+      },
+      "grouped": {
+        "threshold": 2.0,
+        "joined": 6,
+        "true_positive": 6,
+        "false_positive": 0,
+        "false_negative": 12,
+        "precision": 1.0,
+        "recall": 0.3333333333333333,
+        "f1": 0.5
+      },
+      "missed": [
+        {
+          "pair": "A1-A2",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A1-A3",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A1-A4",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A2-A3",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A2-A4",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "A3-A4",
+          "shared_specific": 0,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B1-B2",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B1-B3",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B1-B4",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B2-B3",
+          "shared_specific": 2,
+          "stage": "judged different",
+          "reason": "Both reviews report the final bill exceeding the quoted rate, but B2 says grime covers the suite while B3 says housekeeping skipped the unit, which are different cleanliness claims."
+        },
+        {
+          "pair": "B2-B4",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "B3-B4",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "C1-C4",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        },
+        {
+          "pair": "C2-C3",
+          "shared_specific": 2,
+          "stage": "judged different",
+          "reason": "Both praise lake views, breakfast and wellness/massage, but C2 specifically claims a private terrace, chef-quality breakfast and a massage, while C3 claims a generic deck, five-star dining and a world-class wellness centre, so the concrete details differ."
+        },
+        {
+          "pair": "C3-C4",
+          "shared_specific": 1,
+          "stage": "not a candidate"
+        }
+      ],
+      "false_positives": [],
+      "claims": {
+        "A1": [
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Best hotel in Northern Michigan"
+          },
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Staff are amazing"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Rooms are perfect"
+          }
+        ],
+        "A2": [
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The hotel is the best place to stay in the region."
+          },
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The staff are wonderful."
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The room is flawless."
+          }
+        ],
+        "A3": [
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Staff are incredible"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Accommodation has no problems"
+          },
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Best property in the northern area"
+          }
+        ],
+        "A4": [
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "service is superb"
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "rooms are immaculate"
+          }
+        ],
+        "B1": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "The manager is rude to guests."
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "The room is filthy."
+          },
+          {
+            "aspect": "value",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Hotel charges more than the quoted price."
+          }
+        ],
+        "B2": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "The manager has a bad attitude"
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Grime covers the suite"
+          },
+          {
+            "aspect": "value",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Final bill exceeds the quoted price"
+          }
+        ],
+        "B3": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "Management treats guests with contempt"
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Housekeeping skipped the unit"
+          },
+          {
+            "aspect": "value",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Final invoice exceeded the agreed rate"
+          }
+        ],
+        "B4": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "The owner is unpleasant."
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "The lodging is unclean."
+          },
+          {
+            "aspect": "value",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Unexpected fees are charged at checkout."
+          }
+        ],
+        "C1": [
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Balcony overlooks the lake"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Breakfast is gourmet"
+          },
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "The spa is excellent"
+          }
+        ],
+        "C2": [
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Private terrace overlooks the water"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Breakfast is chef quality"
+          },
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Massage service is blissful"
+          },
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Greatest holiday the guest has ever taken"
+          }
+        ],
+        "C3": [
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "The deck has lake views."
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Breakfast dining is five star quality."
+          },
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "The wellness centre is world class."
+          }
+        ],
+        "C4": [
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Terrace faces the shoreline"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Breakfast spread is exquisite"
+          },
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Spa treatments are relaxing"
+          },
+          {
+            "aspect": "other",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Getaway is the best the guest has experienced"
+          }
+        ],
+        "G1": [
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Room 204 has a marina view"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Breakfast offers only pastries and coffee, no hot food"
+          }
+        ],
+        "G2": [
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Staff promptly helped when key card failed at midnight"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "mixed",
+            "specific": true,
+            "statement": "Beds are firm"
+          },
+          {
+            "aspect": "parking",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Parking lot fills up by six in the evening"
+          }
+        ],
+        "G3": [
+          {
+            "aspect": "cleanliness",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The room is clean."
+          },
+          {
+            "aspect": "noise",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "The hallway is quiet."
+          },
+          {
+            "aspect": "location",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "The docks are a five-minute walk away."
+          },
+          {
+            "aspect": "wifi",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Wifi drops during evening calls."
+          }
+        ],
+        "G4": [
+          {
+            "aspect": "noise",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Room heater clicks all night"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Shower pressure is weak"
+          },
+          {
+            "aspect": "service",
+            "polarity": "mixed",
+            "specific": true,
+            "statement": "Front desk offered a room move but hotel was full"
+          }
+        ],
+        "G5": [
+          {
+            "aspect": "breakfast",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Breakfast runs out before eight on Saturday"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Cinnamon rolls at breakfast are good"
+          }
+        ],
+        "G6": [
+          {
+            "aspect": "value",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Midweek rate is fair for a harbor town in July"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "Room decor is dated"
+          },
+          {
+            "aspect": "cleanliness",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Room is spotless"
+          }
+        ],
+        "G7": [
+          {
+            "aspect": "noise",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Thin walls let neighbors' noise through until eleven at night."
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The stay is comfortable."
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The room has a nice view."
+          }
+        ],
+        "G8": [
+          {
+            "aspect": "service",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Check-in takes twenty minutes with one person covering desk and phone"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "The room is fine"
+          }
+        ],
+        "G9": [
+          {
+            "aspect": "cleanliness",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Bathroom is immaculate."
+          },
+          {
+            "aspect": "service",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Housekeeping leaves fresh towels daily."
+          }
+        ],
+        "G10": [
+          {
+            "aspect": "room comfort",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Second floor room overlooks parking lot, not the water"
+          },
+          {
+            "aspect": "other",
+            "polarity": "negative",
+            "specific": true,
+            "statement": "Booking page does not make room view clear"
+          }
+        ],
+        "G11": [
+          {
+            "aspect": "amenities",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Lobby coffee is available at six in the morning."
+          }
+        ],
+        "G12": [
+          {
+            "aspect": "room comfort",
+            "polarity": "negative",
+            "specific": false,
+            "statement": "Room is small"
+          },
+          {
+            "aspect": "room comfort",
+            "polarity": "positive",
+            "specific": true,
+            "statement": "Room has a large window with harbor sunset view"
+          },
+          {
+            "aspect": "breakfast",
+            "polarity": "mixed",
+            "specific": false,
+            "statement": "Breakfast is average"
+          },
+          {
+            "aspect": "value",
+            "polarity": "positive",
+            "specific": false,
+            "statement": "Stay is good value"
+          }
+        ]
+      },
+      "candidate_pairs": [
+        "B2-B3",
+        "C1-C2",
+        "C1-C3",
+        "C2-C3",
+        "C2-C4"
+      ],
+      "judged_same_pairs": [
+        "C1-C2",
+        "C1-C3",
+        "C2-C4"
+      ],
+      "usage": {
+        "claude-sonnet-5-5": {
+          "calls": 24,
+          "input_tokens": 27798,
+          "output_tokens": 3063
+        },
+        "claude-haiku-5-5": {
+          "calls": 5,
+          "input_tokens": 4097,
+          "output_tokens": 398
+        }
+      }
+    }
+  ],
+  "per_cluster": [
+    {
+      "cluster": "A",
+      "claim": "best hotel in the region, amazing staff, perfect rooms, top rating (positive campaign)",
+      "pairs": 6,
+      "mean_specific": [
+        0.0,
+        0.0
+      ],
+      "candidates": [
+        0,
+        0
+      ],
+      "judged_same": [
+        0,
+        0
+      ]
+    },
+    {
+      "cluster": "B",
+      "claim": "rude manager, dirty room, overcharged, never again (negative campaign)",
+      "pairs": 6,
+      "mean_specific": [
+        1.75,
+        1.5
+      ],
+      "candidates": [
+        1,
+        1
+      ],
+      "judged_same": [
+        1,
+        0
+      ]
+    },
+    {
+      "cluster": "C",
+      "claim": "lakefront balcony, gourmet breakfast, spa, best vacation ever (fabricated amenities)",
+      "pairs": 6,
+      "mean_specific": [
+        2.75,
+        2.5
+      ],
+      "candidates": [
+        5,
+        4
+      ],
+      "judged_same": [
+        5,
+        3
+      ]
+    }
+  ],
+  "agreement": {
+    "judged_in_all": [
+      "C1-C2",
+      "C1-C3",
+      "C2-C4"
+    ],
+    "judged_only_in": {
+      "1": [
+        "B2-B3",
+        "C2-C3",
+        "C3-C4"
+      ],
+      "2": []
+    },
+    "candidates_in_all": [
+      "B2-B3",
+      "C1-C2",
+      "C1-C3",
+      "C2-C3",
+      "C2-C4"
+    ],
+    "candidates_only_in": {
+      "1": [
+        "C3-C4"
+      ],
+      "2": []
+    }
+  },
+  "tokens": {
+    "total": {
+      "claude-sonnet-5-5": {
+        "calls": 48,
+        "input_tokens": 55596,
+        "output_tokens": 6083
+      },
+      "claude-haiku-5-5": {
+        "calls": 11,
+        "input_tokens": 9098,
+        "output_tokens": 833
+      }
+    },
+    "usd": 0.1733483,
+    "prices_per_mtok": {
+      "claude-sonnet-5-5": [
+        2.0,
+        10.0
+      ],
+      "claude-haiku-5-5": [
+        0.1,
+        0.5
+      ]
+    },
+    "prices_as_of": "2026-10-06"
+  },
+  "limits": [
+    "Twenty four synthetic reviews written for this project by the author of the detector. The figures show the mechanism and where it loses pairs, not field accuracy.",
+    "Two runs show whether answers move between runs; they are not a distribution.",
+    "The claim signal is measured on its own. In the graph it runs alongside the detector, and pairs the detector already joined are not judged again.",
+    "The fictional property name in the prompts is a placeholder; the set names none.",
+    "Cost is the token count the API reported; the dollar figure is an estimate at list prices on the stated date."
+  ]
+}
