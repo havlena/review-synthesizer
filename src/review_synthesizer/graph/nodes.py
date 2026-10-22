@@ -1,21 +1,26 @@
 """Node functions. Each takes the state and returns the keys it changes.
 
-``load_batch`` and ``authenticity`` are complete. The rest are still stubs returning empty
-values of the right type, filled in commit by commit (``docs/build-plan.md``, step 5).
-Dependencies (the model client, the optional embedder and classifier) are keyword
-arguments bound by :func:`.build.build_graph`, so they never enter the state.
+``load_batch``, ``authenticity`` and ``extract_claims`` are complete. The rest are still
+stubs returning empty values of the right type, filled in commit by commit
+(``docs/build-plan.md``, step 5). Dependencies (the model client, the optional embedder and
+classifier) are keyword arguments bound by :func:`.build.build_graph`, so they never enter
+the state.
 """
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
-from review_synthesizer.authenticity import Embedder, RatingSummary, detect
+from review_synthesizer.authenticity import Embedder, RatingSummary, Review, ReviewId, detect
 from review_synthesizer.authenticity.detector import Classifier
 
 from .batch import validate_batch
+from .config import MAX_PARALLEL_CALLS
 from .model import ModelClient
-from .state import Brief, BriefState
+from .prompts import EXTRACT_SYSTEM, extract_prompt
+from .schemas import ExtractedClaims
+from .state import Brief, BriefState, Claim, Property
 
 
 def load_batch(state: BriefState) -> dict[str, Any]:
@@ -33,9 +38,47 @@ def authenticity(
     return {"detection": detect(state["reviews"], embedder=embedder, classifier=classifier)}
 
 
+def _extract_one(client: ModelClient, prop: Property, review: Review) -> list[Claim]:
+    out = client.structured(
+        ExtractedClaims, system=EXTRACT_SYSTEM, prompt=extract_prompt(prop, review)
+    )
+    return [
+        Claim(c.aspect, c.polarity, c.specific, c.statement.strip())
+        for c in out.claims
+        if c.statement.strip()
+    ]
+
+
 def extract_claims(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
-    """One model call per review: the claims it makes, by aspect and polarity."""
-    return {"claims": {r.id: [] for r in state["reviews"]}}
+    """One model call per review: the claims it makes, by aspect and polarity.
+
+    Fails soft: a review whose extraction fails keeps an empty claim list and gets a note,
+    and the run continues. Such a review cannot join a claim duplicate group.
+    """
+    reviews = state["reviews"]
+    prop = state.get("property", Property(name="unnamed property"))
+
+    def attempt(review: Review) -> list[Claim] | Exception:
+        try:
+            return _extract_one(client, prop, review)
+        except Exception as exc:  # noqa: BLE001 - any failure is recorded, not raised
+            return exc
+
+    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_CALLS) as pool:
+        results = list(pool.map(attempt, reviews))
+
+    claims: dict[ReviewId, list[Claim]] = {}
+    notes: list[str] = []
+    for review, result in zip(reviews, results, strict=True):
+        if isinstance(result, Exception):
+            claims[review.id] = []
+            notes.append(
+                f"Claim extraction failed for review {review.id} ({type(result).__name__}); "
+                "it stays in the batch with no claims, so it cannot join a claim duplicate group."
+            )
+        else:
+            claims[review.id] = result
+    return {"claims": claims, "notes": notes}
 
 
 def claim_duplicates(state: BriefState, *, client: ModelClient) -> dict[str, Any]:

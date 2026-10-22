@@ -30,6 +30,9 @@ T = TypeVar("T", bound=BaseModel)
 class ModelClient(Protocol):
     """Structured call: a system prompt, a user prompt, and the schema of the answer."""
 
+    config: ModelConfig
+    """Model names, recorded on flags and in the brief's methods note."""
+
     def structured(self, schema: type[T], *, system: str, prompt: str, small: bool = False) -> T:
         """Return an instance of ``schema``. ``small`` selects the cheap model."""
         ...  # pragma: no cover - protocol
@@ -59,6 +62,7 @@ class FakeModelClient:
 
     responses: dict[type[BaseModel], Response] = field(default_factory=dict)
     calls: list[ModelCall] = field(default_factory=list)
+    config: ModelConfig = field(default_factory=lambda: ModelConfig("fake-main", "fake-small"))
 
     def structured(self, schema: type[T], *, system: str, prompt: str, small: bool = False) -> T:
         self.calls.append(ModelCall(schema.__name__, system, prompt, small))

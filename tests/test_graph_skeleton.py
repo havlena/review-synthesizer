@@ -23,6 +23,7 @@ from review_synthesizer.graph import (
     Property,
     build_graph,
 )
+from review_synthesizer.graph.schemas import ExtractedClaims
 
 FIXTURES = Path(__file__).parent / "fixtures"
 HARBOR = Property(name="Harbor Light Inn", type="inn", region="New England coast")
@@ -79,10 +80,11 @@ def test_fan_out_runs_both_branches_in_one_step_and_joins_once():
     ]
 
 
-def test_skeleton_runs_end_to_end_without_calling_a_model():
-    client = FakeModelClient()  # no responses: any model call would raise
+def test_graph_runs_end_to_end_on_the_fake_model():
+    client = FakeModelClient({ExtractedClaims: ExtractedClaims(claims=[])})
     out = build_graph(client).invoke(harbor_input())
-    assert client.calls == []
+    assert {c.schema for c in client.calls} == {"ExtractedClaims"}
+    assert out.get("notes", []) == []
     assert len(out["reviews"]) == 25
     assert all(isinstance(r, Review) for r in out["reviews"])
     assert set(out["claims"]) == {r.id for r in out["reviews"]}

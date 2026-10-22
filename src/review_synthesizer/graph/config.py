@@ -20,6 +20,10 @@ DEFAULT_MODEL_SMALL = "claude-haiku-5-5"
 MAX_TOKENS = 16000
 """Output ceiling per call. Structured outputs are short; this only guards against cut offs."""
 
+MAX_PARALLEL_CALLS = 8
+"""Concurrent model calls within one node (per review, per pair). Not tuned; keeps a batch
+of a few dozen reviews to seconds without approaching rate limits."""
+
 
 @dataclass(frozen=True)
 class ModelConfig:
