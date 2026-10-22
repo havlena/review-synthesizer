@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-10-22T22:54:26+00:00",
+  "created_at": "2026-10-22T23:47:11+00:00",
   "python_version": "3.12.10",
   "property": "Harbor Light Inn",
   "reviews": 25,
@@ -23,7 +23,7 @@
       "rating_burst": "3 or more same rating reviews within 4 days",
       "embedding_similarity": "cosine similarity at or above 0.85",
       "deceptive_language": "classifier probability at or above 0.80",
-      "claim_duplicate": "at least 1 shared specific claim, then a model judgment per pair (lenient prompt)"
+      "claim_duplicate": "at least 2 shared specific claims, then a model judgment per pair (strict prompt)"
     },
     "models": {
       "main": "claude-sonnet-5-5",
@@ -44,11 +44,11 @@
       "run_id": "harbor-light-run1",
       "rating": {
         "total": 25,
-        "removed": 7,
+        "removed": 5,
         "displayed": 3.8,
-        "verified": 3.4
+        "verified": 3.5
       },
-      "matches_golden": false,
+      "matches_golden": true,
       "flags": [
         {
           "key": "duplicate_phrasing:21,22,23,24,25",
@@ -111,67 +111,43 @@
             23
           ],
           "decision": "confirmed"
-        },
-        {
-          "key": "claim_duplicate:10,16",
-          "signal_type": "claim_duplicate",
-          "score": 0.3333333333333333,
-          "confidence": "low",
-          "review_ids": [
-            10,
-            16
-          ],
-          "decision": "confirmed"
         }
       ],
-      "genuine_flagged": [
-        {
-          "review_id": 10,
-          "signals": [
-            "claim_duplicate"
-          ]
-        },
-        {
-          "review_id": 16,
-          "signals": [
-            "claim_duplicate"
-          ]
-        }
-      ],
+      "genuine_flagged": [],
       "notes": [],
       "themes": [
         {
-          "name": "Cleanliness hits and misses",
-          "count": 9,
-          "sentiment": "mixed"
-        },
-        {
-          "name": "Helpful but inconsistent staff",
-          "count": 8,
-          "sentiment": "mixed"
-        },
-        {
-          "name": "Breakfast quality varies",
-          "count": 8,
+          "name": "Cleanliness and mold issues",
+          "count": 11,
           "sentiment": "mixed"
         },
         {
           "name": "Harbor views and location",
-          "count": 7,
+          "count": 9,
           "sentiment": "positive"
         },
         {
-          "name": "Thin walls and noise",
-          "count": 6,
+          "name": "Front desk service varies",
+          "count": 8,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Inconsistent breakfast offering",
+          "count": 8,
           "sentiment": "mixed"
         },
         {
           "name": "Comfortable beds",
-          "count": 4,
+          "count": 5,
           "sentiment": "positive"
         },
         {
-          "name": "Heating and dated rooms",
+          "name": "Dated rooms, heater problems",
+          "count": 4,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Thin walls and noise",
           "count": 3,
           "sentiment": "negative"
         },
@@ -194,33 +170,33 @@
         "value": 3,
         "location": 5,
         "noise": 3,
-        "parking": 1,
+        "parking": 2,
         "wifi": 1,
-        "other": 4
+        "other": 3
       },
       "actions": [
         {
-          "title": "Add a pre-arrival room check for mold, damp and trash",
-          "impact": "High",
-          "effort": "Low"
-        },
-        {
-          "title": "Set a staff protocol for phones, noise complaints and room moves",
-          "impact": "High",
-          "effort": "Low"
-        },
-        {
-          "title": "Expand breakfast with hot items and restock before 9 a.m.",
+          "title": "Inspect rooms for damp and mold, then fix moisture sources",
           "impact": "High",
           "effort": "Medium"
         },
         {
-          "title": "Service and replace heaters in rooms with rattling or failed units",
+          "title": "Service and test every room heater before the cold season",
+          "impact": "High",
+          "effort": "Medium"
+        },
+        {
+          "title": "Add a housekeeping checklist with a supervisor spot-check per room",
           "impact": "Medium",
-          "effort": "Medium"
+          "effort": "Low"
         },
         {
-          "title": "Upgrade wifi coverage and bandwidth for guests working remotely",
+          "title": "Upgrade wifi coverage and capacity for evening and work-call use",
+          "impact": "Medium",
+          "effort": "Low"
+        },
+        {
+          "title": "Set a baseline breakfast menu with hot items and restock plan",
           "impact": "Medium",
           "effort": "Medium"
         }
@@ -228,16 +204,16 @@
       "usage": {
         "claude-sonnet-5-5": {
           "calls": 27,
-          "input_tokens": 34818,
-          "output_tokens": 8248
+          "input_tokens": 35108,
+          "output_tokens": 8750
         },
         "claude-haiku-5-5": {
-          "calls": 29,
-          "input_tokens": 24981,
-          "output_tokens": 2596
+          "calls": 2,
+          "input_tokens": 1705,
+          "output_tokens": 232
         }
       },
-      "usd": 0.1559121
+      "usd": 0.15800250000000002
     }
   ],
   "differences": null,
@@ -245,16 +221,16 @@
     "total": {
       "claude-sonnet-5-5": {
         "calls": 27,
-        "input_tokens": 34818,
-        "output_tokens": 8248
+        "input_tokens": 35108,
+        "output_tokens": 8750
       },
       "claude-haiku-5-5": {
-        "calls": 29,
-        "input_tokens": 24981,
-        "output_tokens": 2596
+        "calls": 2,
+        "input_tokens": 1705,
+        "output_tokens": 232
       }
     },
-    "usd": 0.1559121,
+    "usd": 0.15800250000000002,
     "prices_per_mtok": {
       "claude-sonnet-5-5": [
         2.0,
@@ -275,18 +251,15 @@
   ],
   "headline": {
     "verified_ratings": [
-      3.4
+      3.5
     ],
     "displayed_ratings": [
       3.8
     ],
-    "all_runs_match_golden": false,
-    "genuine_reviews_flagged": [
-      10,
-      16
-    ],
+    "all_runs_match_golden": true,
+    "genuine_reviews_flagged": [],
     "flags_per_run": [
-      6
+      5
     ]
   }
 }

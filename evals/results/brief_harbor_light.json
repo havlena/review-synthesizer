@@ -7,19 +7,19 @@
   "run_id": "harbor-light-run1",
   "rating": {
     "total": 25,
-    "removed": 7,
+    "removed": 5,
     "displayed": 3.8,
-    "verified": 3.4
+    "verified": 3.5
   },
   "themes": [
     {
-      "name": "Cleanliness hits and misses",
-      "count": 9,
+      "name": "Cleanliness and mold issues",
+      "count": 11,
       "sentiment": "mixed",
       "evidence": [
         "Rooms were spotless",
-        "The bathroom had mold in the corner",
-        "Room smelled musty"
+        "Room smelled musty and the carpet felt damp",
+        "The bathroom had mold in the corner"
       ],
       "review_ids": [
         2,
@@ -27,20 +27,44 @@
         5,
         6,
         7,
+        10,
         12,
         14,
+        16,
         18,
         20
       ]
     },
     {
-      "name": "Helpful but inconsistent staff",
+      "name": "Harbor views and location",
+      "count": 9,
+      "sentiment": "positive",
+      "evidence": [
+        "The view of the harbor from our room was incredible at sunrise",
+        "Loved the harbor location and the walk to dinner",
+        "Good location right by the water"
+      ],
+      "review_ids": [
+        1,
+        3,
+        10,
+        12,
+        13,
+        16,
+        18,
+        19,
+        20
+      ]
+    },
+    {
+      "name": "Front desk service varies",
       "count": 8,
       "sentiment": "mixed",
       "evidence": [
         "Staff at the front desk were warm and helpful",
         "Front desk went above and beyond to get us a late checkout",
-        "Nobody answered the desk phone"
+        "Nobody answered the desk phone",
+        "the front desk did nothing"
       ],
       "review_ids": [
         1,
@@ -54,7 +78,7 @@
       ]
     },
     {
-      "name": "Breakfast quality varies",
+      "name": "Inconsistent breakfast offering",
       "count": 8,
       "sentiment": "mixed",
       "evidence": [
@@ -74,71 +98,51 @@
       ]
     },
     {
-      "name": "Harbor views and location",
-      "count": 7,
-      "sentiment": "positive",
-      "evidence": [
-        "The view of the harbor from our room was incredible at sunrise",
-        "Good location right by the water",
-        "walkable to everything"
-      ],
-      "review_ids": [
-        1,
-        3,
-        12,
-        13,
-        18,
-        19,
-        20
-      ]
-    },
-    {
-      "name": "Thin walls and noise",
-      "count": 6,
-      "sentiment": "mixed",
-      "evidence": [
-        "Thin walls, we could hear the hallway",
-        "Noisy neighbors until two in the morning",
-        "a quiet room"
-      ],
-      "review_ids": [
-        3,
-        4,
-        13,
-        14,
-        19,
-        20
-      ]
-    },
-    {
       "name": "Comfortable beds",
-      "count": 4,
+      "count": 5,
       "sentiment": "positive",
       "evidence": [
-        "Comfortable bed",
+        "Comfortable bed and a quiet room",
         "Comfortable beds",
         "The bed was a little firm"
       ],
       "review_ids": [
         3,
         9,
+        12,
         13,
         15
       ]
     },
     {
-      "name": "Heating and dated rooms",
-      "count": 3,
+      "name": "Dated rooms, heater problems",
+      "count": 4,
       "sentiment": "negative",
       "evidence": [
         "the heater rattled all night",
-        "The heater did not work",
-        "a bit tired"
+        "The heater did not work and it was a cold night",
+        "a touch dated"
       ],
       "review_ids": [
         8,
         11,
+        16,
         17
+      ]
+    },
+    {
+      "name": "Thin walls and noise",
+      "count": 3,
+      "sentiment": "negative",
+      "evidence": [
+        "Thin walls, we could hear the hallway",
+        "The walls are a little thin so you hear the hallway",
+        "Noisy neighbors until two in the morning"
+      ],
+      "review_ids": [
+        4,
+        14,
+        19
       ]
     },
     {
@@ -172,16 +176,18 @@
     {
       "aspect": "cleanliness",
       "score": 3,
-      "review_count": 9,
-      "evidence": "Six reviews praise spotless or thorough housekeeping, but three report mold, a musty damp room, or an uncleaned room.",
+      "review_count": 11,
+      "evidence": "Most guests call rooms clean or spotless, but three report musty damp carpet, bathroom mold, and a room not properly cleaned.",
       "review_ids": [
         2,
         4,
         5,
         6,
         7,
+        10,
         12,
         14,
+        16,
         18,
         20
       ]
@@ -190,7 +196,7 @@
       "aspect": "service",
       "score": 3,
       "review_count": 8,
-      "evidence": "Friendly and helpful staff in several reviews, but an unanswered phone, no action on noise, a slow check-in and no room move.",
+      "evidence": "Staff are often described as warm and helpful, but others report slow check-in, an unanswered desk phone, and no action on a noise complaint.",
       "review_ids": [
         1,
         4,
@@ -206,7 +212,7 @@
       "aspect": "breakfast",
       "score": 3,
       "review_count": 8,
-      "evidence": "Praise for cinnamon rolls, coffee and pastries, but complaints about packaged muffins, few hot options and running out of food.",
+      "evidence": "Cinnamon rolls, coffee and pastries are praised, but others report packaged muffins, few hot options, running out of food, and minimal choice.",
       "review_ids": [
         2,
         3,
@@ -221,16 +227,20 @@
     {
       "aspect": "room comfort",
       "score": 3,
-      "review_count": 8,
-      "evidence": "Comfortable beds and rooms are praised, but others report a dated, tired room and a rattling or broken heater.",
+      "review_count": 12,
+      "evidence": "Comfortable beds and cozy rooms are praised, but guests also report dated rooms, a rattling or broken heater, and damp musty conditions.",
       "review_ids": [
+        2,
         3,
+        5,
+        6,
         8,
         9,
         11,
         12,
         13,
         15,
+        16,
         17
       ]
     },
@@ -238,7 +248,7 @@
       "aspect": "value",
       "score": 3,
       "review_count": 2,
-      "evidence": "One guest found it great value in season, another found it disappointing for the price.",
+      "evidence": "One guest found it great value in season; another found it disappointing for the price.",
       "review_ids": [
         2,
         15
@@ -247,11 +257,15 @@
     {
       "aspect": "location",
       "score": 5,
-      "review_count": 5,
-      "evidence": "Walkable to the docks and marina, right by the water, with no complaints.",
+      "review_count": 9,
+      "evidence": "Guests praise the harbor setting, water views, and walkability to docks, dinner, and the marina, with no complaints.",
       "review_ids": [
+        1,
         3,
+        10,
+        12,
         13,
+        16,
         18,
         19,
         20
@@ -260,11 +274,12 @@
     {
       "aspect": "noise",
       "score": 3,
-      "review_count": 6,
-      "evidence": "Three guests found rooms quiet, while three report hallway noise through thin walls or neighbors until 2 a.m.",
+      "review_count": 7,
+      "evidence": "Four guests found rooms quiet, while three reported thin walls, hallway sound, or noisy neighbors until 2 a.m.",
       "review_ids": [
         3,
         4,
+        10,
         13,
         14,
         19,
@@ -273,9 +288,9 @@
     },
     {
       "aspect": "parking",
-      "score": 1,
+      "score": 2,
       "review_count": 2,
-      "evidence": "Both reviews complain that parking is limited and tight, one calling it a nightmare.",
+      "evidence": "Parking is described as a nightmare and as tight, with only one guest saying they managed.",
       "review_ids": [
         8,
         15
@@ -285,7 +300,7 @@
       "aspect": "wifi",
       "score": 1,
       "review_count": 2,
-      "evidence": "Both reviews report wifi that dropped or was too slow for work calls.",
+      "evidence": "Both guests who mention wifi report problems: evening dropouts and slowness for work calls.",
       "review_ids": [
         6,
         13
@@ -293,64 +308,30 @@
     },
     {
       "aspect": "other",
-      "score": 4,
-      "review_count": 4,
-      "evidence": "Harbor views and sunsets are praised, though one guest booked a lakeview room and got a parking lot view.",
+      "score": 3,
+      "review_count": 2,
+      "evidence": "One guest praised the Northern Michigan charm; another booked a lakeview room and got a parking lot view.",
       "review_ids": [
-        1,
         5,
-        12,
-        18
+        6
       ]
     }
   ],
   "actions": [
     {
-      "title": "Add a pre-arrival room check for mold, damp and trash",
-      "why": "Cleanliness is split, with reviews reporting mold in a bathroom, a musty damp room and trash left in the bin while others call rooms spotless.",
-      "impact": "High",
-      "effort": "Low",
-      "review_ids": [
-        2,
-        5,
-        14,
-        6,
-        7,
-        18
-      ]
-    },
-    {
-      "title": "Set a staff protocol for phones, noise complaints and room moves",
-      "why": "Reviews praise friendly staff but also cite an unanswered desk phone, no action on late-night noise, a slow check-in and no room move for a broken heater.",
-      "impact": "High",
-      "effort": "Low",
-      "review_ids": [
-        5,
-        14,
-        4,
-        17,
-        1,
-        12
-      ]
-    },
-    {
-      "title": "Expand breakfast with hot items and restock before 9 a.m.",
-      "why": "Guests praised the cinnamon rolls and pastries but complained of packaged muffins, few hot options and food running out by eight.",
+      "title": "Inspect rooms for damp and mold, then fix moisture sources",
+      "why": "Reviews report musty damp carpet and bathroom mold, and cleanliness is a mixed theme across 11 reviews.",
       "impact": "High",
       "effort": "Medium",
       "review_ids": [
         2,
-        3,
-        11,
-        17,
-        7,
-        20
+        5
       ]
     },
     {
-      "title": "Service and replace heaters in rooms with rattling or failed units",
-      "why": "Two guests reported a rattling heater and a heater that did not work on a cold night, and staff had no room to move one of them to.",
-      "impact": "Medium",
+      "title": "Service and test every room heater before the cold season",
+      "why": "Guests report a rattling heater and a heater that failed on a cold night, with staff unable to move them.",
+      "impact": "High",
       "effort": "Medium",
       "review_ids": [
         8,
@@ -358,13 +339,37 @@
       ]
     },
     {
-      "title": "Upgrade wifi coverage and bandwidth for guests working remotely",
-      "why": "Both wifi reviews say the connection dropped or was too slow for work calls, and wifi scored 1 of 5.",
+      "title": "Add a housekeeping checklist with a supervisor spot-check per room",
+      "why": "One guest found trash still in the bin and another a moldy bathroom, while most others call rooms spotless, so consistency is the gap.",
       "impact": "Medium",
-      "effort": "Medium",
+      "effort": "Low",
+      "review_ids": [
+        5,
+        14,
+        2
+      ]
+    },
+    {
+      "title": "Upgrade wifi coverage and capacity for evening and work-call use",
+      "why": "Both guests who mention wifi report evening dropouts or slowness for work calls, and it scores 1 of 5.",
+      "impact": "Medium",
+      "effort": "Low",
       "review_ids": [
         6,
         13
+      ]
+    },
+    {
+      "title": "Set a baseline breakfast menu with hot items and restock plan",
+      "why": "Praise for cinnamon rolls sits beside reports of packaged muffins, minimal choice, and food running out by eight.",
+      "impact": "Medium",
+      "effort": "Medium",
+      "review_ids": [
+        2,
+        3,
+        11,
+        17,
+        7
       ]
     }
   ],
@@ -487,40 +492,6 @@
             "in"
           ]
         }
-      },
-      {
-        "key": "claim_duplicate:10,16",
-        "decision": "confirmed",
-        "signal_type": "claim_duplicate",
-        "review_ids": [
-          10,
-          16
-        ],
-        "score": 0.3333333333333333,
-        "confidence": "low",
-        "rationale": "2 reviews make the same specific claims in different words: 1 of 1 pairs in the group were judged to describe the same things, sharing 1.0 specific claim on average, none of them already joined by the detector's wording or meaning signals. Reviews 10 and 16: Both reviews praise the inn's waterfront/harbor location as a key feature, and both describe the room as clean; review 16 adds a dated-room remark that review 10 lacks, but the shared claims about location match.",
-        "details": {
-          "pairs_judged_same": 1,
-          "member_pairs": 1,
-          "mean_shared_specific": 1.0,
-          "shared_specific_per_pair": [
-            {
-              "a": 10,
-              "b": 16,
-              "shared": 1
-            }
-          ],
-          "min_shared_specific": 1,
-          "model": "claude-haiku-5-5",
-          "judgments": [
-            {
-              "a": 10,
-              "b": 16,
-              "same_claims": true,
-              "reason": "Both reviews praise the inn's waterfront/harbor location as a key feature, and both describe the room as clean; review 16 adds a dated-room remark that review 10 lacks, but the shared claims about location match."
-            }
-          ]
-        }
       }
     ],
     "verified_review_ids": [
@@ -533,19 +504,19 @@
       7,
       8,
       9,
+      10,
       11,
       12,
       13,
       14,
       15,
+      16,
       17,
       18,
       19,
       20
     ],
     "held_review_ids": [
-      10,
-      16,
       21,
       22,
       23,
@@ -567,7 +538,7 @@
       "rating_burst": "3 or more same rating reviews within 4 days",
       "embedding_similarity": "cosine similarity at or above 0.85",
       "deceptive_language": "classifier probability at or above 0.80",
-      "claim_duplicate": "at least 1 shared specific claim, then a model judgment per pair (lenient prompt)"
+      "claim_duplicate": "at least 2 shared specific claims, then a model judgment per pair (strict prompt)"
     },
     "models": {
       "main": "claude-sonnet-5-5",
