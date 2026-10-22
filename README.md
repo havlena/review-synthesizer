@@ -19,13 +19,13 @@ The v1 artifacts are kept unchanged under `prototype/`.
 ## Layout
 
 ```
-src/review_synthesizer/authenticity/   rule based signals (v1 port, step 3)
+src/review_synthesizer/authenticity/   the detector: rules, embedding similarity, classifier, one detect() call
 src/review_synthesizer/data/           fetch and normalise public evaluation data (step 4a)
 src/review_synthesizer/evals/          evaluation harnesses; results are committed under evals/results/ (step 4b)
 scripts/                                command line entry points
 tests/                                  golden tests on the capstone data set
 prototype/                              v1 single file prototype and the AI Studio system prompt
-db/                                     Postgres schema (Module 4 base, extended in v2)
+db/                                     Postgres schema (Module 4 base) and v2 migrations
 docs/                                   design notes; docs/data.md lists every data source and its terms
 ```
 
@@ -40,6 +40,22 @@ pytest
 
 The golden tests replay the capstone demo: the five planted reviews are flagged, none of the twenty genuine ones are, and the rating moves from 3.8 displayed to 3.5 verified.
 
+## Detector signals
+
+| Signal | What it catches | How it is measured |
+|---|---|---|
+| `duplicate_phrasing` | Copy and paste with light edits: Jaccard word overlap at or above 0.55 | Golden tests on the capstone data set |
+| `rating_burst` | Three or more same rating reviews within four days; separate bursts reported separately | Golden tests |
+| `embedding_similarity` | Light rewrites and shared specifics: cosine similarity of sentence embeddings at or above 0.80 (paraphrase-mpnet-base-v2, runs locally). Measured limit: heavy paraphrase is not separable from honest reviews on the same topic by any of three models tested | `evals/results/paraphrase_similarity.md` |
+| `deceptive_language` | Language that resembles reviews written without a stay; flagged only at p ≥ 0.8 | 99.1% precision, 42% recall on the Ott corpus, `evals/results/ott_classifier.md` |
+
+Every flag carries a score, a confidence band and a written reason, and is a signal for human review rather than a verdict. Try it on the capstone data set:
+
+```
+python scripts/detect.py tests/fixtures/harbor_light_inn.json
+python scripts/detect.py tests/fixtures/paraphrase_set.json --embeddings --classifier models/ott_deception.joblib
+```
+
 ## Evaluation
 
 The deceptive language classifier is scored on the Ott corpus with the published, hotel disjoint folds; the current figures are in `evals/results/ott_classifier.md` and the protocol in `docs/evaluation.md`. Reproduce them with:
@@ -49,7 +65,7 @@ python scripts/fetch_ott_corpus.py
 python scripts/eval_ott.py
 ```
 
-Embedding similarity, the LangGraph graph and the API follow as the build proceeds.
+The duplicate signals are compared on a labelled paraphrase set across three embedding models with `python scripts/eval_similarity.py` (needs `pip install -e .[embeddings]`); the result is a measured limit as much as a measured capability. The LangGraph graph and the API follow as the build proceeds.
 
 ## Notes
 

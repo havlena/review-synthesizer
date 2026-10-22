@@ -1,0 +1,180 @@
+{
+  "name": "Paraphrase set (synthetic)",
+  "purpose": "Measure whether embedding similarity finds rewritten duplicates that word overlap misses, and whether it wrongly joins distinct genuine reviews on the same topics.",
+  "note": "All text written for this project in October 2026; no real property, reviewer or platform data. 'cluster' is ground truth for evaluation only; detection never reads it.",
+  "clusters": {
+    "A": "best hotel in the region, amazing staff, perfect rooms, top rating (positive campaign)",
+    "B": "rude manager, dirty room, overcharged, never again (negative campaign)",
+    "C": "lakefront balcony, gourmet breakfast, spa, best vacation ever (fabricated amenities)"
+  },
+  "reviews": [
+    {
+      "id": "A1",
+      "date": "2026-07-02",
+      "rating": 5,
+      "cluster": "A",
+      "text": "Absolutely the best hotel in Northern Michigan, amazing staff and perfect rooms, five stars all the way!"
+    },
+    {
+      "id": "A2",
+      "date": "2026-07-03",
+      "rating": 5,
+      "cluster": "A",
+      "text": "Hands down the top place to stay in the whole region. The team were wonderful and our room was flawless. Full marks from us."
+    },
+    {
+      "id": "A3",
+      "date": "2026-07-03",
+      "rating": 5,
+      "cluster": "A",
+      "text": "Nowhere else up north comes close. Incredible people working here and not a thing wrong with the accommodation. Ten out of ten."
+    },
+    {
+      "id": "A4",
+      "date": "2026-07-05",
+      "rating": 5,
+      "cluster": "A",
+      "text": "You will not find a finer inn anywhere in the north. Superb service and immaculate quarters. Highest possible rating."
+    },
+    {
+      "id": "B1",
+      "date": "2026-07-10",
+      "rating": 1,
+      "cluster": "B",
+      "text": "The manager was rude to us, the room was filthy, and they charged us more than the quoted price. Never staying here again."
+    },
+    {
+      "id": "B2",
+      "date": "2026-07-11",
+      "rating": 1,
+      "cluster": "B",
+      "text": "Awful attitude from the person in charge, grime everywhere in our suite, and the bill came out above what we were told. We are done with this place."
+    },
+    {
+      "id": "B3",
+      "date": "2026-07-11",
+      "rating": 1,
+      "cluster": "B",
+      "text": "Management treated us with contempt, housekeeping clearly skipped our unit, and the final invoice exceeded the agreed rate. Avoid."
+    },
+    {
+      "id": "B4",
+      "date": "2026-07-12",
+      "rating": 1,
+      "cluster": "B",
+      "text": "Unpleasant owner, unclean lodging, surprise fees on checkout. Would not return under any circumstances."
+    },
+    {
+      "id": "C1",
+      "date": "2026-07-20",
+      "rating": 5,
+      "cluster": "C",
+      "text": "Our balcony looked right over the lake, breakfast was gourmet, the spa was heavenly, best vacation of our lives."
+    },
+    {
+      "id": "C2",
+      "date": "2026-07-21",
+      "rating": 5,
+      "cluster": "C",
+      "text": "Waking up to the water from our private terrace, a chef quality morning meal, and a blissful massage. The greatest holiday we have ever taken."
+    },
+    {
+      "id": "C3",
+      "date": "2026-07-22",
+      "rating": 5,
+      "cluster": "C",
+      "text": "Lake views from the deck, five star dining at breakfast, and a world class wellness centre. A trip we will never top."
+    },
+    {
+      "id": "C4",
+      "date": "2026-07-23",
+      "rating": 5,
+      "cluster": "C",
+      "text": "Terrace facing the shoreline, exquisite breakfast spread, relaxing spa treatments. Nothing will ever beat this getaway."
+    },
+    {
+      "id": "G1",
+      "date": "2026-07-01",
+      "rating": 4,
+      "cluster": null,
+      "text": "Room 204 faces the marina and we watched the ferry come in each morning. Breakfast is pastries and coffee only, nothing hot."
+    },
+    {
+      "id": "G2",
+      "date": "2026-07-04",
+      "rating": 4,
+      "cluster": null,
+      "text": "Staff were helpful when our key card stopped working at midnight. Beds are firm. Parking filled up by six."
+    },
+    {
+      "id": "G3",
+      "date": "2026-07-06",
+      "rating": 4,
+      "cluster": null,
+      "text": "Clean room, quiet hallway, and the walk to the docks took five minutes. Wifi dropped during our evening calls."
+    },
+    {
+      "id": "G4",
+      "date": "2026-07-08",
+      "rating": 2,
+      "cluster": null,
+      "text": "The heater clicked all night and the shower pressure was weak. Front desk offered to move us but the inn was full."
+    },
+    {
+      "id": "G5",
+      "date": "2026-07-09",
+      "rating": 3,
+      "cluster": null,
+      "text": "Breakfast ran out before eight on Saturday. The cinnamon rolls were good while they lasted."
+    },
+    {
+      "id": "G6",
+      "date": "2026-07-13",
+      "rating": 4,
+      "cluster": null,
+      "text": "We paid the midweek rate and felt it was fair for a harbor town in July. Room was dated but spotless."
+    },
+    {
+      "id": "G7",
+      "date": "2026-07-15",
+      "rating": 3,
+      "cluster": null,
+      "text": "Thin walls. We could hear the family next door until eleven. Otherwise a comfortable stay with a nice view."
+    },
+    {
+      "id": "G8",
+      "date": "2026-07-17",
+      "rating": 3,
+      "cluster": null,
+      "text": "Check in took twenty minutes because one person was covering the desk and the phone. The room itself was fine."
+    },
+    {
+      "id": "G9",
+      "date": "2026-07-19",
+      "rating": 5,
+      "cluster": null,
+      "text": "Housekeeping left fresh towels daily and the bathroom was immaculate. No complaints about cleanliness at all."
+    },
+    {
+      "id": "G10",
+      "date": "2026-07-24",
+      "rating": 2,
+      "cluster": null,
+      "text": "Our second floor room overlooked the parking lot, not the water, which the booking page did not make clear."
+    },
+    {
+      "id": "G11",
+      "date": "2026-07-26",
+      "rating": 5,
+      "cluster": null,
+      "text": "The lobby coffee at six in the morning was a nice touch before our fishing charter. Would stay again."
+    },
+    {
+      "id": "G12",
+      "date": "2026-07-28",
+      "rating": 4,
+      "cluster": null,
+      "text": "Small room, large window, sunset over the harbor. Breakfast was average. Good value overall."
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "model": "sentence-transformers/all-mpnet-base-v2",
+  "reviews": 24,
+  "clusters": {
+    "A": "best hotel in the region, amazing staff, perfect rooms, top rating (positive campaign)",
+    "B": "rude manager, dirty room, overcharged, never again (negative campaign)",
+    "C": "lakefront balcony, gourmet breakfast, spa, best vacation ever (fabricated amenities)"
+  },
+  "truth_pairs": 18,
+  "negative_pairs": 258,
+  "jaccard": {
+    "threshold": 0.55,
+    "joined": 0,
+    "true_positive": 0,
+    "false_positive": 0,
+    "false_negative": 18,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "embedding_sweep": [
+    {
+      "threshold": 0.3,
+      "joined": 198,
+      "true_positive": 18,
+      "false_positive": 180,
+      "false_negative": 0,
+      "precision": 0.09090909090909091,
+      "recall": 1.0,
+      "f1": 0.16666666666666669
+    },
+    {
+      "threshold": 0.4,
+      "joined": 116,
+      "true_positive": 18,
+      "false_positive": 98,
+      "false_negative": 0,
+      "precision": 0.15517241379310345,
+      "recall": 1.0,
+      "f1": 0.26865671641791045
+    },
+    {
+      "threshold": 0.5,
+      "joined": 59,
+      "true_positive": 18,
+      "false_positive": 41,
+      "false_negative": 0,
+      "precision": 0.3050847457627119,
+      "recall": 1.0,
+      "f1": 0.4675324675324675
+    },
+    {
+      "threshold": 0.6,
+      "joined": 22,
+      "true_positive": 15,
+      "false_positive": 7,
+      "false_negative": 3,
+      "precision": 0.6818181818181818,
+      "recall": 0.8333333333333334,
+      "f1": 0.7499999999999999
+    },
+    {
+      "threshold": 0.7,
+      "joined": 8,
+      "true_positive": 8,
+      "false_positive": 0,
+      "false_negative": 10,
+      "precision": 1.0,
+      "recall": 0.4444444444444444,
+      "f1": 0.6153846153846153
+    },
+    {
+      "threshold": 0.8,
+      "joined": 0,
+      "true_positive": 0,
+      "false_positive": 0,
+      "false_negative": 18,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "threshold": 0.9,
+      "joined": 0,
+      "true_positive": 0,
+      "false_positive": 0,
+      "false_negative": 18,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  ],
+  "chosen_threshold": 0.8,
+  "chosen": {
+    "threshold": 0.8,
+    "joined": 0,
+    "true_positive": 0,
+    "false_positive": 0,
+    "false_negative": 18,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "overlap": {
+    "both": 0,
+    "embedding_only": 0,
+    "jaccard_only": 0,
+    "neither": 18
+  },
+  "false_positive_pairs": [],
+  "missed_pairs": [
+    [
+      "C3",
+      "C4",
+      0.774
+    ],
+    [
+      "B1",
+      "B2",
+      0.769
+    ],
+    [
+      "C1",
+      "C2",
+      0.743
+    ],
+    [
+      "C1",
+      "C4",
+      0.736
+    ],
+    [
+      "C1",
+      "C3",
+      0.733
+    ],
+    [
+      "A1",
+      "A4",
+      0.732
+    ],
+    [
+      "C2",
+      "C4",
+      0.715
+    ],
+    [
+      "B1",
+      "B4",
+      0.706
+    ],
+    [
+      "A2",
+      "A4",
+      0.695
+    ],
+    [
+      "A1",
+      "A2",
+      0.686
+    ],
+    [
+      "B2",
+      "B3",
+      0.671
+    ],
+    [
+      "B2",
+      "B4",
+      0.665
+    ],
+    [
+      "A3",
+      "A4",
+      0.664
+    ],
+    [
+      "A2",
+      "A3",
+      0.653
+    ],
+    [
+      "C2",
+      "C3",
+      0.615
+    ],
+    [
+      "B3",
+      "B4",
+      0.593
+    ],
+    [
+      "B1",
+      "B3",
+      0.561
+    ],
+    [
+      "A1",
+      "A3",
+      0.548
+    ]
+  ],
+  "nearest_negative": [
+    "C3",
+    "G12",
+    0.646
+  ],
+  "within_cluster": {
+    "min": 0.5477638390361199,
+    "mean": 0.6809572664231237,
+    "max": 0.7742243515621898
+  },
+  "negatives": {
+    "mean": 0.36660429802963035,
+    "p95": 0.5661710974140564,
+    "max": 0.6464210104945076
+  },
+  "per_cluster": [
+    {
+      "cluster": "A",
+      "claim": "best hotel in the region, amazing staff, perfect rooms, top rating (positive campaign)",
+      "pairs": 6,
+      "min": 0.5477638390361199,
+      "mean": 0.6627461983094917,
+      "max": 0.7319095393952341
+    },
+    {
+      "cluster": "B",
+      "claim": "rude manager, dirty room, overcharged, never again (negative campaign)",
+      "pairs": 6,
+      "min": 0.5610436779654255,
+      "mean": 0.6608138133844236,
+      "max": 0.7687021793050111
+    },
+    {
+      "cluster": "C",
+      "claim": "lakefront balcony, gourmet breakfast, spa, best vacation ever (fabricated amenities)",
+      "pairs": 6,
+      "min": 0.6149622495206992,
+      "mean": 0.7193117875754561,
+      "max": 0.7742243515621898
+    }
+  ],
+  "separable": false,
+  "created_at": "2026-10-22T19:37:08+00:00",
+  "python_version": "3.12.10",
+  "extras": {
+    "Harbor Light Inn fixture": "planted cluster pairwise cosine min 0.928, mean 0.965; fully joined at 0.80: True; nearest genuine review to a planted one 0.747; most similar pair of genuine reviews 0.835",
+    "Rating burst rule on this set (timing only, no text)": "4 1-star reviews, 2026-07-10 to 2026-07-12; 4 5-star reviews, 2026-07-02 to 2026-07-05; 6 5-star reviews, 2026-07-19 to 2026-07-26, genuine reviews swept in: G9, G11"
+  }
+}

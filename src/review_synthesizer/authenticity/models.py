@@ -6,7 +6,12 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Literal
 
-SignalType = Literal["duplicate_phrasing", "rating_burst"]
+SignalType = Literal[
+    "duplicate_phrasing",  # near duplicate wording (Jaccard over word sets)
+    "rating_burst",  # same rating, dense window in time
+    "embedding_similarity",  # near duplicate meaning (cosine over sentence embeddings)
+    "deceptive_language",  # language resembles reviews written without a stay (classifier)
+]
 Confidence = Literal["low", "medium", "high"]
 
 ReviewId = int | str
@@ -62,7 +67,12 @@ class DetectionResult:
     flags: list[Flag]
     flagged_ids: set[ReviewId]
     peak_similarity: float
-    """Highest pairwise similarity among the flagged reviews (shown on the v1 panel)."""
+    """Highest pairwise Jaccard similarity among the flagged reviews (shown on the v1 panel)."""
+    signals: list[str] = field(default_factory=list)
+    """Which signals ran, in order."""
+
+    def flags_for(self, review_id: ReviewId) -> list[Flag]:
+        return [f for f in self.flags if review_id in f.review_ids]
 
 
 @dataclass(frozen=True)
