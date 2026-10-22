@@ -11,6 +11,7 @@ SignalType = Literal[
     "rating_burst",  # same rating, dense window in time
     "embedding_similarity",  # near duplicate meaning (cosine over sentence embeddings)
     "deceptive_language",  # language resembles reviews written without a stay (classifier)
+    "claim_duplicate",  # same specific claims in different words (language model, graph)
 ]
 Confidence = Literal["low", "medium", "high"]
 

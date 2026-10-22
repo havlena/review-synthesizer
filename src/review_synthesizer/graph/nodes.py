@@ -1,26 +1,30 @@
 """Node functions. Each takes the state and returns the keys it changes.
 
-``load_batch``, ``authenticity`` and ``extract_claims`` are complete. The rest are still
-stubs returning empty values of the right type, filled in commit by commit
-(``docs/build-plan.md``, step 5). Dependencies (the model client, the optional embedder and
-classifier) are keyword arguments bound by :func:`.build.build_graph`, so they never enter
-the state.
+Complete up to ``claim_duplicates``. The rest are still stubs returning empty values of
+the right type, filled in commit by commit (``docs/build-plan.md``, step 5). Dependencies
+(the model client, the optional embedder and classifier) are keyword arguments bound by
+:func:`.build.build_graph`, so they never enter the state.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any
+from typing import Any, TypeVar
 
 from review_synthesizer.authenticity import Embedder, RatingSummary, Review, ReviewId, detect
 from review_synthesizer.authenticity.detector import Classifier
 
 from .batch import validate_batch
 from .config import MAX_PARALLEL_CALLS
+from .duplicates import candidate_pairs, claim_flags
 from .model import ModelClient
-from .prompts import EXTRACT_SYSTEM, extract_prompt
-from .schemas import ExtractedClaims
-from .state import Brief, BriefState, Claim, Property
+from .prompts import EXTRACT_SYSTEM, JUDGE_SYSTEM, extract_prompt, judge_prompt
+from .schemas import ExtractedClaims, PairVerdict
+from .state import Brief, BriefState, Claim, PairJudgment, Property
+
+T = TypeVar("T")
+R = TypeVar("R")
 
 
 def load_batch(state: BriefState) -> dict[str, Any]:
@@ -36,6 +40,23 @@ def authenticity(
 ) -> dict[str, Any]:
     """Run the detector with whichever optional signals are configured. No model call."""
     return {"detection": detect(state["reviews"], embedder=embedder, classifier=classifier)}
+
+
+def _property(state: BriefState) -> Property:
+    return state.get("property") or Property(name="unnamed property")
+
+
+def _attempt_all(fn: Callable[[T], R], items: Sequence[T]) -> list[R | Exception]:
+    """Run ``fn`` over ``items`` concurrently, in order; a failure is returned, not raised."""
+
+    def attempt(item: T) -> R | Exception:
+        try:
+            return fn(item)
+        except Exception as exc:  # noqa: BLE001 - every failure is recorded by the caller
+            return exc
+
+    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_CALLS) as pool:
+        return list(pool.map(attempt, items))
 
 
 def _extract_one(client: ModelClient, prop: Property, review: Review) -> list[Claim]:
@@ -56,16 +77,8 @@ def extract_claims(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
     and the run continues. Such a review cannot join a claim duplicate group.
     """
     reviews = state["reviews"]
-    prop = state.get("property", Property(name="unnamed property"))
-
-    def attempt(review: Review) -> list[Claim] | Exception:
-        try:
-            return _extract_one(client, prop, review)
-        except Exception as exc:  # noqa: BLE001 - any failure is recorded, not raised
-            return exc
-
-    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_CALLS) as pool:
-        results = list(pool.map(attempt, reviews))
+    prop = _property(state)
+    results = _attempt_all(lambda r: _extract_one(client, prop, r), reviews)
 
     claims: dict[ReviewId, list[Claim]] = {}
     notes: list[str] = []
@@ -82,10 +95,40 @@ def extract_claims(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
 
 
 def claim_duplicates(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
-    """Join point of the fan out: needs both the detector result and the claims."""
+    """Join point of the fan out: judge candidate pairs, group those making the same claims.
+
+    A failed judgment is noted and the pair is left unjoined; the run continues.
+    """
     if "detection" not in state or "claims" not in state:
         raise RuntimeError("claim_duplicates ran before both parallel branches finished")
-    return {"claim_judgments": [], "claim_flags": []}
+    reviews, claims, prop = state["reviews"], state["claims"], _property(state)
+    pairs = candidate_pairs(reviews, claims, state["detection"])
+
+    def judge(pair: tuple[Review, Review]) -> PairJudgment:
+        a, b = pair
+        verdict = client.structured(
+            PairVerdict,
+            system=JUDGE_SYSTEM,
+            prompt=judge_prompt(prop, a, b, claims.get(a.id, []), claims.get(b.id, [])),
+            small=True,
+        )
+        return PairJudgment(a.id, b.id, verdict.same_claims, verdict.reason.strip())
+
+    judgments: list[PairJudgment] = []
+    notes: list[str] = []
+    for (a, b), result in zip(pairs, _attempt_all(judge, pairs), strict=True):
+        if isinstance(result, Exception):
+            notes.append(
+                f"The claim comparison of reviews {a.id} and {b.id} failed "
+                f"({type(result).__name__}); the pair was not joined."
+            )
+        else:
+            judgments.append(result)
+    return {
+        "claim_judgments": judgments,
+        "claim_flags": claim_flags(reviews, judgments, client.config.small),
+        "notes": notes,
+    }
 
 
 def verified_set(state: BriefState) -> dict[str, Any]:

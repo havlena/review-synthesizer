@@ -28,3 +28,10 @@ class ExtractedClaims(BaseModel):
     """Every claim one review makes. An empty list is a valid answer."""
 
     claims: list[ClaimOut]
+
+
+class PairVerdict(BaseModel):
+    """Whether two reviews make the same specific claims about the same things."""
+
+    same_claims: bool
+    reason: str = Field(description="One sentence: the shared claims, or what differs.")

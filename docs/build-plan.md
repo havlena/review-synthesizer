@@ -121,8 +121,9 @@ Job application forms ask for these five things, so the README answers them in o
   flags with reasons), `POST /batches/{id}/review` (operator decisions, resumes the graph),
   `GET /batches/{id}/brief`. Pydantic models mirror the graph state.
 - Postgres 17 with pgvector in Docker Compose for local development. Apply `db/schema.sql`
-  then `db/migrations/` in order; add migration 0002 (`claim_duplicate` signal type,
-  `source`, `external_id` and `language` on reviews, an embedding column) and the row level
+  then `db/migrations/` in order (0002, the `claim_duplicate` signal type, came with step 5);
+  add migration 0003 (`source`, `external_id` and `language` on reviews, an embedding
+  column) and the row level
   security policies the capstone left out (`db/README.md`, gap 1).
 - Persist batches, reviews, flags with `score` and `details`, and analyses.
 - An MCP server exposing `detect` as a tool, so any agent or client can call the detector.

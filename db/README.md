@@ -4,7 +4,7 @@
 
 - `schema.sql`: the Module 4 base schema (CIS 576, June 2026), captured from the Supabase Schema Visualizer on 2026-10-18. Eight tables: `users`, `properties`, `review_batches`, `reviews`, `analyses`, `authenticity_flags`, `flag_reviews`, `audit_log`.
 - `policies.sql`: row level security state at capture time, reconstructed as DDL.
-- `migrations/`: v2 changes, numbered, applied on top of `schema.sql`. `0001_detector_signals.sql` adds the embedding and classifier signal types, a numeric `score` and a `details` JSON column on flags, and the foreign key indexes.
+- `migrations/`: v2 changes, numbered, applied on top of `schema.sql`. `0001_detector_signals.sql` adds the embedding and classifier signal types, a numeric `score` and a `details` JSON column on flags, and the foreign key indexes. `0002_claim_duplicate_signal.sql` adds the `claim_duplicate` signal type produced by the graph.
 
 ## What the capstone design got right
 
