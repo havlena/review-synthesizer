@@ -120,24 +120,48 @@ yields no specific claims at all, so no candidate rule can reach it; the rating 
 is the one for that pattern. The runs agreed on 3 joined pairs: claim extraction itself
 varies between runs.
 
-Ablation (`evals/results/claim_duplicates_ablation.md`): each run extracts once and all four
-cells (1 or 2 shared claims, strict or lenient judge) are scored on that same extraction.
-No cell made a wrong join in either run. Mean judged recall: 0.222 (2, strict), 0.222
-(2, lenient), 0.389 (1, strict), 0.417 (1, lenient). The rule fixed before the run (no wrong
-join in either run, then highest recall, ties to the stricter setting, otherwise keep the
-default) chose 1 shared claim with the lenient judge, and that is now the product default.
-What it costs: about seven times the judgments on this set (12% of all pairs become
-candidates, against 2%), roughly 15,000 small model judgments, about $2, on a batch of 500
-reviews, and more on real batches where honest reviews share more specifics.
+Ablation (`evals/results/claim_duplicates_ablation.md`): each run extracts once per set and
+all four cells (1 or 2 shared claims, strict or lenient judge) are scored on that same
+extraction.
 
-Read the gain with care. Most of it comes from the candidate rule (0.222 to 0.389 with the
-same judge). The judge prompt's share is half a pair per run on average: lenient led strict
-by two pairs in one run and trailed by one in the other. The lenient prompt's examples of
-different names for one feature are the vocabulary of cluster C, which favours it on this
-set. The setting was chosen on the same 24 reviews it is reported on, with no held out set,
-so expect less on new data. The signal finds about four in ten rewritten pairs here, with
-precision 1.0 in every run so far; it is a precise, partial signal, like the embedding one,
-and the pairs it finds still go to a person.
+The first version used the paraphrase set alone. Its negatives were in sample and on
+different topics, which cannot show the failure that matters most: honest reviews of one
+property that mention the same features. No cell made a wrong join there, and the rule then
+(no wrong join, highest recall) chose 1 shared claim with the lenient judge. The Harbor Light
+end to end run at that default joined genuine reviews 10 and 16 on one shared claim, the
+waterfront location.
+
+The current version adds a control: the 20 genuine Harbor Light reviews, 190 honest pairs of
+one property, every join wrong. The rule, fixed before the run: a cell qualifies only with no
+wrong join on either set in either run; then highest mean paraphrase recall, ties to the
+stricter setting; if none qualifies, nothing changes. Result: no cell made a wrong join on
+either set in either run, so all four qualified. Mean paraphrase recall 0.333 (2, strict),
+0.333 (2, lenient), 0.444 (1, strict), 0.472 (1, lenient). The rule kept 1 shared claim with
+the lenient judge.
+
+That result needs one caveat stated plainly. Pair 10 and 16 was a candidate in both control
+runs and was judged not the same by both prompts both times; in the end to end run the
+lenient prompt judged it the same. One "same" in five judgments of one pair is a judge that
+is not stable on a borderline case, and two runs of 190 pairs do not catch a failure that
+rare. Zero wrong joins on 190 pairs puts the per pair false join rate under about 1.6% at 95%
+confidence (rule of three, pairs treated as independent, which they are not); at that rate a
+batch of 500 reviews could still hold about 2,000 wrong joins. It bounds nothing about other
+properties, longer reviews or other languages. The control prompts also named the property
+with the evaluation placeholder rather than "Harbor Light Inn", a difference not measured.
+
+Cost, from the realistic share: on honest reviews of one property 18% of pairs become
+candidates at 1 shared claim (1.3% at 2), so a batch of 500 reviews needs about 22,650 small
+model judgments, about $3, against about 1,640 at 2 shared claims. Claim duplicate flags
+are now scored and banded by the evidence behind the join: the mean number of specific claims
+shared by the pairs judged the same (1 is low, 2 medium, 3 or more high), so a join on one
+shared claim reaches the operator as low.
+
+Read the gain with care. Most of it comes from the candidate rule, and the lenient prompt's
+examples of different names for one feature are the vocabulary of cluster C, which favours it
+on recall. The setting was chosen on the sets it is reported on, so expect less on new data.
+Any held out set must include honest reviews of one property that mention the same features.
+The signal finds about four to five in ten rewritten pairs here; it is a partial signal whose
+joins still go to a person.
 
 Known behaviour, visible in the report: the rating burst rule is timing only, so a genuine
 review posted within four days of a planted cluster is flagged with it. That is the Module

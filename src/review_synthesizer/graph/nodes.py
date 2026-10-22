@@ -139,7 +139,7 @@ def claim_duplicates(state: BriefState, *, client: ModelClient) -> dict[str, Any
             judgments.append(result)
     return {
         "claim_judgments": judgments,
-        "claim_flags": claim_flags(reviews, judgments, client.config.small),
+        "claim_flags": claim_flags(reviews, judgments, client.config.small, claims),
         "notes": notes,
     }
 

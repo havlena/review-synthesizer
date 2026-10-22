@@ -78,23 +78,27 @@ def test_pairs_joined_by_detector_duplicate_signals_are_skipped_but_not_bursts()
     assert pairs == [(1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
 
 
-def test_chained_pairs_form_one_flag_scored_by_the_share_judged_same():
+def test_chained_pairs_form_one_flag_scored_by_the_shared_claims_behind_the_joins():
     reviews = [mk(1), mk(2), mk(3), mk(4)]
+    claims = {1: [HOT_TUB, ROLLS, FEE], 2: [HOT_TUB, ROLLS, FEE], 3: [HOT_TUB], 4: []}
     judgments = [
         PairJudgment(1, 2, True, "Both describe the late rooftop hot tub and the rolls."),
         PairJudgment(2, 3, True, "Same hot tub and rolls."),
         PairJudgment(1, 3, False, "Review 3 does not mention the hot tub hours."),
         PairJudgment(1, 4, False, "Different claims."),
     ]
-    flags = claim_flags(reviews, judgments, "small-model")
+    flags = claim_flags(reviews, judgments, "small-model", claims)
     assert len(flags) == 1
     f = flags[0]
     assert f.signal_type == "claim_duplicate"
     assert f.review_ids == [1, 2, 3]
+    # Pairs judged the same share 3 and 1 specific claims: mean 2, medium.
+    assert f.details["mean_shared_specific"] == 2
     assert f.score == pytest.approx(2 / 3) and f.confidence == "medium"
     assert f.rationale.startswith(
         "3 reviews make the same specific claims in different words: 2 of 3 pairs"
     )
+    assert "sharing 2.0 specific claims on average" in f.rationale
     assert "Reviews 1 and 2: Both describe the late rooftop hot tub" in f.rationale
     assert f.details["model"] == "small-model"
     assert [(j["a"], j["b"]) for j in f.details["judgments"]] == [(1, 2), (2, 3), (1, 3)]
@@ -102,7 +106,22 @@ def test_chained_pairs_form_one_flag_scored_by_the_share_judged_same():
 
 def test_no_pair_judged_same_means_no_flag():
     reviews = [mk(1), mk(2)]
-    assert claim_flags(reviews, [PairJudgment(1, 2, False, "Different.")], "m") == []
+    assert claim_flags(reviews, [PairJudgment(1, 2, False, "Different.")], "m", {}) == []
+
+
+@pytest.mark.parametrize(
+    ("claims_b", "score", "band"),
+    [
+        ([HOT_TUB], 1 / 3, "low"),
+        ([HOT_TUB, ROLLS], 2 / 3, "medium"),
+        ([HOT_TUB, ROLLS, FEE], 1.0, "high"),
+    ],
+)
+def test_a_pair_of_two_is_banded_by_its_shared_claims(claims_b, score, band):
+    reviews = [mk(1), mk(2)]
+    claims = {1: [HOT_TUB, ROLLS, FEE], 2: claims_b}
+    (f,) = claim_flags(reviews, [PairJudgment(1, 2, True, "Same.")], "m", claims)
+    assert f.score == pytest.approx(score) and f.confidence == band
 
 
 def verdict_for(same_pairs):

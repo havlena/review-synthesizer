@@ -11,12 +11,15 @@ come from ANTHROPIC_MODEL and ANTHROPIC_MODEL_SMALL, with the defaults in graph/
 --min-shared (1 or 2) is the candidate rule: specific claims two reviews must share by
 aspect and polarity. --judge (strict or lenient) picks the judge prompt. With one value
 each, every run extracts and judges for that one setting and the report is
-claim_duplicates (or --name). With several, the script runs the ablation: each run extracts
-once, saves the extraction under data/interim/claims/ (git ignored), judges the union of
-candidates with every prompt, and scores every cell on that same extraction; the report is
+claim_duplicates (or --name). With several, the script runs the ablation on two sets: the
+paraphrase set for recall, and the genuine Harbor Light reviews (--control) as honest pairs
+of one property where every join is wrong. Each run extracts once per set, saves the
+extractions under data/interim/claims/ (git ignored), judges the union of candidates with
+every prompt, and scores every cell on that same extraction; the report is
 claim_duplicates_ablation (or --name).
 
-Inputs: tests/fixtures/paraphrase_set.json (or --set).
+Inputs: tests/fixtures/paraphrase_set.json (or --set); tests/fixtures/harbor_light_inn.json
+(or --control), reviews whose intent is genuine.
 Outputs: evals/results/<name>.md and .json (or --out-dir), written only if every run
 completed. If any extraction or judgment call fails, the script prints the failures, writes
 no report and exits with status 2.
@@ -25,6 +28,7 @@ no report and exits with status 2.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 from importlib.metadata import version
@@ -32,8 +36,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from review_synthesizer.authenticity import Review
 from review_synthesizer.evals import claims, claims_ablation
-from review_synthesizer.evals.similarity import load_paraphrase_set
+from review_synthesizer.evals.similarity import LabelledReview, load_paraphrase_set
 from review_synthesizer.graph import AnthropicModelClient, ModelConfig
 from review_synthesizer.graph.config import MAX_PARALLEL_CALLS, MAX_TOKENS
 from review_synthesizer.graph.duplicates import JUDGE_STYLE, MIN_SHARED_SPECIFIC
@@ -62,20 +67,56 @@ LIMITS = [
 
 ABLATION_LIMITS = [
     (
-        "The setting is chosen on the same 24 reviews it is reported on. There is no held "
-        "out set, so the chosen cell's figures are optimistic for new data."
+        "The setting is chosen on the same reviews it is reported on, both sets. There is no "
+        "held out set, so the chosen cell's figures are optimistic for new data."
+    ),
+    (
+        "Any future held out set must include honest reviews of one property that mention the "
+        "same features. Negatives on different topics, as in the first version of this "
+        "ablation, cannot show the failure that matters most."
     ),
     (
         "The lenient prompt's examples of different names for one feature (a deck, a terrace, "
         "a balcony; a massage, a spa treatment, a wellness centre) are the vocabulary of "
-        "cluster C in this set, which favours the lenient prompt here."
+        "cluster C in the paraphrase set, which favours the lenient prompt on recall."
+    ),
+    (
+        "The control is one fictional property with 20 short reviews written by the author of "
+        "the detector."
     ),
     *LIMITS[1:],
+]
+
+ABLATION_HISTORY = [
     (
-        "Per cell cost is estimated from measured tokens: judgments ran once on the union of "
-        "candidates, not once per cell."
+        "First version (2026-10-22, commit 61ab971): paraphrase set only. Its negatives were "
+        "in sample and on different topics. Mean paraphrase recall 0.222 (2 shared, strict), "
+        "0.222 (2 shared, lenient), 0.389 (1 shared, strict), 0.417 (1 shared, lenient); no "
+        "wrong join in any cell. The rule then (no wrong join, highest recall) chose 1 shared "
+        "claim with the lenient judge, and it became the product default."
+    ),
+    (
+        "The Harbor Light end to end run at that default (commit 8173b18) joined genuine "
+        "reviews 10 and 16 on one shared claim, the waterfront location. The pair had been "
+        "hidden in earlier runs because embedding similarity joined it first and the graph "
+        "does not judge pairs the detector already joined."
+    ),
+    (
+        "This version adds the 20 genuine Harbor Light reviews as a control set of honest "
+        "pairs of one property, every join wrong, and a rule that disqualifies any cell with a "
+        "wrong join on either set."
     ),
 ]
+
+
+def harbor_control(path: Path) -> list[LabelledReview]:
+    """The genuine Harbor Light reviews (the fixture's intent labels), as a negatives only set."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return [
+        LabelledReview(Review.from_dict(r), None)
+        for r in data["reviews"]
+        if r.get("intent") == "genuine"
+    ]
 
 
 def settings(config: ModelConfig) -> dict[str, str]:
@@ -120,6 +161,9 @@ def print_tokens(tokens: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--set", type=Path, default=ROOT / "tests/fixtures/paraphrase_set.json")
+    parser.add_argument(
+        "--control", type=Path, default=ROOT / "tests/fixtures/harbor_light_inn.json"
+    )
     parser.add_argument("--runs", type=int, default=2)
     parser.add_argument(
         "--min-shared", type=int, nargs="+", choices=[1, 2], default=[MIN_SHARED_SPECIFIC]
@@ -149,12 +193,14 @@ def main() -> int:
         if grid:
             report = claims_ablation.evaluate_grid(
                 rows,
+                harbor_control(args.control),
                 lambda: AnthropicModelClient(config),
                 runs=args.runs,
                 min_shared=min_shared,
                 judges=judges,
                 save_dir=args.extraction_dir,
                 settings=settings(config),
+                history=ABLATION_HISTORY,
                 limits=ABLATION_LIMITS,
             )
         else:
@@ -181,12 +227,13 @@ def main() -> int:
         ]
         for name in report.cells:
             for r in report.runs:
-                c = r["cells"][name]
+                c, k = r["cells"][name], r["control_cells"][name]
                 print(
                     f"{name:<20} run {r['run']}: candidates {c['candidates']['true']} true, "
                     f"{c['candidates']['false']} non duplicate; judged same "
                     f"{c['judged']['true_positive']} true, {c['judged']['false_positive']} wrong; "
-                    f"recall {c['judged']['recall']:.3f}"
+                    f"recall {c['judged']['recall']:.3f}; control {k['candidates']} candidates, "
+                    f"{len(k['wrong_joins'])} wrong"
                 )
         print(f"decision: {report.decision['chosen']}. {report.decision['reason']}")
     else:

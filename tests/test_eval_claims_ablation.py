@@ -1,5 +1,5 @@
-"""The ablation harness, offline: one extraction per run, every cell scored on it, and the
-fixed decision rule."""
+"""The ablation harness, offline: one extraction per run per set, every cell scored on it,
+the same property control, and the fixed decision rule."""
 
 import json
 import re
@@ -9,9 +9,10 @@ import pytest
 
 pytest.importorskip("langgraph")
 
+from review_synthesizer.authenticity import Review
 from review_synthesizer.evals.claims import CallFailure
 from review_synthesizer.evals.claims_ablation import choose_default, evaluate_grid
-from review_synthesizer.evals.similarity import load_paraphrase_set
+from review_synthesizer.evals.similarity import LabelledReview, load_paraphrase_set
 from review_synthesizer.graph import ModelConfig
 from review_synthesizer.graph.prompts import JUDGE_SYSTEM_LENIENT, JUDGE_SYSTEM_STRICT
 from review_synthesizer.graph.schemas import ClaimOut, ExtractedClaims, PairVerdict
@@ -19,23 +20,34 @@ from review_synthesizer.graph.schemas import ClaimOut, ExtractedClaims, PairVerd
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
+def control_rows():
+    data = json.loads((FIXTURES / "harbor_light_inn.json").read_text(encoding="utf-8"))
+    return [
+        LabelledReview(Review.from_dict(r), None)
+        for r in data["reviews"]
+        if r["intent"] == "genuine"
+    ]
+
+
 def claim(aspect):
     return ClaimOut(aspect=aspect, polarity="negative", specific=True, statement=aspect)
 
 
 def extraction(rid):
-    """C shares two specific claims, B and the pair G1, G2 share one."""
+    """C shares two specific claims; B, the pair G1 G2, and genuine Harbor 1 and 2 share one."""
     if rid[0] == "C":
         return [claim("amenities"), claim("breakfast")]
     if rid[0] == "B":
         return [claim("service")]
     if rid in ("G1", "G2"):
         return [claim("parking")]
+    if rid in ("1", "2"):
+        return [claim("location")]
     return []
 
 
 class PromptAwareFake:
-    """Strict judge: only C pairs are the same. Lenient: B and C pairs, and G1-G2 (wrong)."""
+    """Strict judge: B and C pairs are the same. Lenient: also G1-G2 and Harbor 1-2 (wrong)."""
 
     config = ModelConfig("fake-main", "fake-small")
 
@@ -51,16 +63,15 @@ class PromptAwareFake:
         if schema is ExtractedClaims:
             return ExtractedClaims(claims=extraction(ids[0]))
         a, b = ids
-        groups = {a[0], b[0]}
-        if system == JUDGE_SYSTEM_STRICT:
-            same = groups == {"C"}
+        same = a[0] == b[0] and a[0] in "BC"
+        if system == JUDGE_SYSTEM_LENIENT:
+            same = same or {a, b} in ({"G1", "G2"}, {"1", "2"})
         else:
-            assert system == JUDGE_SYSTEM_LENIENT
-            same = groups in ({"C"}, {"B"}) and a[0] != "G" or {a, b} == {"G1", "G2"}
+            assert system == JUDGE_SYSTEM_STRICT
         return PairVerdict(same_claims=same, reason=f"{a} and {b}.")
 
 
-def test_one_extraction_per_run_and_every_cell_scored_on_it(tmp_path):
+def test_every_cell_scored_on_one_extraction_per_set_and_the_control_decides(tmp_path):
     rows, _ = load_paraphrase_set(FIXTURES / "paraphrase_set.json")
     clients = []
 
@@ -68,95 +79,76 @@ def test_one_extraction_per_run_and_every_cell_scored_on_it(tmp_path):
         clients.append(PromptAwareFake())
         return clients[-1]
 
-    report = evaluate_grid(rows, make, runs=2, save_dir=tmp_path, current=(2, "strict"))
+    report = evaluate_grid(rows, control_rows(), make, runs=2, save_dir=tmp_path)
 
     for c in clients:
-        extractions = [x for x in c.calls if x[0] == "ExtractedClaims"]
-        judged = [x for x in c.calls if x[0] == "PairVerdict"]
-        assert len(extractions) == 24
-        assert len(judged) == 2 * 13  # union at 1 shared (6 B, 6 C, G1-G2), each prompt once
-    assert report.cells == [
-        "2 shared, strict",
-        "2 shared, lenient",
-        "1 shared, strict",
-        "1 shared, lenient",
+        assert sum(x[0] == "ExtractedClaims" for x in c.calls) == 24 + 20
+        # Union at 1 shared: paraphrase 13 (6 B, 6 C, G1-G2), control 1 (1-2); each prompt once.
+        assert sum(x[0] == "PairVerdict" for x in c.calls) == 2 * (13 + 1)
+    assert report.control_pairs == 190
+
+    r1 = report.runs[0]
+    assert r1["control_cells"]["1 shared, lenient"]["wrong_joins"] == [
+        {"pair": "1-2", "reason": "1 and 2."}
     ]
+    assert r1["control_cells"]["1 shared, strict"] == {"candidates": 1, "wrong_joins": []}
+    s = report.summary
+    assert s["1 shared, lenient"]["control_wrong_joins_per_run"] == [1, 1]
+    assert s["1 shared, strict"]["mean_recall"] == pytest.approx(12 / 18)
 
-    r1 = report.runs[0]["cells"]
-    assert r1["2 shared, strict"]["candidates"] == {"total": 6, "true": 6, "false": 0}
-    assert r1["1 shared, strict"]["candidates"] == {"total": 13, "true": 12, "false": 1}
-    assert r1["1 shared, lenient"]["judged"]["true_positive"] == 12
-    assert r1["1 shared, lenient"]["wrong_joins"] == [
-        {"pair": "G1-G2", "clusters": "distinct / distinct", "reason": "G1 and G2."}
-    ]
-    assert report.summary["1 shared, lenient"]["wrong_joins_per_run"] == [1, 1]
-    assert report.summary["2 shared, strict"]["lost_per_run"] == [(12, 0), (12, 0)]
+    d = report.decision
+    assert d["qualifying"] == ["2 shared, strict", "2 shared, lenient", "1 shared, strict"]
+    assert (d["chosen"], d["min_shared"], d["judge"]) == ("1 shared, strict", 1, "strict")
 
-    # 2 shared strict and 1 shared strict tie at 6 of 18; the stricter one is the default.
-    assert report.decision["chosen"] == "2 shared, strict"
-    assert report.decision["changed"] is False
-
-    saved = json.loads((tmp_path / "extraction_run1.json").read_text(encoding="utf-8"))
-    assert saved["model"] == "fake-main" and saved["claims"]["C1"][0]["aspect"] == "amenities"
+    assert (tmp_path / "control_extraction_run2.json").exists()
     md = report.to_markdown()
-    assert "| 1 shared, lenient | 1 | 12 / 1 | 12 / 1 |" in md
-    assert "- 1 shared, lenient, run 1: G1-G2 (distinct / distinct). G1 and G2." in md
-    assert "Judgments at 500 reviews" in md
+    assert "- 1 shared, lenient, run 1, Harbor Light control: 1-2. 1 and 2." in md
+    assert "| 1 shared, lenient | 1 / 1, 1 / 1 | no |" in md
+    assert "Zero wrong joins on 190 honest pairs of one property" in md
+    assert "Harbor Light share" in md
     report.to_json()
 
 
-def summary(**cells):
+def summary(*cells):
+    names = ["2 shared, strict", "2 shared, lenient", "1 shared, strict", "1 shared, lenient"]
     return {
-        name: {"wrong_joins_per_run": wrong, "mean_recall": recall}
-        for name, (wrong, recall) in cells.items()
+        n: {"wrong_joins_per_run": w, "control_wrong_joins_per_run": c, "mean_recall": r}
+        for n, (w, c, r) in zip(names, cells, strict=True)
     }
 
 
 CELLS = [(2, "strict"), (2, "lenient"), (1, "strict"), (1, "lenient")]
-NAMES = ["2 shared, strict", "2 shared, lenient", "1 shared, strict", "1 shared, lenient"]
 
 
-def test_rule_picks_highest_recall_without_a_wrong_join():
+def test_rule_ties_go_to_the_stricter_setting():
     s = summary(
-        **dict(zip(NAMES, [([0, 0], 0.25), ([0, 0], 0.40), ([0, 0], 0.60), ([1, 0], 0.90)]))
+        ([0, 0], [0, 0], 0.3), ([0, 0], [0, 0], 0.3), ([0, 0], [1, 0], 0.6), ([0, 0], [0, 2], 0.7)
     )
-    d = choose_default(s, CELLS, (2, "strict"))
-    assert (d["chosen"], d["changed"], d["min_shared"], d["judge"]) == (
-        "1 shared, strict",
-        True,
-        1,
-        "strict",
-    )
+    d = choose_default(s, CELLS)
+    assert d["chosen"] == "2 shared, strict" and "stricter" in d["reason"]
 
 
-def test_rule_breaks_ties_toward_the_stricter_setting():
+def test_a_control_wrong_join_in_one_run_disqualifies():
     s = summary(
-        **dict(zip(NAMES, [([0, 0], 0.25), ([0, 0], 0.50), ([0, 0], 0.50), ([0, 0], 0.50)]))
+        ([0, 0], [0, 0], 0.2), ([0, 0], [0, 1], 0.5), ([0, 0], [0, 0], 0.4), ([0, 0], [0, 0], 0.4)
     )
-    d = choose_default(s, CELLS, (2, "strict"))
-    assert d["chosen"] == "2 shared, lenient"
-    assert "stricter" in d["reason"]
+    d = choose_default(s, CELLS)
+    assert d["chosen"] == "1 shared, strict"
+    assert d["qualifying"] == ["2 shared, strict", "1 shared, strict", "1 shared, lenient"]
 
 
-def test_a_current_default_with_a_wrong_join_is_replaced_by_a_clean_cell():
+def test_no_qualifying_cell_means_no_change():
     s = summary(
-        **dict(zip(NAMES, [([0, 0], 0.25), ([0, 0], 0.25), ([0, 0], 0.25), ([1, 0], 0.90)]))
+        ([1, 0], [0, 0], 0.2), ([0, 0], [0, 1], 0.5), ([0, 1], [0, 0], 0.4), ([2, 2], [3, 3], 0.9)
     )
-    d = choose_default(s, CELLS, (1, "lenient"))
-    assert (d["chosen"], d["changed"]) == ("2 shared, strict", True)
+    d = choose_default(s, CELLS)
+    assert d["chosen"] is None and d["changed"] is False
+    assert "design change, not a setting" in d["reason"]
 
 
-def test_rule_keeps_the_default_when_nothing_beats_it_cleanly():
-    s = summary(
-        **dict(zip(NAMES, [([0, 0], 0.25), ([0, 1], 0.40), ([0, 0], 0.25), ([2, 2], 0.90)]))
-    )
-    d = choose_default(s, CELLS, (2, "strict"))
-    assert (d["chosen"], d["changed"]) == ("2 shared, strict", False)
-
-
-def test_a_failed_judgment_stops_the_ablation():
+def test_a_failed_call_stops_the_ablation():
     rows, _ = load_paraphrase_set(FIXTURES / "paraphrase_set.json")
     with pytest.raises(CallFailure) as err:
-        evaluate_grid(rows, lambda: PromptAwareFake(fail_on="C3"), runs=1)
+        evaluate_grid(rows, control_rows(), lambda: PromptAwareFake(fail_on="7"), runs=1)
     assert err.value.stage == "claim extraction"
     assert "ConnectionError: reset by peer" in err.value.failures[0]

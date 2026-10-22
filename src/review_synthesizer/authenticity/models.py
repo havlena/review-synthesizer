@@ -45,9 +45,9 @@ class Review:
 def confidence_band(score: float) -> Confidence:
     """Map a 0 to 1 score to the three bands used by the database schema.
 
-    For scores that are not a measurement against a threshold: the rating burst (count over
-    twice the minimum size) and the claim duplicate share of pairs judged the same. Signals
-    with a threshold use :func:`margin_band`.
+    For scores that are not a measurement against a threshold, which today means the rating
+    burst (count over twice the minimum size). Signals with a threshold use
+    :func:`margin_band`; claim duplicates band by shared claims (``graph.duplicates``).
     """
     if score >= 0.75:
         return "high"

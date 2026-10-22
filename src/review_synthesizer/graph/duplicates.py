@@ -22,23 +22,26 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Mapping, Sequence
 
-from review_synthesizer.authenticity import DetectionResult, Flag, Review, ReviewId, confidence_band
+from review_synthesizer.authenticity import DetectionResult, Flag, Review, ReviewId
 from review_synthesizer.authenticity.clustering import union_clusters
+from review_synthesizer.authenticity.models import Confidence
 
 from .state import Claim, PairJudgment
 
 MIN_SHARED_SPECIFIC = 1
-"""Specific claims (same aspect and polarity) two reviews must share to be judged. Chosen by
-the fixed rule in evals/results/claim_duplicates_ablation.md (October 2026): at 1 with the
-lenient judge, mean recall 0.417 and no wrong join in two runs, against 0.222 at 2 (the
-step 5 starting value). Chosen on the set it is reported on. Costs about seven times the
-judgments of 2 on that set; see the report's batch size projection."""
+"""Specific claims (same aspect and polarity) two reviews must share to be judged. Kept by the
+fixed rule in evals/results/claim_duplicates_ablation.md (October 2026, with the Harbor Light
+same property control): no wrong join on either set in two runs, mean paraphrase recall
+0.472 with the lenient judge, against 0.333 at 2. Chosen on the sets it is reported on. On
+honest reviews of one property 18% of pairs become candidates (1.3% at 2), about 22,650
+judgments on a batch of 500."""
 
 JUDGE_STYLE = "lenient"
-"""Which judge prompt the product uses (``prompts.JUDGE_SYSTEMS``). Chosen with
-``MIN_SHARED_SPECIFIC`` by the same ablation; at 1 shared claim the lenient prompt led the
-strict one by two pairs in run 1 and trailed by one in run 2, so the margin is within run to
-run variation. Its examples are the vocabulary of one cluster of that set."""
+"""Which judge prompt the product uses (``prompts.JUDGE_SYSTEMS``). Kept with
+``MIN_SHARED_SPECIFIC`` by the same ablation (0.472 against 0.444 for strict). Not stable on
+borderline pairs: it joined genuine Harbor Light reviews 10 and 16 once in the end to end
+run and not in the ablation's two runs. Its examples are the vocabulary of one cluster of
+the paraphrase set."""
 
 DETECTOR_DUPLICATE_SIGNALS = ("duplicate_phrasing", "embedding_similarity")
 """Detector signals whose pairs are already joined, so the model is not asked about them."""
@@ -84,10 +87,31 @@ def candidate_pairs(
     return out
 
 
+def claim_band(mean_shared: float) -> Confidence:
+    """Band from the specific claims behind a join: 1 shared is low, 2 medium, 3 or more high.
+
+    One shared specific claim is weak evidence: honest guests of one property share one
+    readily (the Harbor Light run joined two genuine reviews on the location alone).
+    """
+    if mean_shared >= 3:
+        return "high"
+    if mean_shared >= 2:
+        return "medium"
+    return "low"
+
+
 def claim_flags(
-    reviews: Sequence[Review], judgments: Sequence[PairJudgment], model: str
+    reviews: Sequence[Review],
+    judgments: Sequence[PairJudgment],
+    model: str,
+    claims: Mapping[ReviewId, Sequence[Claim]],
 ) -> list[Flag]:
-    """One flag per group of reviews joined by pairs judged to make the same claims."""
+    """One flag per group of reviews joined by pairs judged to make the same claims.
+
+    Score and band rest on the evidence: the mean number of specific claims shared by the
+    pairs judged the same, banded by :func:`claim_band`; the score is that mean over 3,
+    capped at 1, to stay on the 0 to 1 scale of the other signals.
+    """
     index = {r.id: i for i, r in enumerate(reviews)}
     same = [j for j in judgments if j.same_claims]
     clusters = union_clusters(len(reviews), [(index[j.a], index[j.b], 1.0) for j in same])
@@ -99,25 +123,31 @@ def claim_flags(
         inside = [j for j in judgments if j.a in members and j.b in members]
         judged_same = [j for j in inside if j.same_claims]
         member_pairs = len(ids) * (len(ids) - 1) // 2
-        score = len(judged_same) / member_pairs
+        shared = [shared_specific(claims.get(j.a, []), claims.get(j.b, [])) for j in judged_same]
+        mean_shared = sum(shared) / len(shared)
         example = judged_same[0]
         flags.append(
             Flag(
                 signal_type="claim_duplicate",
                 review_ids=ids,
-                score=score,
-                # A share of pairs, not a measurement against a threshold: raw score bands.
-                confidence=confidence_band(score),
+                score=min(mean_shared / 3, 1.0),
+                confidence=claim_band(mean_shared),
                 rationale=(
                     f"{len(ids)} reviews make the same specific claims in different words: "
                     f"{len(judged_same)} of {member_pairs} pairs in the group were judged to "
-                    f"describe the same things, none of them already joined by the "
-                    f"detector's wording or meaning signals. Reviews {example.a} and {example.b}: "
-                    f"{example.reason}"
+                    f"describe the same things, sharing {mean_shared:.1f} specific "
+                    f"claim{'' if mean_shared == 1 else 's'} on average, none of them already "
+                    f"joined by the detector's wording or meaning signals. Reviews {example.a} "
+                    f"and {example.b}: {example.reason}"
                 ),
                 details={
                     "pairs_judged_same": len(judged_same),
                     "member_pairs": member_pairs,
+                    "mean_shared_specific": mean_shared,
+                    "shared_specific_per_pair": [
+                        {"a": j.a, "b": j.b, "shared": s}
+                        for j, s in zip(judged_same, shared, strict=True)
+                    ],
                     "min_shared_specific": MIN_SHARED_SPECIFIC,
                     "model": model,
                     "judgments": [

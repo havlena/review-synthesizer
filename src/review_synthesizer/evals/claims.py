@@ -193,7 +193,7 @@ def run_once(
     judged = judge_pairs(rows, claims, candidates, client, judge)
     index = {r.id: i for i, r in enumerate(reviews)}
     grouped: set[Pair] = set()
-    for f in claim_flags(reviews, list(judged.values()), client.config.small):
+    for f in claim_flags(reviews, list(judged.values()), client.config.small, claims):
         grouped.update(combinations(sorted(index[i] for i in f.review_ids), 2))
     return RunResult(
         extracted=claims,
