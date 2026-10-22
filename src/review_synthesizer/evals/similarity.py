@@ -120,19 +120,19 @@ class SimilarityReport:
         lines = [
             "# Duplicate signals: word overlap versus embedding similarity",
             "",
-            f"Generated {self.created_at} on Python {self.python_version}. Embedding model: "
-            f"`{self.model}`.",
+            (f"Generated {self.created_at} on Python {self.python_version}. Embedding model: "
+            f"`{self.model}`."),
             "",
-            f"Set: {self.reviews} reviews, {len(self.clusters)} labelled clusters of rewritten "
+            (f"Set: {self.reviews} reviews, {len(self.clusters)} labelled clusters of rewritten "
             f"duplicates ({self.truth_pairs} true duplicate pairs) and {self.negative_pairs} "
-            "pairs that should not be joined. Synthetic; see tests/fixtures/paraphrase_set.json.",
+            "pairs that should not be joined. Synthetic; see tests/fixtures/paraphrase_set.json."),
             "",
             "## Pair level results",
             "",
             "| Signal | Threshold | Pairs joined | Correct | Wrong | Missed | Precision | Recall | F1 |",
             "|---|---|---|---|---|---|---|---|---|",
-            f"| Word overlap (Jaccard) | {j.threshold:.2f} | {j.joined} | {j.true_positive} | "
-            f"{j.false_positive} | {j.false_negative} | {j.precision:.3f} | {j.recall:.3f} | {j.f1:.3f} |",
+            (f"| Word overlap (Jaccard) | {j.threshold:.2f} | {j.joined} | {j.true_positive} | "
+            f"{j.false_positive} | {j.false_negative} | {j.precision:.3f} | {j.recall:.3f} | {j.f1:.3f} |"),
         ]
         for m in self.embedding_sweep:
             mark = " **(default)**" if abs(m.threshold - self.chosen_threshold) < 1e-9 else ""
@@ -150,8 +150,8 @@ class SimilarityReport:
             f"| True duplicates ({self.truth_pairs}) | {w['min']:.3f} | {w['mean']:.3f} | | {w['max']:.3f} |",
             f"| Everything else ({self.negative_pairs}) | | {ng['mean']:.3f} | {ng['p95']:.3f} | {ng['max']:.3f} |",
             "",
-            "A threshold that separates the two exists only if the duplicates' minimum is above the "
-            f"others' maximum: {'yes' if self.separable else 'no'} on this set.",
+            ("A threshold that separates the two exists only if the duplicates' minimum is above the "
+            f"others' maximum: {'yes' if self.separable else 'no'} on this set."),
             "",
             "| Cluster | Written as | Pairs | Min | Mean | Max |",
             "|---|---|---|---|---|---|",
@@ -170,9 +170,9 @@ class SimilarityReport:
             f"- Caught by word overlap only: {o['jaccard_only']}",
             f"- Missed by both: {o['neither']}",
             "",
-            f"Nearest non duplicate pair: {self.nearest_negative[0]} and {self.nearest_negative[1]} "
+            (f"Nearest non duplicate pair: {self.nearest_negative[0]} and {self.nearest_negative[1]} "
             f"at cosine {self.nearest_negative[2]:.3f}. The gap between that and the threshold is "
-            "the margin against false positives on this set.",
+            "the margin against false positives on this set."),
             "",
         ]
         if self.false_positive_pairs:
@@ -190,18 +190,18 @@ class SimilarityReport:
         lines += [
             "## Read this before quoting the numbers",
             "",
-            "- Twenty four synthetic reviews written for this project. The clusters were written "
+            ("- Twenty four synthetic reviews written for this project. The clusters were written "
             "to share meaning and avoid shared words, which is the case word overlap is known to "
             "miss; the distinct reviews were written to share topics without sharing claims. The "
-            "figures show the mechanism and the chosen threshold's margin, not field accuracy.",
-            "- Embedding similarity joins reviews that say the same thing. Two honest guests can "
+            "figures show the mechanism and the chosen threshold's margin, not field accuracy."),
+            ("- Embedding similarity joins reviews that say the same thing. Two honest guests can "
             "say the same thing. The signal is one input to a human decision, never a verdict, "
             "and the Module 6 false positive risk (a cluster of honest praise after a good "
-            "weekend) is exactly what the nearest non duplicate figure watches.",
-            "- If the duplicates' minimum sits below the others' maximum, no cosine threshold on "
+            "weekend) is exactly what the nearest non duplicate figure watches."),
+            ("- If the duplicates' minimum sits below the others' maximum, no cosine threshold on "
             "this model separates rewritten fakes from genuine reviews on the same topic. Cosine "
             "similarity measures wording and topic; it does not compare the claims being made. "
-            "Claim level comparison is the job of the language model step.",
+            "Claim level comparison is the job of the language model step."),
             "",
         ]
         return "\n".join(lines)
@@ -302,6 +302,6 @@ def evaluate(
         negatives=negatives,
         per_cluster=per_cluster,
         separable=separable,
-        created_at=_dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+        created_at=_dt.datetime.now(_dt.UTC).isoformat(timespec="seconds"),
         python_version=platform.python_version(),
     )

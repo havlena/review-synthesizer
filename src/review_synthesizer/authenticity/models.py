@@ -28,7 +28,7 @@ class Review:
     author: str | None = None
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Review":
+    def from_dict(cls, d: dict[str, Any]) -> Review:
         posted = d.get("posted", d.get("date"))
         if isinstance(posted, str):
             posted = date.fromisoformat(posted)

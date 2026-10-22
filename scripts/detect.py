@@ -15,7 +15,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import sys
 from dataclasses import asdict
 from pathlib import Path
 

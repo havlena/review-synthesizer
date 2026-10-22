@@ -138,7 +138,7 @@ class DeceptionClassifier:
     def is_fitted(self) -> bool:
         return hasattr(self._model, "coef_")
 
-    def fit(self, texts: Sequence[str], labels: Iterable[Any]) -> "DeceptionClassifier":
+    def fit(self, texts: Sequence[str], labels: Iterable[Any]) -> DeceptionClassifier:
         y = to_binary(labels)
         if len(y) != len(texts):
             raise ValueError("texts and labels differ in length")
@@ -147,10 +147,10 @@ class DeceptionClassifier:
         self.pipeline.fit(list(texts), y)
         self.meta.update(
             {
-                "n_train": int(len(y)),
+                "n_train": len(y),
                 "n_deceptive": int(y.sum()),
-                "vocabulary_size": int(len(self._vectorizer.vocabulary_)),
-                "trained_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+                "vocabulary_size": len(self._vectorizer.vocabulary_),
+                "trained_at": _dt.datetime.now(_dt.UTC).isoformat(timespec="seconds"),
                 "sklearn_version": sklearn.__version__,
             }
         )
@@ -200,7 +200,7 @@ class DeceptionClassifier:
         return path
 
     @classmethod
-    def load(cls, path: str | Path) -> "DeceptionClassifier":
+    def load(cls, path: str | Path) -> DeceptionClassifier:
         obj = joblib.load(path)
         if obj.get("format") != 1:
             raise ValueError(f"unsupported model file format: {obj.get('format')!r}")

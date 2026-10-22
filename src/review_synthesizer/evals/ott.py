@@ -146,12 +146,12 @@ class EvalReport:
         lines = [
             "# Deceptive language classifier: evaluation on the Ott corpus",
             "",
-            f"Generated {self.created_at} with scikit-learn {self.sklearn_version} on "
-            f"Python {self.python_version}. Protocol: {self.protocol}.",
+            (f"Generated {self.created_at} with scikit-learn {self.sklearn_version} on "
+            f"Python {self.python_version}. Protocol: {self.protocol}."),
             "",
-            f"Corpus: {c['reviews']} reviews, {c['deceptive']} deceptive and {c['truthful']} "
+            (f"Corpus: {c['reviews']} reviews, {c['deceptive']} deceptive and {c['truthful']} "
             f"truthful, {c['hotels']} hotels, {c['folds']} folds. "
-            f"Folds are hotel disjoint: {'yes' if self.hotel_disjoint else 'NO'}.",
+            f"Folds are hotel disjoint: {'yes' if self.hotel_disjoint else 'NO'}."),
             "",
             "Model: TF-IDF over unigrams and bigrams, logistic regression. Parameters: "
             + ", ".join(f"{k}={v}" for k, v in self.params.items())
@@ -179,8 +179,8 @@ class EvalReport:
             "",
             f"## Conservative operating point (flag only when p ≥ {self.threshold})",
             "",
-            "This is how the signal is used in detection. Precision is what matters to an "
-            "operator (a flag should be right); recall says how much slips through.",
+            ("This is how the signal is used in detection. Precision is what matters to an "
+            "operator (a flag should be right); recall says how much slips through."),
             "",
             "| Fold | Flagged | Precision | Recall |",
             "|---|---|---|---|",
@@ -214,15 +214,15 @@ class EvalReport:
         lines += [
             "## Read this before quoting the numbers",
             "",
-            "- The deceptive reviews were written by paid crowd workers between 2011 and 2013 "
+            ("- The deceptive reviews were written by paid crowd workers between 2011 and 2013 "
             "for 20 large Chicago hotels, in English. The model learns that style. Coordinated "
             "campaigns, paraphrased duplicates and reviews written by people who did stay are "
-            "different problems, covered by the other signals.",
-            "- Hotel disjoint folds stop the model from memorising hotel names, but all 20 "
+            "different problems, covered by the other signals."),
+            ("- Hotel disjoint folds stop the model from memorising hotel names, but all 20 "
             "hotels are in one city and one market segment. Expect lower figures on independent "
-            "lodging in a different region until the model is retrained on data from it.",
-            "- The corpus is CC BY-NC-SA 3.0. A model trained on it is for research and "
-            "demonstration; see docs/data.md.",
+            "lodging in a different region until the model is retrained on data from it."),
+            ("- The corpus is CC BY-NC-SA 3.0. A model trained on it is for research and "
+            "demonstration; see docs/data.md."),
             "",
         ]
         return "\n".join(lines)
@@ -319,7 +319,7 @@ def evaluate(
         mean=mean,
         std=std,
         top_terms=top,
-        created_at=_dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+        created_at=_dt.datetime.now(_dt.UTC).isoformat(timespec="seconds"),
         sklearn_version=sklearn.__version__,
         python_version=platform.python_version(),
     )

@@ -5,8 +5,11 @@ from __future__ import annotations
 import re
 
 STOP_WORDS: frozenset[str] = frozenset(
-    "a an the and or but of to in on at for with is are was were be been it we our us "
-    "you your they them this that i my me so all".split()
+    [
+        "a", "an", "the", "and", "or", "but", "of", "to", "in", "on", "at", "for",
+        "with", "is", "are", "was", "were", "be", "been", "it", "we", "our", "us",
+        "you", "your", "they", "them", "this", "that", "i", "my", "me", "so", "all",
+    ]
 )
 _NON_ALNUM = re.compile(r"[^a-z0-9\s]")
 

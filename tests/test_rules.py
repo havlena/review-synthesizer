@@ -123,7 +123,9 @@ def test_burst_reports_one_entry_per_rating():
 
 
 def test_separate_bursts_of_the_same_rating_are_reported_separately():
-    reviews = [mk(i, 5, "2026-01-0%d" % i) for i in range(1, 4)] + [mk(i, 5, "2026-02-0%d" % (i - 3)) for i in range(4, 7)]
+    reviews = [mk(i, 5, f"2026-01-0{i}") for i in range(1, 4)] + [
+        mk(i, 5, f"2026-02-0{i - 3}") for i in range(4, 7)
+    ]
     bursts = find_rating_bursts(reviews)
     assert len(bursts) == 2
     assert set(bursts[0].review_ids) == {1, 2, 3} and set(bursts[1].review_ids) == {4, 5, 6}

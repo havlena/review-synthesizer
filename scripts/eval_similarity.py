@@ -57,9 +57,9 @@ def write_summary(out_dir: Path, comparison: list[dict], threshold: float, rows,
     lines = [
         "# Duplicate signals: embedding similarity across models",
         "",
-        f"Set: {len(rows)} synthetic reviews, {len(clusters)} labelled clusters of rewritten duplicates "
+        (f"Set: {len(rows)} synthetic reviews, {len(clusters)} labelled clusters of rewritten duplicates "
         f"(see tests/fixtures/paraphrase_set.json). Operating threshold {threshold:.2f}. "
-        "Per model detail, including the threshold sweep, is in the linked reports.",
+        "Per model detail, including the threshold sweep, is in the linked reports."),
         "",
         "| Model | Default | True pairs min / mean | Non duplicate max | Separable | At threshold: precision, recall, pairs | Best F1 (threshold) | Harbor Light planted min / nearest genuine | Report |",
         "|---|---|---|---|---|---|---|---|---|",
@@ -85,15 +85,15 @@ def write_summary(out_dir: Path, comparison: list[dict], threshold: float, rows,
         "",
         "## Reading",
         "",
-        "- Light rewrites (a few words changed, the capstone case) score high on every model and are caught "
-        "cleanly at the operating threshold. The embedding signal is a precise detector of those.",
-        "- Heavy paraphrases that keep the claims and change every word overlap honest reviews on the same "
+        ("- Light rewrites (a few words changed, the capstone case) score high on every model and are caught "
+        "cleanly at the operating threshold. The embedding signal is a precise detector of those."),
+        ("- Heavy paraphrases that keep the claims and change every word overlap honest reviews on the same "
         "topics on every model tested: the weakest true pair scores below the strongest non duplicate pair, "
-        "so no threshold separates them. Cosine similarity measures wording and topic, not the claims being made.",
-        "- Rewrites built on concrete specifics (named amenities) are the most detectable; generic praise or "
-        "generic complaint rewrites are the least, because generic claims look like generic honest reviews.",
-        "- The default model is the one with the best behaviour at the operating point: any recall with no "
-        "false positives on this set, and the widest margin between planted and genuine reviews on Harbor Light.",
+        "so no threshold separates them. Cosine similarity measures wording and topic, not the claims being made."),
+        ("- Rewrites built on concrete specifics (named amenities) are the most detectable; generic praise or "
+        "generic complaint rewrites are the least, because generic claims look like generic honest reviews."),
+        ("- The default model is the one with the best behaviour at the operating point: any recall with no "
+        "false positives on this set, and the widest margin between planted and genuine reviews on Harbor Light."),
         "- Claim level comparison of reviews is the job of the language model step, not of this signal.",
         "",
     ]
@@ -183,7 +183,7 @@ def main() -> int:
         print("\nmodel comparison (true pairs min / mean, negatives max, separable, best threshold, best F1)")
         for r in comparison:
             b = r["best"]
-            print(f"  {r['short']:<34} {r['true_min']:.3f} / {r['true_mean']:.3f}   {r['neg_max']:.3f}   {str(r['separable']):<5} {b['threshold']:.2f}  {b['f1']:.3f}")
+            print(f"  {r['short']:<34} {r['true_min']:.3f} / {r['true_mean']:.3f}   {r['neg_max']:.3f}   {r['separable']!s:<5} {b['threshold']:.2f}  {b['f1']:.3f}")
     print(f"summary: {summary_md}")
     return 0
 

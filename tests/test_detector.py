@@ -13,9 +13,9 @@ from review_synthesizer.authenticity import (
     embedding_flags,
     find_embedding_clusters,
     rating_summary,
+    rules,
     similar_pairs,
 )
-from review_synthesizer.authenticity import rules
 from review_synthesizer.authenticity.clustering import union_clusters
 from review_synthesizer.authenticity.embeddings import normalize_rows, similarity_matrix
 from review_synthesizer.evals import similarity

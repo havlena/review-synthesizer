@@ -8,13 +8,13 @@ import pytest
 
 pytest.importorskip("sklearn")
 
-from review_synthesizer.authenticity.classifier import (  # noqa: E402
+from review_synthesizer.authenticity.classifier import (
     DECEPTIVE,
     TRUTHFUL,
     DeceptionClassifier,
     to_binary,
 )
-from review_synthesizer.evals import ott  # noqa: E402
+from review_synthesizer.evals import ott
 
 TRUTHFUL_PHRASES = [
     "our room on the fourth floor faced the parking garage",
