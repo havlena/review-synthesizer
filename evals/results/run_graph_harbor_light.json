@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-10-22T23:47:11+00:00",
+  "created_at": "2026-10-23T00:23:18+00:00",
   "python_version": "3.12.10",
   "property": "Harbor Light Inn",
   "reviews": 25,
@@ -117,32 +117,198 @@
       "notes": [],
       "themes": [
         {
-          "name": "Cleanliness and mold issues",
-          "count": 11,
+          "name": "Clean rooms, some lapses",
+          "count": 10,
           "sentiment": "mixed"
         },
         {
-          "name": "Harbor views and location",
+          "name": "Comfortable beds, dated rooms",
+          "count": 9,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Walkable harbor location",
+          "count": 7,
+          "sentiment": "positive"
+        },
+        {
+          "name": "Friendly but inconsistent service",
+          "count": 7,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Uneven breakfast offering",
+          "count": 7,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Quiet rooms, thin walls",
+          "count": 7,
+          "sentiment": "mixed"
+        },
+        {
+          "name": "Tight parking",
+          "count": 2,
+          "sentiment": "negative"
+        },
+        {
+          "name": "Unreliable wifi",
+          "count": 2,
+          "sentiment": "negative"
+        }
+      ],
+      "scores": {
+        "cleanliness": 3,
+        "service": 3,
+        "breakfast": 2,
+        "room comfort": 3,
+        "value": 3,
+        "location": 5,
+        "noise": 3,
+        "parking": 2,
+        "wifi": 1,
+        "amenities": null
+      },
+      "actions": [
+        {
+          "title": "Add a room inspection checklist to housekeeping routines",
+          "impact": "High",
+          "effort": "Low"
+        },
+        {
+          "title": "Inspect and remediate mold and damp in affected bathrooms and carpets",
+          "impact": "High",
+          "effort": "Medium"
+        },
+        {
+          "title": "Expand breakfast with hot items and restock before 8 am",
+          "impact": "High",
+          "effort": "Medium"
+        },
+        {
+          "title": "Set front desk standards for phone answering and noise complaints",
+          "impact": "Medium",
+          "effort": "Low"
+        },
+        {
+          "title": "Service and replace faulty room heaters before the cold season",
+          "impact": "Medium",
+          "effort": "Medium"
+        }
+      ],
+      "usage": {
+        "claude-sonnet-5-5": {
+          "calls": 27,
+          "input_tokens": 35670,
+          "output_tokens": 7236
+        },
+        "claude-haiku-5-5": {
+          "calls": 2,
+          "input_tokens": 1706,
+          "output_tokens": 223
+        }
+      },
+      "usd": 0.1439821
+    },
+    {
+      "run": 2,
+      "run_id": "harbor-light-run2",
+      "rating": {
+        "total": 25,
+        "removed": 5,
+        "displayed": 3.8,
+        "verified": 3.5
+      },
+      "matches_golden": true,
+      "flags": [
+        {
+          "key": "duplicate_phrasing:21,22,23,24,25",
+          "signal_type": "duplicate_phrasing",
+          "score": 0.9166666666666666,
+          "confidence": "high",
+          "review_ids": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "rating_burst:21,22,23,24,25",
+          "signal_type": "rating_burst",
+          "score": 0.8333333333333334,
+          "confidence": "high",
+          "review_ids": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "embedding_similarity:21,22,23,24,25",
+          "signal_type": "embedding_similarity",
+          "score": 0.9964848849837722,
+          "confidence": "high",
+          "review_ids": [
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "deceptive_language:21",
+          "signal_type": "deceptive_language",
+          "score": 0.8187503917146796,
+          "confidence": "low",
+          "review_ids": [
+            21
+          ],
+          "decision": "confirmed"
+        },
+        {
+          "key": "deceptive_language:23",
+          "signal_type": "deceptive_language",
+          "score": 0.8215444291949836,
+          "confidence": "low",
+          "review_ids": [
+            23
+          ],
+          "decision": "confirmed"
+        }
+      ],
+      "genuine_flagged": [],
+      "notes": [],
+      "themes": [
+        {
+          "name": "Harbor location and views",
           "count": 9,
           "sentiment": "positive"
         },
         {
-          "name": "Front desk service varies",
+          "name": "Clean, spotless rooms",
           "count": 8,
-          "sentiment": "mixed"
+          "sentiment": "positive"
         },
         {
           "name": "Inconsistent breakfast offering",
-          "count": 8,
+          "count": 7,
           "sentiment": "mixed"
         },
         {
-          "name": "Comfortable beds",
+          "name": "Friendly, helpful staff",
           "count": 5,
           "sentiment": "positive"
         },
         {
-          "name": "Dated rooms, heater problems",
+          "name": "Dated rooms, heater trouble",
           "count": 4,
           "sentiment": "negative"
         },
@@ -165,38 +331,38 @@
       "scores": {
         "cleanliness": 3,
         "service": 3,
-        "breakfast": 3,
+        "breakfast": 2,
         "room comfort": 3,
         "value": 3,
         "location": 5,
         "noise": 3,
         "parking": 2,
         "wifi": 1,
-        "other": 3
+        "amenities": null
       },
       "actions": [
         {
-          "title": "Inspect rooms for damp and mold, then fix moisture sources",
+          "title": "Standardize breakfast with a hot item and restock before 9am",
+          "impact": "High",
+          "effort": "Low"
+        },
+        {
+          "title": "Inspect and mold-treat bathrooms and musty rooms, then dehumidify",
           "impact": "High",
           "effort": "Medium"
         },
         {
-          "title": "Service and test every room heater before the cold season",
+          "title": "Service or replace rattling and failing room heaters before cold season",
           "impact": "High",
           "effort": "Medium"
         },
         {
-          "title": "Add a housekeeping checklist with a supervisor spot-check per room",
+          "title": "Set quiet hours and a staffed process for night noise complaints",
           "impact": "Medium",
           "effort": "Low"
         },
         {
-          "title": "Upgrade wifi coverage and capacity for evening and work-call use",
-          "impact": "Medium",
-          "effort": "Low"
-        },
-        {
-          "title": "Set a baseline breakfast menu with hot items and restock plan",
+          "title": "Upgrade wifi capacity and coverage for evening and work-call use",
           "impact": "Medium",
           "effort": "Medium"
         }
@@ -204,33 +370,75 @@
       "usage": {
         "claude-sonnet-5-5": {
           "calls": 27,
-          "input_tokens": 35108,
-          "output_tokens": 8750
+          "input_tokens": 35659,
+          "output_tokens": 6937
         },
         "claude-haiku-5-5": {
-          "calls": 2,
-          "input_tokens": 1705,
-          "output_tokens": 232
+          "calls": 3,
+          "input_tokens": 2543,
+          "output_tokens": 319
         }
       },
-      "usd": 0.15800250000000002
+      "usd": 0.1411018
     }
   ],
-  "differences": null,
+  "differences": {
+    "flags": {
+      "run 1 only": [],
+      "run 2 only": []
+    },
+    "themes": {
+      "run 1 only": [
+        "Clean rooms, some lapses",
+        "Comfortable beds, dated rooms",
+        "Walkable harbor location",
+        "Friendly but inconsistent service",
+        "Uneven breakfast offering",
+        "Quiet rooms, thin walls"
+      ],
+      "run 2 only": [
+        "Harbor location and views",
+        "Clean, spotless rooms",
+        "Inconsistent breakfast offering",
+        "Friendly, helpful staff",
+        "Dated rooms, heater trouble",
+        "Thin walls and noise"
+      ]
+    },
+    "theme_changes": [],
+    "scores": [],
+    "actions": {
+      "run 1 only": [
+        "Add a room inspection checklist to housekeeping routines",
+        "Inspect and remediate mold and damp in affected bathrooms and carpets",
+        "Expand breakfast with hot items and restock before 8 am",
+        "Set front desk standards for phone answering and noise complaints",
+        "Service and replace faulty room heaters before the cold season"
+      ],
+      "run 2 only": [
+        "Standardize breakfast with a hot item and restock before 9am",
+        "Inspect and mold-treat bathrooms and musty rooms, then dehumidify",
+        "Service or replace rattling and failing room heaters before cold season",
+        "Set quiet hours and a staffed process for night noise complaints",
+        "Upgrade wifi capacity and coverage for evening and work-call use"
+      ]
+    },
+    "same_action_order": false
+  },
   "tokens": {
     "total": {
       "claude-sonnet-5-5": {
-        "calls": 27,
-        "input_tokens": 35108,
-        "output_tokens": 8750
+        "calls": 54,
+        "input_tokens": 71329,
+        "output_tokens": 14173
       },
       "claude-haiku-5-5": {
-        "calls": 2,
-        "input_tokens": 1705,
-        "output_tokens": 232
+        "calls": 5,
+        "input_tokens": 4249,
+        "output_tokens": 542
       }
     },
-    "usd": 0.15800250000000002,
+    "usd": 0.2850839,
     "prices_per_mtok": {
       "claude-sonnet-5-5": [
         2.0,
@@ -249,16 +457,213 @@
     "Two runs show what moves between runs; they are not a distribution.",
     "Cost is the token count the API reported; the dollar figure is an estimate at list prices on the stated date."
   ],
+  "variance": {
+    "runs": [
+      {
+        "label": "before 1 (7a2b779)",
+        "themes": 9,
+        "theme_names": [
+          "Cleanliness and mold issues",
+          "Harbor views and location",
+          "Front desk service varies",
+          "Inconsistent breakfast offering",
+          "Comfortable beds",
+          "Dated rooms, heater problems",
+          "Thin walls and noise",
+          "Tight parking",
+          "Unreliable wifi"
+        ],
+        "scores": {
+          "cleanliness": 3,
+          "service": 3,
+          "breakfast": 3,
+          "room comfort": 3,
+          "value": 3,
+          "location": 5,
+          "noise": 3,
+          "parking": 2,
+          "wifi": 1,
+          "other": 3
+        },
+        "serious_issues": [],
+        "actions": [
+          "Inspect rooms for damp and mold, then fix moisture sources",
+          "Service and test every room heater before the cold season",
+          "Add a housekeeping checklist with a supervisor spot-check per room",
+          "Upgrade wifi coverage and capacity for evening and work-call use",
+          "Set a baseline breakfast menu with hot items and restock plan"
+        ]
+      },
+      {
+        "label": "before 2",
+        "themes": 10,
+        "theme_names": [
+          "Cleanliness is inconsistent",
+          "Harbor location and views",
+          "Front desk and staff",
+          "Breakfast quality and availability",
+          "Noise and thin walls",
+          "Comfortable beds",
+          "Dated rooms, heater problems",
+          "Tight parking",
+          "Unreliable wifi",
+          "Value for price"
+        ],
+        "scores": {
+          "cleanliness": 3,
+          "service": 3,
+          "breakfast": 3,
+          "room comfort": 3,
+          "value": 3,
+          "location": 5,
+          "noise": 3,
+          "parking": 1,
+          "wifi": 1,
+          "other": 4
+        },
+        "serious_issues": [],
+        "actions": [
+          "Add a room inspection checklist to housekeeping, covering mold and damp",
+          "Set a desk protocol for noise complaints, phone answering and room moves",
+          "Expand hot breakfast options and restock before 9am",
+          "Inspect and service room heaters and address damp or musty rooms",
+          "Upgrade wifi coverage and bandwidth in guest rooms"
+        ]
+      },
+      {
+        "label": "after 1",
+        "themes": 8,
+        "theme_names": [
+          "Clean rooms, some lapses",
+          "Comfortable beds, dated rooms",
+          "Walkable harbor location",
+          "Friendly but inconsistent service",
+          "Uneven breakfast offering",
+          "Quiet rooms, thin walls",
+          "Tight parking",
+          "Unreliable wifi"
+        ],
+        "scores": {
+          "cleanliness": 3,
+          "service": 3,
+          "breakfast": 2,
+          "room comfort": 3,
+          "value": 3,
+          "location": 5,
+          "noise": 3,
+          "parking": 2,
+          "wifi": 1,
+          "amenities": null
+        },
+        "serious_issues": [
+          "health, review 5"
+        ],
+        "actions": [
+          "Add a room inspection checklist to housekeeping routines",
+          "Inspect and remediate mold and damp in affected bathrooms and carpets",
+          "Expand breakfast with hot items and restock before 8 am",
+          "Set front desk standards for phone answering and noise complaints",
+          "Service and replace faulty room heaters before the cold season"
+        ]
+      },
+      {
+        "label": "after 2",
+        "themes": 8,
+        "theme_names": [
+          "Harbor location and views",
+          "Clean, spotless rooms",
+          "Inconsistent breakfast offering",
+          "Friendly, helpful staff",
+          "Dated rooms, heater trouble",
+          "Thin walls and noise",
+          "Tight parking",
+          "Unreliable wifi"
+        ],
+        "scores": {
+          "cleanliness": 3,
+          "service": 3,
+          "breakfast": 2,
+          "room comfort": 3,
+          "value": 3,
+          "location": 5,
+          "noise": 3,
+          "parking": 2,
+          "wifi": 1,
+          "amenities": null
+        },
+        "serious_issues": [
+          "health, review 5"
+        ],
+        "actions": [
+          "Standardize breakfast with a hot item and restock before 9am",
+          "Inspect and mold-treat bathrooms and musty rooms, then dehumidify",
+          "Service or replace rattling and failing room heaters before cold season",
+          "Set quiet hours and a staffed process for night noise complaints",
+          "Upgrade wifi capacity and coverage for evening and work-call use"
+        ]
+      }
+    ],
+    "pairs": [
+      {
+        "runs": [
+          "before 1 (7a2b779)",
+          "before 2"
+        ],
+        "same_theme_sets": 8,
+        "themes": [
+          9,
+          10
+        ],
+        "same_scores": 8,
+        "aspects": 10,
+        "different_scores": [
+          {
+            "aspect": "other",
+            "before 1 (7a2b779)": 3,
+            "before 2": 4
+          },
+          {
+            "aspect": "parking",
+            "before 1 (7a2b779)": 2,
+            "before 2": 1
+          }
+        ],
+        "same_serious_issues": [],
+        "same_action_titles": 0
+      },
+      {
+        "runs": [
+          "after 1",
+          "after 2"
+        ],
+        "same_theme_sets": 3,
+        "themes": [
+          8,
+          8
+        ],
+        "same_scores": 10,
+        "aspects": 10,
+        "different_scores": [],
+        "same_serious_issues": [
+          "health, review 5"
+        ],
+        "same_action_titles": 0
+      }
+    ]
+  },
   "headline": {
     "verified_ratings": [
+      3.5,
       3.5
     ],
     "displayed_ratings": [
+      3.8,
       3.8
     ],
     "all_runs_match_golden": true,
     "genuine_reviews_flagged": [],
     "flags_per_run": [
+      5,
       5
     ]
   }

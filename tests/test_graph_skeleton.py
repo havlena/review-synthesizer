@@ -83,7 +83,7 @@ def test_graph_runs_end_to_end_on_the_fake_model(run_graph):
     client = FakeModelClient(
         {
             ExtractedClaims: ExtractedClaims(claims=[]),
-            Synthesis: Synthesis(themes=[], aspect_scores=[]),
+            Synthesis: Synthesis(themes=[], aspect_evidence=[], serious_issues=[]),
             ActionList: ActionList(actions=[]),
         }
     )

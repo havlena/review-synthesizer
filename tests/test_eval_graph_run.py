@@ -14,7 +14,6 @@ from review_synthesizer.graph.run import AUTO_APPROVED
 from review_synthesizer.graph.schemas import (
     ActionList,
     ActionOut,
-    AspectScoreOut,
     ClaimOut,
     ExtractedClaims,
     PairVerdict,
@@ -30,18 +29,22 @@ def rows():
     return json.loads((FIXTURES / "harbor_light_inn.json").read_text(encoding="utf-8"))["reviews"]
 
 
-def client(*, breakfast_score, theme, action, join_genuine):
+def client(*, breakfast, theme, action, join_genuine):
+    """Reviews 2 and 4 take the given breakfast polarities; with join_genuine, genuine
+    reviews 1 and 3 share two specific claims and are judged the same."""
+
     def extract(prompt):
         rid = int(re.search(r'<review id="(\d+)"', prompt).group(1))
-        shared = join_genuine and rid in (1, 3)
-        return ExtractedClaims(
-            claims=[
+        claims = []
+        if rid in (2, 4):
+            pol = breakfast[0 if rid == 2 else 1]
+            claims = [ClaimOut(aspect="breakfast", polarity=pol, specific=False, statement="b")]
+        if join_genuine and rid in (1, 3):
+            claims = [
                 ClaimOut(aspect="location", polarity="positive", specific=True, statement="view"),
                 ClaimOut(aspect="breakfast", polarity="positive", specific=True, statement="rolls"),
             ]
-            if shared
-            else []
-        )
+        return ExtractedClaims(claims=claims)
 
     return FakeModelClient(
         {
@@ -49,13 +52,16 @@ def client(*, breakfast_score, theme, action, join_genuine):
             PairVerdict: PairVerdict(same_claims=True, reason="Same harbor view."),
             Synthesis: Synthesis(
                 themes=[
-                    ThemeOut(name=theme, sentiment="negative", review_ids=["2", "3"], evidence=[])
-                ],
-                aspect_scores=[
-                    AspectScoreOut(
-                        aspect="breakfast", score=breakfast_score, review_ids=["2"], evidence="x"
+                    ThemeOut(
+                        name=theme,
+                        aspect="breakfast",
+                        sentiment="negative",
+                        review_ids=["2", "4"],
+                        evidence=[],
                     )
                 ],
+                aspect_evidence=[],
+                serious_issues=[],
             ),
             ActionList: ActionList(
                 actions=[
@@ -71,7 +77,12 @@ def test_report_checks_golden_flags_genuine_reviews_and_diffs_runs():
         rows(),
         HARBOR,
         approve_all,
-        client=client(breakfast_score=2, theme="Breakfast", action="Hot items", join_genuine=False),
+        client=client(
+            breakfast=("negative", "negative"),
+            theme="Breakfast",
+            action="Hot items",
+            join_genuine=False,
+        ),
         run_id="r1",
         approved_by=AUTO_APPROVED,
     )
@@ -79,7 +90,12 @@ def test_report_checks_golden_flags_genuine_reviews_and_diffs_runs():
         rows(),
         HARBOR,
         approve_all,
-        client=client(breakfast_score=3, theme="Coffee", action="Better coffee", join_genuine=True),
+        client=client(
+            breakfast=("negative", "positive"),
+            theme="Coffee",
+            action="Better coffee",
+            join_genuine=True,
+        ),
         run_id="r2",
         approved_by=AUTO_APPROVED,
     )
@@ -98,7 +114,7 @@ def test_report_checks_golden_flags_genuine_reviews_and_diffs_runs():
     d = report.differences
     assert d["flags"] == {"run 1 only": [], "run 2 only": ["claim_duplicate:1,3"]}
     assert d["themes"] == {"run 1 only": ["Breakfast"], "run 2 only": ["Coffee"]}
-    assert d["scores"] == [{"aspect": "breakfast", "run 1": 2, "run 2": 3}]
+    assert d["scores"] == [{"aspect": "breakfast", "run 1": 1, "run 2": 3}]
     assert d["actions"] == {"run 1 only": ["Hot items"], "run 2 only": ["Better coffee"]}
 
     md = report.to_markdown()
@@ -108,3 +124,28 @@ def test_report_checks_golden_flags_genuine_reviews_and_diffs_runs():
     assert f"- Flag decisions: {AUTO_APPROVED}." in run1.markdown
     assert report.tokens["usd"] == pytest.approx(0.10)
     report.to_json()
+
+
+def test_variance_compares_labelled_runs_pairwise():
+    def brief(theme, breakfast):
+        return run_brief(
+            rows(),
+            HARBOR,
+            approve_all,
+            client=client(breakfast=breakfast, theme=theme, action="Hot items", join_genuine=False),
+        ).data
+
+    a, b = (
+        brief("Breakfast", ("negative", "negative")),
+        brief("Breakfast", ("negative", "positive")),
+    )
+    report = summarize(rows(), [a, a], [{}, {}], before=[("before 1", a), ("before 2", b)])
+    v = report.variance
+    assert [r["label"] for r in v["runs"]] == ["before 1", "before 2", "after 1", "after 2"]
+    before, after = v["pairs"]
+    assert before["same_theme_sets"] == 1 and before["same_scores"] == 0
+    assert before["different_scores"] == [{"aspect": "breakfast", "before 1": 1, "before 2": 3}]
+    assert after["same_scores"] == 1 and after["same_action_titles"] == 1
+    md = report.to_markdown()
+    assert "## Synthesis variance, before and after" in md
+    assert "| breakfast | 1 | 3 | 1 | 1 |" in md

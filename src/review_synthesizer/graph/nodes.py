@@ -33,8 +33,9 @@ from .prompts import (
     synthesis_prompt,
 )
 from .schemas import ActionList, ExtractedClaims, PairVerdict, Synthesis
+from .scorecard import compute_scorecard
 from .state import BriefState, Claim, PairJudgment, Property
-from .synthesis import clean_actions, clean_scores, clean_themes
+from .synthesis import clean_actions, clean_aspect_evidence, clean_serious_issues, clean_themes
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -174,23 +175,45 @@ NOTHING_VERIFIED = (
 
 
 def themes_and_scores(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
-    """Ranked themes and the aspect scorecard: one model call over verified reviews only.
+    """Themes, the aspect scorecard and serious issues, from verified reviews only.
 
-    If the call fails, the brief goes ahead without these parts and says so in a note.
+    The scorecard is computed from the extracted claims (``scorecard``), not by the model;
+    one model call supplies themes, one evidence line per aspect and serious issues. If the
+    call fails, the scorecard still stands without evidence lines, and a note says so.
     """
     verified = _verified_reviews(state)
     if not verified:
-        return {"themes": [], "aspect_scores": [], "notes": [NOTHING_VERIFIED]}
+        return {
+            "themes": [],
+            "aspect_scores": [],
+            "serious_issues": [],
+            "notes": [NOTHING_VERIFIED],
+        }
+    claims = state.get("claims") or {}
     try:
         out = client.structured(
             Synthesis, system=SYNTHESIS_SYSTEM, prompt=synthesis_prompt(_property(state), verified)
         )
     except Exception as exc:  # noqa: BLE001 - recorded for the operator, run continues
-        note = f"Theme and scorecard synthesis failed ({type(exc).__name__}); both are empty."
-        return {"themes": [], "aspect_scores": [], "notes": [note]}
+        note = (
+            f"Theme synthesis failed ({type(exc).__name__}); themes and serious issues are "
+            "empty, and the scorecard has no evidence lines."
+        )
+        return {
+            "themes": [],
+            "aspect_scores": compute_scorecard(verified, claims),
+            "serious_issues": [],
+            "notes": [note],
+        }
     themes, theme_notes = clean_themes(out.themes, verified)
-    scores, score_notes = clean_scores(out.aspect_scores, verified)
-    return {"themes": themes, "aspect_scores": scores, "notes": theme_notes + score_notes}
+    evidence, evidence_notes = clean_aspect_evidence(out.aspect_evidence, verified)
+    issues, issue_notes = clean_serious_issues(out.serious_issues, verified)
+    return {
+        "themes": themes,
+        "aspect_scores": compute_scorecard(verified, claims, evidence),
+        "serious_issues": issues,
+        "notes": theme_notes + evidence_notes + issue_notes,
+    }
 
 
 def actions(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
@@ -199,7 +222,11 @@ def actions(state: BriefState, *, client: ModelClient) -> dict[str, Any]:
     if not verified:
         return {"actions": []}
     prompt = actions_prompt(
-        _property(state), verified, state.get("themes", []), state.get("aspect_scores", [])
+        _property(state),
+        verified,
+        state.get("themes", []),
+        state.get("aspect_scores", []),
+        state.get("serious_issues", []),
     )
     try:
         out = client.structured(ActionList, system=ACTIONS_SYSTEM, prompt=prompt)

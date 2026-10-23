@@ -13,17 +13,16 @@
   },
   "themes": [
     {
-      "name": "Cleanliness and mold issues",
-      "count": 11,
+      "name": "Clean rooms, some lapses",
+      "count": 10,
       "sentiment": "mixed",
       "evidence": [
         "Rooms were spotless",
-        "Room smelled musty and the carpet felt damp",
-        "The bathroom had mold in the corner"
+        "Housekeeping was thorough",
+        "The room was not cleaned properly"
       ],
       "review_ids": [
         2,
-        4,
         5,
         6,
         7,
@@ -33,37 +32,58 @@
         16,
         18,
         20
-      ]
+      ],
+      "aspect": "cleanliness"
     },
     {
-      "name": "Harbor views and location",
+      "name": "Comfortable beds, dated rooms",
       "count": 9,
-      "sentiment": "positive",
+      "sentiment": "mixed",
       "evidence": [
-        "The view of the harbor from our room was incredible at sunrise",
-        "Loved the harbor location and the walk to dinner",
-        "Good location right by the water"
+        "Comfortable bed and a quiet room",
+        "The room was dated and the heater rattled all night",
+        "The heater did not work and it was a cold night"
       ],
       "review_ids": [
-        1,
+        3,
+        8,
+        9,
+        11,
+        12,
+        13,
+        15,
+        16,
+        17
+      ],
+      "aspect": "room comfort"
+    },
+    {
+      "name": "Walkable harbor location",
+      "count": 7,
+      "sentiment": "positive",
+      "evidence": [
+        "Location is walkable to the docks",
+        "Good location right by the water",
+        "a short walk to the marina"
+      ],
+      "review_ids": [
         3,
         10,
-        12,
         13,
         16,
         18,
         19,
         20
-      ]
+      ],
+      "aspect": "location"
     },
     {
-      "name": "Front desk service varies",
-      "count": 8,
+      "name": "Friendly but inconsistent service",
+      "count": 7,
       "sentiment": "mixed",
       "evidence": [
         "Staff at the front desk were warm and helpful",
-        "Front desk went above and beyond to get us a late checkout",
-        "Nobody answered the desk phone",
+        "Front desk went above and beyond",
         "the front desk did nothing"
       ],
       "review_ids": [
@@ -73,77 +93,49 @@
         9,
         12,
         14,
-        17,
         19
-      ]
+      ],
+      "aspect": "service"
     },
     {
-      "name": "Inconsistent breakfast offering",
-      "count": 8,
+      "name": "Uneven breakfast offering",
+      "count": 7,
       "sentiment": "mixed",
       "evidence": [
         "Best breakfast on the lakeshore",
-        "Breakfast was just packaged muffins and weak coffee",
+        "Breakfast could use more hot options",
         "out of food by eight"
       ],
       "review_ids": [
         2,
         3,
         7,
-        9,
         11,
         17,
         19,
         20
-      ]
-    },
-    {
-      "name": "Comfortable beds",
-      "count": 5,
-      "sentiment": "positive",
-      "evidence": [
-        "Comfortable bed and a quiet room",
-        "Comfortable beds",
-        "The bed was a little firm"
       ],
-      "review_ids": [
-        3,
-        9,
-        12,
-        13,
-        15
-      ]
+      "aspect": "breakfast"
     },
     {
-      "name": "Dated rooms, heater problems",
-      "count": 4,
-      "sentiment": "negative",
-      "evidence": [
-        "the heater rattled all night",
-        "The heater did not work and it was a cold night",
-        "a touch dated"
-      ],
-      "review_ids": [
-        8,
-        11,
-        16,
-        17
-      ]
-    },
-    {
-      "name": "Thin walls and noise",
-      "count": 3,
-      "sentiment": "negative",
+      "name": "Quiet rooms, thin walls",
+      "count": 7,
+      "sentiment": "mixed",
       "evidence": [
         "Thin walls, we could hear the hallway",
         "The walls are a little thin so you hear the hallway",
         "Noisy neighbors until two in the morning"
       ],
       "review_ids": [
+        3,
         4,
+        10,
+        13,
         14,
-        19
-      ]
+        19,
+        20
+      ],
+      "aspect": "noise"
     },
     {
       "name": "Tight parking",
@@ -156,7 +148,8 @@
       "review_ids": [
         8,
         15
-      ]
+      ],
+      "aspect": "parking"
     },
     {
       "name": "Unreliable wifi",
@@ -169,7 +162,8 @@
       "review_ids": [
         6,
         13
-      ]
+      ],
+      "aspect": "wifi"
     }
   ],
   "aspect_scores": [
@@ -177,7 +171,7 @@
       "aspect": "cleanliness",
       "score": 3,
       "review_count": 11,
-      "evidence": "Most guests call rooms clean or spotless, but three report musty damp carpet, bathroom mold, and a room not properly cleaned.",
+      "evidence": "Most guests found rooms clean or spotless, but others reported a musty smell, damp carpet, mold and a room not properly cleaned.",
       "review_ids": [
         2,
         4,
@@ -190,13 +184,16 @@
         16,
         18,
         20
-      ]
+      ],
+      "positive": 7,
+      "mixed": 1,
+      "negative": 3
     },
     {
       "aspect": "service",
       "score": 3,
       "review_count": 8,
-      "evidence": "Staff are often described as warm and helpful, but others report slow check-in, an unanswered desk phone, and no action on a noise complaint.",
+      "evidence": "Front desk staff were often described as warm, friendly and helpful, but some guests reported slow check-in, an unanswered phone and no action on a noise complaint.",
       "review_ids": [
         1,
         4,
@@ -206,34 +203,38 @@
         14,
         17,
         19
-      ]
+      ],
+      "positive": 4,
+      "mixed": 2,
+      "negative": 2
     },
     {
       "aspect": "breakfast",
-      "score": 3,
-      "review_count": 8,
-      "evidence": "Cinnamon rolls, coffee and pastries are praised, but others report packaged muffins, few hot options, running out of food, and minimal choice.",
+      "score": 2,
+      "review_count": 7,
+      "evidence": "Opinions split: praise for cinnamon rolls, pastries and coffee, against complaints of packaged muffins, few hot options, running out of food and minimal choice.",
       "review_ids": [
         2,
         3,
         7,
-        9,
         11,
         17,
         19,
         20
-      ]
+      ],
+      "positive": 2,
+      "mixed": 1,
+      "negative": 4
     },
     {
       "aspect": "room comfort",
       "score": 3,
-      "review_count": 12,
-      "evidence": "Comfortable beds and cozy rooms are praised, but guests also report dated rooms, a rattling or broken heater, and damp musty conditions.",
+      "review_count": 11,
+      "evidence": "Beds were generally comfortable, though rooms were called dated or tired and two guests had heater problems.",
       "review_ids": [
-        2,
+        1,
         3,
         5,
-        6,
         8,
         9,
         11,
@@ -242,25 +243,30 @@
         15,
         16,
         17
-      ]
+      ],
+      "positive": 5,
+      "mixed": 2,
+      "negative": 4
     },
     {
       "aspect": "value",
       "score": 3,
       "review_count": 2,
-      "evidence": "One guest found it great value in season; another found it disappointing for the price.",
+      "evidence": "One guest found it great value for a harbor town in season, another found it disappointing for the price.",
       "review_ids": [
         2,
         15
-      ]
+      ],
+      "positive": 1,
+      "mixed": 0,
+      "negative": 1
     },
     {
       "aspect": "location",
       "score": 5,
-      "review_count": 9,
-      "evidence": "Guests praise the harbor setting, water views, and walkability to docks, dinner, and the marina, with no complaints.",
+      "review_count": 8,
+      "evidence": "The harbor and waterfront location, walkable to docks, marina and dining, is a consistent strength.",
       "review_ids": [
-        1,
         3,
         10,
         12,
@@ -269,107 +275,136 @@
         18,
         19,
         20
-      ]
+      ],
+      "positive": 8,
+      "mixed": 0,
+      "negative": 0
     },
     {
       "aspect": "noise",
       "score": 3,
-      "review_count": 7,
-      "evidence": "Four guests found rooms quiet, while three reported thin walls, hallway sound, or noisy neighbors until 2 a.m.",
+      "review_count": 8,
+      "evidence": "Several guests found rooms quiet, while others heard the hallway through thin walls or had noisy neighbors late at night.",
       "review_ids": [
         3,
         4,
+        8,
         10,
         13,
         14,
         19,
         20
-      ]
+      ],
+      "positive": 4,
+      "mixed": 0,
+      "negative": 4
     },
     {
       "aspect": "parking",
       "score": 2,
       "review_count": 2,
-      "evidence": "Parking is described as a nightmare and as tight, with only one guest saying they managed.",
+      "evidence": "Parking is limited, with few spots for the size of the inn.",
       "review_ids": [
         8,
         15
-      ]
+      ],
+      "positive": 0,
+      "mixed": 1,
+      "negative": 1
     },
     {
       "aspect": "wifi",
       "score": 1,
       "review_count": 2,
-      "evidence": "Both guests who mention wifi report problems: evening dropouts and slowness for work calls.",
+      "evidence": "Wifi dropped in the evening and was slow for work calls.",
       "review_ids": [
         6,
         13
-      ]
+      ],
+      "positive": 0,
+      "mixed": 0,
+      "negative": 2
     },
     {
-      "aspect": "other",
-      "score": 3,
-      "review_count": 2,
-      "evidence": "One guest praised the Northern Michigan charm; another booked a lakeview room and got a parking lot view.",
+      "aspect": "amenities",
+      "score": null,
+      "review_count": 1,
+      "evidence": "The lobby coffee was a welcome touch.",
       "review_ids": [
-        5,
-        6
-      ]
+        9
+      ],
+      "positive": 1,
+      "mixed": 0,
+      "negative": 0
+    }
+  ],
+  "serious_issues": [
+    {
+      "kind": "health",
+      "review_id": 5,
+      "quote": "The bathroom had mold in the corner."
     }
   ],
   "actions": [
     {
-      "title": "Inspect rooms for damp and mold, then fix moisture sources",
-      "why": "Reviews report musty damp carpet and bathroom mold, and cleanliness is a mixed theme across 11 reviews.",
+      "title": "Add a room inspection checklist to housekeeping routines",
+      "why": "Most guests found rooms spotless, but review 14 found trash left in the bin and others reported mold and mustiness, so cleaning quality is inconsistent.",
       "impact": "High",
-      "effort": "Medium",
-      "review_ids": [
-        2,
-        5
-      ]
-    },
-    {
-      "title": "Service and test every room heater before the cold season",
-      "why": "Guests report a rattling heater and a heater that failed on a cold night, with staff unable to move them.",
-      "impact": "High",
-      "effort": "Medium",
-      "review_ids": [
-        8,
-        17
-      ]
-    },
-    {
-      "title": "Add a housekeeping checklist with a supervisor spot-check per room",
-      "why": "One guest found trash still in the bin and another a moldy bathroom, while most others call rooms spotless, so consistency is the gap.",
-      "impact": "Medium",
       "effort": "Low",
       "review_ids": [
-        5,
         14,
+        5,
+        2,
+        7,
+        18
+      ]
+    },
+    {
+      "title": "Inspect and remediate mold and damp in affected bathrooms and carpets",
+      "why": "Review 5 reported mold in the bathroom corner and review 2 a musty smell and damp carpet, a health issue behind the 3 of 5 cleanliness score.",
+      "impact": "High",
+      "effort": "Medium",
+      "review_ids": [
+        5,
         2
       ]
     },
     {
-      "title": "Upgrade wifi coverage and capacity for evening and work-call use",
-      "why": "Both guests who mention wifi report evening dropouts or slowness for work calls, and it scores 1 of 5.",
-      "impact": "Medium",
-      "effort": "Low",
-      "review_ids": [
-        6,
-        13
-      ]
-    },
-    {
-      "title": "Set a baseline breakfast menu with hot items and restock plan",
-      "why": "Praise for cinnamon rolls sits beside reports of packaged muffins, minimal choice, and food running out by eight.",
-      "impact": "Medium",
+      "title": "Expand breakfast with hot items and restock before 8 am",
+      "why": "Breakfast scored 2 of 5, with complaints of packaged muffins, few hot options and running out of food, while the cinnamon rolls and pastries were praised.",
+      "impact": "High",
       "effort": "Medium",
       "review_ids": [
         2,
         3,
         11,
         17,
-        7
+        7,
+        20
+      ]
+    },
+    {
+      "title": "Set front desk standards for phone answering and noise complaints",
+      "why": "Guests reported an unanswered desk phone, slow check-in and no action on late-night noise, despite warm staff overall.",
+      "impact": "Medium",
+      "effort": "Low",
+      "review_ids": [
+        5,
+        4,
+        14,
+        17
+      ]
+    },
+    {
+      "title": "Service and replace faulty room heaters before the cold season",
+      "why": "Reviews 8 and 17 report a rattling heater and a heater that did not work on a cold night, and staff could not move the guest.",
+      "impact": "Medium",
+      "effort": "Medium",
+      "review_ids": [
+        8,
+        17,
+        11,
+        16
       ]
     }
   ],

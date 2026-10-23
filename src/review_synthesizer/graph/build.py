@@ -40,6 +40,7 @@ from .state import (
     Claim,
     PairJudgment,
     Property,
+    SeriousIssue,
     Theme,
 )
 
@@ -53,6 +54,7 @@ STATE_TYPES = (
     PairJudgment,
     Theme,
     AspectScore,
+    SeriousIssue,
     Action,
     Brief,
 )

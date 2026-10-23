@@ -33,6 +33,13 @@ from .state import Brief, BriefState
 GRAPH_SIGNALS = ("claim_duplicate",)
 """Signals the graph adds to whatever the detector ran."""
 
+SCORECARD_NOTE = (
+    "Scores are computed from the verified reviews' claims, not chosen by a model: each review "
+    "takes one stance per aspect, and the share of negative stances (mixed counting half) sets "
+    "the score, 0 is 5, up to a quarter 4, up to half 3, up to three quarters 2, above that 1. "
+    "An aspect needs two reviews to be scored. Serious issues are listed below, not scored."
+)
+
 
 def _jsonable(value: Any) -> Any:
     """Plain JSON types only: dates as ISO strings, sets sorted, dataclasses as dicts."""
@@ -93,6 +100,7 @@ def build_data(
         "rating": rating,
         "themes": state.get("themes", []),
         "aspect_scores": state.get("aspect_scores", []),
+        "serious_issues": state.get("serious_issues", []),
         "actions": state.get("actions", []),
         "authenticity": {
             "note": REVIEW_NOTE,
@@ -157,26 +165,46 @@ def render_markdown(data: dict[str, Any]) -> str:
 
     lines += ["", "## 1. Themes", ""]
     if data["themes"]:
-        lines += ["| Theme | Sentiment | Reviews | Evidence |", "|---|---|---|---|"]
+        lines += [
+            "| Theme | Aspect | Sentiment | Reviews | Evidence |",
+            "|---|---|---|---|---|",
+        ]
         for t in data["themes"]:
             quotes = "; ".join(f'"{q}"' for q in t["evidence"]) or "none quoted"
             lines.append(
-                f"| {_cell(t['name'])} | {t['sentiment']} | {t['count']} "
-                f"({_ids(t['review_ids'])}) | {_cell(quotes)} |"
+                f"| {_cell(t['name'])} | {t.get('aspect', '')} | {t['sentiment']} | "
+                f"{t['count']} ({_ids(t['review_ids'])}) | {_cell(quotes)} |"
             )
     else:
         lines.append("No themes produced; see notes.")
 
     lines += ["", "## 2. Aspect scorecard", ""]
     if data["aspect_scores"]:
-        lines += ["| Aspect | Score (1 to 5) | Reviews | Evidence |", "|---|---|---|---|"]
+        lines += [
+            SCORECARD_NOTE,
+            "",
+            "| Aspect | Score (1 to 5) | Positive / mixed / negative | Reviews | Evidence |",
+            "|---|---|---|---|---|",
+        ]
         for s in data["aspect_scores"]:
+            score = "mentioned once, unscored" if s["score"] is None else s["score"]
             lines.append(
-                f"| {s['aspect']} | {s['score']} | {s['review_count']} "
-                f"({_ids(s['review_ids'])}) | {_cell(s['evidence'])} |"
+                f"| {s['aspect']} | {score} | {s['positive']} / {s['mixed']} / {s['negative']} | "
+                f"{s['review_count']} ({_ids(s['review_ids'])}) | {_cell(s['evidence']) or '-'} |"
             )
     else:
         lines.append("No aspect scores produced; see notes.")
+
+    issues = data.get("serious_issues", [])
+    lines += ["", "### Serious issues reported", ""]
+    if issues:
+        lines.append("Listed, not scored: each is one guest's report and needs a look.")
+        lines.append("")
+        lines += [
+            f'- {i["kind"].capitalize()}, review {i["review_id"]}: "{i["quote"]}"' for i in issues
+        ]
+    else:
+        lines.append("None reported in the verified reviews.")
 
     lines += ["", "## 3. Actions", ""]
     if data["actions"]:

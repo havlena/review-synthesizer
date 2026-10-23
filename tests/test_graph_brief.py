@@ -6,6 +6,7 @@ parts of the brief, the authenticity findings and the methods note.
 
 import json
 import logging
+import re
 from pathlib import Path
 
 import pytest
@@ -23,8 +24,10 @@ from review_synthesizer.graph.batch import validate_batch
 from review_synthesizer.graph.schemas import (
     ActionList,
     ActionOut,
-    AspectScoreOut,
+    AspectEvidenceOut,
+    ClaimOut,
     ExtractedClaims,
+    SeriousIssueOut,
     Synthesis,
     ThemeOut,
 )
@@ -37,23 +40,34 @@ def harbor_rows():
     return json.loads((FIXTURES / "harbor_light_inn.json").read_text(encoding="utf-8"))["reviews"]
 
 
+def breakfast_complaints(prompt):
+    """Reviews 2 and 3 complain about breakfast; no other claims."""
+    rid = re.search(r'<review id="(\d+)"', prompt).group(1)
+    claim = ClaimOut(aspect="breakfast", polarity="negative", specific=False, statement="thin")
+    return ExtractedClaims(claims=[claim] if rid in ("2", "3") else [])
+
+
 def fake_client(synthesis=None):
     return FakeModelClient(
         {
-            ExtractedClaims: ExtractedClaims(claims=[]),
+            ExtractedClaims: breakfast_complaints,
             Synthesis: synthesis
             or Synthesis(
                 themes=[
                     ThemeOut(
                         name="Breakfast | coffee",
+                        aspect="breakfast",
                         sentiment="negative",
                         review_ids=["2", "3"],
                         evidence=["weak coffee", "could use more hot options"],
                     )
                 ],
-                aspect_scores=[
-                    AspectScoreOut(
-                        aspect="breakfast", score=2, review_ids=["2", "3"], evidence="Thin."
+                aspect_evidence=[
+                    AspectEvidenceOut(aspect="breakfast", evidence="Thin.", review_ids=["2", "3"])
+                ],
+                serious_issues=[
+                    SeriousIssueOut(
+                        kind="health", review_id="5", quote="The bathroom had mold in the corner"
                     )
                 ],
             ),
@@ -123,7 +137,11 @@ def test_markdown_has_the_four_parts_in_order_and_the_methods_note():
     ]
     assert md.startswith("# Operator brief: Harbor Light Inn\n")
     assert "**3.5** verified, from 20 of 25 reviews (displayed rating 3.8)" in md
-    assert "| Breakfast \\| coffee | negative | 2 (2, 3) |" in md
+    assert "| Breakfast \\| coffee | breakfast | negative | 2 (2, 3) |" in md
+    # Computed from claims: reviews 2 and 3 both negative on breakfast -> share 1 -> score 1.
+    assert "| breakfast | 1 | 0 / 0 / 2 | 2 (2, 3) | Thin. |" in md
+    assert "Scores are computed from the verified reviews' claims, not chosen by a model" in md
+    assert '- Health, review 5: "The bathroom had mold in the corner"' in md
     assert "1. **Add two hot breakfast items** Impact Medium, effort Medium." in md
     assert "- **Confirmed**, duplicate_phrasing, reviews 21, 22, 23, 24, 25, high" in md
     assert "signal for review, not a verdict" in md
@@ -146,7 +164,10 @@ def test_a_note_repeated_by_the_rerun_appears_once():
     client.responses[Synthesis] = TimeoutError("slow")
     dismiss = lambda req: {f["key"]: False for f in req["flags"]}
     brief = run_brief(harbor_rows(), HARBOR, dismiss, client=client)
-    failure = "Theme and scorecard synthesis failed (TimeoutError); both are empty."
+    failure = (
+        "Theme synthesis failed (TimeoutError); themes and serious issues are empty, and the "
+        "scorecard has no evidence lines."
+    )
     assert sum(c.schema == "Synthesis" for c in client.calls) == 2
     assert brief.data["notes"].count(failure) == 1
     assert "## Notes on this run" in brief.markdown

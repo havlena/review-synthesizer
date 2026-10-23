@@ -8,40 +8,47 @@ Run `harbor-light-run1`.
 
 ## 1. Themes
 
-| Theme | Sentiment | Reviews | Evidence |
-|---|---|---|---|
-| Cleanliness and mold issues | mixed | 11 (2, 4, 5, 6, 7, 10, 12, 14, 16, 18, 20) | "Rooms were spotless"; "Room smelled musty and the carpet felt damp"; "The bathroom had mold in the corner" |
-| Harbor views and location | positive | 9 (1, 3, 10, 12, 13, 16, 18, 19, 20) | "The view of the harbor from our room was incredible at sunrise"; "Loved the harbor location and the walk to dinner"; "Good location right by the water" |
-| Front desk service varies | mixed | 8 (1, 4, 5, 9, 12, 14, 17, 19) | "Staff at the front desk were warm and helpful"; "Front desk went above and beyond to get us a late checkout"; "Nobody answered the desk phone"; "the front desk did nothing" |
-| Inconsistent breakfast offering | mixed | 8 (2, 3, 7, 9, 11, 17, 19, 20) | "Best breakfast on the lakeshore"; "Breakfast was just packaged muffins and weak coffee"; "out of food by eight" |
-| Comfortable beds | positive | 5 (3, 9, 12, 13, 15) | "Comfortable bed and a quiet room"; "Comfortable beds"; "The bed was a little firm" |
-| Dated rooms, heater problems | negative | 4 (8, 11, 16, 17) | "the heater rattled all night"; "The heater did not work and it was a cold night"; "a touch dated" |
-| Thin walls and noise | negative | 3 (4, 14, 19) | "Thin walls, we could hear the hallway"; "The walls are a little thin so you hear the hallway"; "Noisy neighbors until two in the morning" |
-| Tight parking | negative | 2 (8, 15) | "Parking was a nightmare"; "Parking is tight but we managed" |
-| Unreliable wifi | negative | 2 (6, 13) | "Wifi dropped a few times in the evening"; "Wifi was slow for work calls" |
+| Theme | Aspect | Sentiment | Reviews | Evidence |
+|---|---|---|---|---|
+| Clean rooms, some lapses | cleanliness | mixed | 10 (2, 5, 6, 7, 10, 12, 14, 16, 18, 20) | "Rooms were spotless"; "Housekeeping was thorough"; "The room was not cleaned properly" |
+| Comfortable beds, dated rooms | room comfort | mixed | 9 (3, 8, 9, 11, 12, 13, 15, 16, 17) | "Comfortable bed and a quiet room"; "The room was dated and the heater rattled all night"; "The heater did not work and it was a cold night" |
+| Walkable harbor location | location | positive | 7 (3, 10, 13, 16, 18, 19, 20) | "Location is walkable to the docks"; "Good location right by the water"; "a short walk to the marina" |
+| Friendly but inconsistent service | service | mixed | 7 (1, 4, 5, 9, 12, 14, 19) | "Staff at the front desk were warm and helpful"; "Front desk went above and beyond"; "the front desk did nothing" |
+| Uneven breakfast offering | breakfast | mixed | 7 (2, 3, 7, 11, 17, 19, 20) | "Best breakfast on the lakeshore"; "Breakfast could use more hot options"; "out of food by eight" |
+| Quiet rooms, thin walls | noise | mixed | 7 (3, 4, 10, 13, 14, 19, 20) | "Thin walls, we could hear the hallway"; "The walls are a little thin so you hear the hallway"; "Noisy neighbors until two in the morning" |
+| Tight parking | parking | negative | 2 (8, 15) | "Parking was a nightmare"; "Parking is tight but we managed" |
+| Unreliable wifi | wifi | negative | 2 (6, 13) | "Wifi dropped a few times in the evening"; "Wifi was slow for work calls" |
 
 ## 2. Aspect scorecard
 
-| Aspect | Score (1 to 5) | Reviews | Evidence |
-|---|---|---|---|
-| cleanliness | 3 | 11 (2, 4, 5, 6, 7, 10, 12, 14, 16, 18, 20) | Most guests call rooms clean or spotless, but three report musty damp carpet, bathroom mold, and a room not properly cleaned. |
-| service | 3 | 8 (1, 4, 5, 9, 12, 14, 17, 19) | Staff are often described as warm and helpful, but others report slow check-in, an unanswered desk phone, and no action on a noise complaint. |
-| breakfast | 3 | 8 (2, 3, 7, 9, 11, 17, 19, 20) | Cinnamon rolls, coffee and pastries are praised, but others report packaged muffins, few hot options, running out of food, and minimal choice. |
-| room comfort | 3 | 12 (2, 3, 5, 6, 8, 9, 11, 12, 13, 15, 16, 17) | Comfortable beds and cozy rooms are praised, but guests also report dated rooms, a rattling or broken heater, and damp musty conditions. |
-| value | 3 | 2 (2, 15) | One guest found it great value in season; another found it disappointing for the price. |
-| location | 5 | 9 (1, 3, 10, 12, 13, 16, 18, 19, 20) | Guests praise the harbor setting, water views, and walkability to docks, dinner, and the marina, with no complaints. |
-| noise | 3 | 7 (3, 4, 10, 13, 14, 19, 20) | Four guests found rooms quiet, while three reported thin walls, hallway sound, or noisy neighbors until 2 a.m. |
-| parking | 2 | 2 (8, 15) | Parking is described as a nightmare and as tight, with only one guest saying they managed. |
-| wifi | 1 | 2 (6, 13) | Both guests who mention wifi report problems: evening dropouts and slowness for work calls. |
-| other | 3 | 2 (5, 6) | One guest praised the Northern Michigan charm; another booked a lakeview room and got a parking lot view. |
+Scores are computed from the verified reviews' claims, not chosen by a model: each review takes one stance per aspect, and the share of negative stances (mixed counting half) sets the score, 0 is 5, up to a quarter 4, up to half 3, up to three quarters 2, above that 1. An aspect needs two reviews to be scored. Serious issues are listed below, not scored.
+
+| Aspect | Score (1 to 5) | Positive / mixed / negative | Reviews | Evidence |
+|---|---|---|---|---|
+| cleanliness | 3 | 7 / 1 / 3 | 11 (2, 4, 5, 6, 7, 10, 12, 14, 16, 18, 20) | Most guests found rooms clean or spotless, but others reported a musty smell, damp carpet, mold and a room not properly cleaned. |
+| service | 3 | 4 / 2 / 2 | 8 (1, 4, 5, 9, 12, 14, 17, 19) | Front desk staff were often described as warm, friendly and helpful, but some guests reported slow check-in, an unanswered phone and no action on a noise complaint. |
+| breakfast | 2 | 2 / 1 / 4 | 7 (2, 3, 7, 11, 17, 19, 20) | Opinions split: praise for cinnamon rolls, pastries and coffee, against complaints of packaged muffins, few hot options, running out of food and minimal choice. |
+| room comfort | 3 | 5 / 2 / 4 | 11 (1, 3, 5, 8, 9, 11, 12, 13, 15, 16, 17) | Beds were generally comfortable, though rooms were called dated or tired and two guests had heater problems. |
+| value | 3 | 1 / 0 / 1 | 2 (2, 15) | One guest found it great value for a harbor town in season, another found it disappointing for the price. |
+| location | 5 | 8 / 0 / 0 | 8 (3, 10, 12, 13, 16, 18, 19, 20) | The harbor and waterfront location, walkable to docks, marina and dining, is a consistent strength. |
+| noise | 3 | 4 / 0 / 4 | 8 (3, 4, 8, 10, 13, 14, 19, 20) | Several guests found rooms quiet, while others heard the hallway through thin walls or had noisy neighbors late at night. |
+| parking | 2 | 0 / 1 / 1 | 2 (8, 15) | Parking is limited, with few spots for the size of the inn. |
+| wifi | 1 | 0 / 0 / 2 | 2 (6, 13) | Wifi dropped in the evening and was slow for work calls. |
+| amenities | mentioned once, unscored | 1 / 0 / 0 | 1 (9) | The lobby coffee was a welcome touch. |
+
+### Serious issues reported
+
+Listed, not scored: each is one guest's report and needs a look.
+
+- Health, review 5: "The bathroom had mold in the corner."
 
 ## 3. Actions
 
-1. **Inspect rooms for damp and mold, then fix moisture sources** Impact High, effort Medium. Reviews report musty damp carpet and bathroom mold, and cleanliness is a mixed theme across 11 reviews. Reviews 2, 5.
-2. **Service and test every room heater before the cold season** Impact High, effort Medium. Guests report a rattling heater and a heater that failed on a cold night, with staff unable to move them. Reviews 8, 17.
-3. **Add a housekeeping checklist with a supervisor spot-check per room** Impact Medium, effort Low. One guest found trash still in the bin and another a moldy bathroom, while most others call rooms spotless, so consistency is the gap. Reviews 5, 14, 2.
-4. **Upgrade wifi coverage and capacity for evening and work-call use** Impact Medium, effort Low. Both guests who mention wifi report evening dropouts or slowness for work calls, and it scores 1 of 5. Reviews 6, 13.
-5. **Set a baseline breakfast menu with hot items and restock plan** Impact Medium, effort Medium. Praise for cinnamon rolls sits beside reports of packaged muffins, minimal choice, and food running out by eight. Reviews 2, 3, 11, 17, 7.
+1. **Add a room inspection checklist to housekeeping routines** Impact High, effort Low. Most guests found rooms spotless, but review 14 found trash left in the bin and others reported mold and mustiness, so cleaning quality is inconsistent. Reviews 14, 5, 2, 7, 18.
+2. **Inspect and remediate mold and damp in affected bathrooms and carpets** Impact High, effort Medium. Review 5 reported mold in the bathroom corner and review 2 a musty smell and damp carpet, a health issue behind the 3 of 5 cleanliness score. Reviews 5, 2.
+3. **Expand breakfast with hot items and restock before 8 am** Impact High, effort Medium. Breakfast scored 2 of 5, with complaints of packaged muffins, few hot options and running out of food, while the cinnamon rolls and pastries were praised. Reviews 2, 3, 11, 17, 7, 20.
+4. **Set front desk standards for phone answering and noise complaints** Impact Medium, effort Low. Guests reported an unanswered desk phone, slow check-in and no action on late-night noise, despite warm staff overall. Reviews 5, 4, 14, 17.
+5. **Service and replace faulty room heaters before the cold season** Impact Medium, effort Medium. Reviews 8 and 17 report a rattling heater and a heater that did not work on a cold night, and staff could not move the guest. Reviews 8, 17, 11, 16.
 
 ## 4. Authenticity findings
 

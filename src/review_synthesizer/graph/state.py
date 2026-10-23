@@ -72,17 +72,35 @@ class Theme:
     evidence: list[str] = field(default_factory=list)
     """Short phrases quoted exactly from the cited reviews (checked, not trusted)."""
     review_ids: list[ReviewId] = field(default_factory=list)
+    aspect: Aspect = "other"
+    """The one aspect the theme is about."""
 
 
 @dataclass(frozen=True)
 class AspectScore:
-    """Score 1 to 5 on the anchored bands in :mod:`.prompts`, from verified reviews only."""
+    """Score 1 to 5 computed from the verified reviews' claims (:mod:`.scorecard`).
+
+    ``score`` is ``None`` when only one review mentions the aspect: listed, not scored.
+    """
 
     aspect: Aspect
-    score: int
+    score: int | None
     review_count: int
     evidence: str
     review_ids: list[ReviewId] = field(default_factory=list)
+    positive: int = 0
+    mixed: int = 0
+    negative: int = 0
+
+
+@dataclass(frozen=True)
+class SeriousIssue:
+    """A report of a health or safety problem or a stay cut short: listed, never scored."""
+
+    kind: Literal["health", "safety", "stay cut short"]
+    review_id: ReviewId
+    quote: str
+    """Quoted exactly from the review (checked, not trusted)."""
 
 
 @dataclass(frozen=True)
@@ -121,6 +139,7 @@ class BriefState(TypedDict, total=False):
     rating: RatingSummary
     themes: list[Theme]
     aspect_scores: list[AspectScore]
+    serious_issues: list[SeriousIssue]
     actions: list[Action]
     decisions: dict[str, bool]
     """Operator decision per flag key: ``True`` confirmed, ``False`` dismissed."""

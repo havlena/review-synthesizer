@@ -9,6 +9,8 @@ enforces; nodes check those in code.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from .state import Aspect, Level, Polarity
@@ -39,23 +41,32 @@ class PairVerdict(BaseModel):
 
 class ThemeOut(BaseModel):
     name: str = Field(description="Two to five words, for example 'Thin walls and noise'.")
+    aspect: Aspect = Field(description="The one aspect this theme is about.")
     sentiment: Polarity
-    review_ids: list[str] = Field(description="Ids of every review that supports the theme.")
+    review_ids: list[str] = Field(
+        description="Ids of every review that supports the theme; at least two."
+    )
     evidence: list[str] = Field(
         description="Two or three short phrases copied exactly from the cited reviews."
     )
 
 
-class AspectScoreOut(BaseModel):
+class AspectEvidenceOut(BaseModel):
     aspect: Aspect
-    score: int = Field(description="1 to 5 on the bands in the instructions.")
-    review_ids: list[str] = Field(description="Ids of the reviews that speak to this aspect.")
-    evidence: str = Field(description="One line saying what the reviews report.")
+    evidence: str = Field(description="One line saying what the reviews report on it.")
+    review_ids: list[str] = Field(description="Ids of the reviews the line draws on.")
+
+
+class SeriousIssueOut(BaseModel):
+    kind: Literal["health", "safety", "stay cut short"]
+    review_id: str
+    quote: str = Field(description="The guest's words, copied exactly from that review.")
 
 
 class Synthesis(BaseModel):
     themes: list[ThemeOut]
-    aspect_scores: list[AspectScoreOut]
+    aspect_evidence: list[AspectEvidenceOut]
+    serious_issues: list[SeriousIssueOut]
 
 
 class ActionOut(BaseModel):

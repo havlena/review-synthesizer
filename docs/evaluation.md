@@ -189,6 +189,29 @@ property that mention the same features, and must be prompted exactly as the gra
 The signal finds two to four in ten rewritten pairs on this set; it is a partial signal whose
 joins still go to a person.
 
+## Synthesis stability on one input (step 5)
+
+The end to end runs showed the synthesis moving between runs on the same 20 verified
+reviews: 13 themes then 9, cleanliness scored 1 then 3 (one mold report under the old "serious
+problem" band), one-review themes. Three changes, measured with two runs before and two after
+on the same verified set (`evals/results/run_graph_harbor_light.md`, "Synthesis variance"):
+
+- Aspect scores are computed in code from the extracted claims (`graph/scorecard.py`): each
+  verified review takes one stance per aspect, the share of negative stances (mixed counting
+  half) sets the score, and an aspect needs two reviews. The bands are a design choice in
+  the capstone rubric's style, not measured.
+- Serious issues (health, safety, a stay cut short) are a separate list with verbatim quotes,
+  never a score override.
+- Themes name one aspect, cite at least two verified reviews, at most eight.
+
+Result: aspect scores equal in 10 of 10 aspects between the two after runs, against 8 of 10
+between the two before runs (other 3 vs 4, parking 2 vs 1). The serious issue (mold, review 5)
+was found in both after runs. Theme counts were 8 and 8, against 9 and 10. Themes with
+identical review id sets fell from 8 to 3 per pair: the constrained themes are broader (7 to
+10 reviews each), and an exact id set of that size repeats less often than a small one; this
+reading is not tested. Action titles were reworded in every run, before and after; the topics
+held. Two runs per condition show what moves; they are not a distribution.
+
 Known behaviour, visible in the report: the rating burst rule is timing only, so a genuine
 review posted within four days of a planted cluster is flagged with it. That is the Module
 6 false positive risk, and it is why every flag goes to a person with its reason attached

@@ -12,7 +12,9 @@ note says so: this is an evaluation run against the golden result, not an operat
 Needs ANTHROPIC_API_KEY (read from .env) and the network; it spends API credit. The
 embedding model is downloaded into the Hugging Face cache on first use.
 
-Inputs: tests/fixtures/harbor_light_inn.json (or --fixture).
+Inputs: tests/fixtures/harbor_light_inn.json (or --fixture). --before label=path (repeatable)
+adds earlier brief JSON files on the same input to the run report's before and after
+comparison of the synthesis; they are read before anything is written.
 Outputs, under evals/results/ (or --out-dir):
   brief_harbor_light.md and .json          the brief of run 1
   run_graph_harbor_light.md and .json      the run report over all runs
@@ -71,7 +73,12 @@ def main() -> int:
     parser.add_argument("--classifier", type=Path, default=ROOT / "models/ott_deception.joblib")
     parser.add_argument("--runs", type=int, default=2)
     parser.add_argument("--out-dir", type=Path, default=ROOT / "evals/results")
+    parser.add_argument("--before", action="append", default=[], metavar="LABEL=PATH")
     args = parser.parse_args()
+    before = []
+    for item in args.before:
+        label, _, path = item.partition("=")
+        before.append((label, json.loads(Path(path).read_text(encoding="utf-8"))))
 
     load_dotenv(ROOT / ".env")
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -114,9 +121,9 @@ def main() -> int:
             f"{len(brief.data['authenticity']['flags'])} flags"
         )
 
-    report = summarize(rows, [b.data for b in briefs], usages, limits=LIMITS)
+    report = summarize(rows, [b.data for b in briefs], usages, limits=LIMITS, before=before)
 
-    out = args.out_dir
+    out = args.out_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
     files = {
         "brief_harbor_light.md": briefs[0].markdown,

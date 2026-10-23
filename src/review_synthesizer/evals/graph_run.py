@@ -116,6 +116,61 @@ def _differences(r1: dict[str, Any], r2: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _theme_sets(data: dict[str, Any]) -> list[frozenset]:
+    return [frozenset(map(str, t["review_ids"])) for t in data["themes"]]
+
+
+def _same_theme_sets(a: dict[str, Any], b: dict[str, Any]) -> int:
+    """Themes of run a whose exact set of review ids is also a theme of run b."""
+    other = set(_theme_sets(b))
+    return sum(1 for s in _theme_sets(a) if s in other)
+
+
+def variance(labelled: Sequence[tuple[str, dict[str, Any]]]) -> dict[str, Any]:
+    """The synthesis on the points that should not move between runs on the same input."""
+    runs = [
+        {
+            "label": label,
+            "themes": len(d["themes"]),
+            "theme_names": [t["name"] for t in d["themes"]],
+            "scores": {s["aspect"]: s["score"] for s in d["aspect_scores"]},
+            "serious_issues": [
+                f"{i['kind']}, review {i['review_id']}" for i in d.get("serious_issues", [])
+            ],
+            "actions": [a["title"] for a in d["actions"]],
+        }
+        for label, d in labelled
+    ]
+    pairs = []
+    for k in range(0, len(labelled) - 1, 2):
+        (la, a), (lb, b) = labelled[k], labelled[k + 1]
+        sa = {s["aspect"]: s["score"] for s in a["aspect_scores"]}
+        sb = {s["aspect"]: s["score"] for s in b["aspect_scores"]}
+        aspects = sorted(set(sa) | set(sb))
+        pairs.append(
+            {
+                "runs": [la, lb],
+                "same_theme_sets": _same_theme_sets(a, b),
+                "themes": [len(a["themes"]), len(b["themes"])],
+                "same_scores": sum(1 for x in aspects if sa.get(x) == sb.get(x)),
+                "aspects": len(aspects),
+                "different_scores": [
+                    {"aspect": x, la: sa.get(x), lb: sb.get(x)}
+                    for x in aspects
+                    if sa.get(x) != sb.get(x)
+                ],
+                "same_serious_issues": sorted(
+                    {f"{i['kind']}, review {i['review_id']}" for i in a.get("serious_issues", [])}
+                    & {f"{i['kind']}, review {i['review_id']}" for i in b.get("serious_issues", [])}
+                ),
+                "same_action_titles": len(
+                    {t["title"] for t in a["actions"]} & {t["title"] for t in b["actions"]}
+                ),
+            }
+        )
+    return {"runs": runs, "pairs": pairs}
+
+
 @dataclass
 class GraphRunReport:
     created_at: str
@@ -129,6 +184,8 @@ class GraphRunReport:
     differences: dict[str, Any] | None
     tokens: dict[str, Any]
     limits: list[str] = field(default_factory=list)
+    variance: dict[str, Any] | None = None
+    """Before and after comparison of the synthesis, when earlier briefs are given."""
 
     @property
     def headline(self) -> dict[str, Any]:
@@ -248,6 +305,8 @@ class GraphRunReport:
                     f"{'yes' if d['same_action_order'] else 'no'}."
                 ),
             ]
+        if self.variance:
+            lines += self._variance_lines()
         lines += [
             "",
             "## Cost (measured tokens)",
@@ -288,6 +347,54 @@ class GraphRunReport:
         ]
         return "\n".join(lines) + "\n"
 
+    def _variance_lines(self) -> list[str]:
+        v = self.variance
+        runs = v["runs"]
+        labels = [r["label"] for r in runs]
+        lines = [
+            "",
+            "## Synthesis variance, before and after",
+            "",
+            ("Same input (the 20 verified Harbor Light reviews) in every run. Before: the model "
+            "chose aspect scores; after: scores are computed from the claims, serious issues are "
+            "listed separately, and themes need one aspect, two verified reviews, at most eight."),
+            "",
+            "| | " + " | ".join(labels) + " |",
+            "|---|" + "---|" * len(labels),
+            "| Themes | " + " | ".join(str(r["themes"]) for r in runs) + " |",
+        ]
+        aspects = list(dict.fromkeys(a for r in runs for a in r["scores"]))
+        for a in aspects:
+            cells = []
+            for r in runs:
+                s = r["scores"].get(a, "-")
+                cells.append("unscored" if s is None else str(s))
+            lines.append(f"| {a} | " + " | ".join(cells) + " |")
+        lines.append(
+            "| Serious issues | " + " | ".join(str(len(r["serious_issues"])) for r in runs) + " |"
+        )
+        lines.append("| Actions | " + " | ".join(str(len(r["actions"])) for r in runs) + " |")
+        lines += ["", "Within each pair of runs:", ""]
+        for p in v["pairs"]:
+            a, b = p["runs"]
+            diff = "; ".join(
+                f"{d['aspect']} {d[a] if d[a] is not None else 'unscored'} vs "
+                f"{d[b] if d[b] is not None else 'unscored'}"
+                for d in p["different_scores"]
+            )
+            lines.append(
+                f"- {a} and {b}: {p['same_theme_sets']} theme(s) with identical review id sets "
+                f"(of {p['themes'][0]} and {p['themes'][1]}); {p['same_scores']} of "
+                f"{p['aspects']} aspect scores equal"
+                + (f" (differ: {diff})" if diff else "")
+                + f"; serious issues in both: {', '.join(p['same_serious_issues']) or 'none'}; "
+                f"identical action titles: {p['same_action_titles']}."
+            )
+        for r in runs:
+            if r["serious_issues"]:
+                lines.append(f"- Serious issues, {r['label']}: {'; '.join(r['serious_issues'])}.")
+        return lines
+
 
 def summarize(
     fixture_rows: Sequence[Mapping[str, Any]],
@@ -296,7 +403,10 @@ def summarize(
     *,
     settings: Mapping[str, str] | None = None,
     limits: Sequence[str] = (),
+    before: Sequence[tuple[str, dict[str, Any]]] = (),
 ) -> GraphRunReport:
+    """Report on the runs; with ``before`` (labelled earlier briefs on the same input), also
+    compare the synthesis before and after on the points that should not move."""
     intent = {r["id"]: r.get("intent") for r in fixture_rows}
     runs = [
         _run(k, data, intent, usage)
@@ -326,4 +436,9 @@ def summarize(
             "prices_as_of": PRICES_AS_OF,
         },
         limits=list(limits),
+        variance=variance(
+            [*before, *((f"after {k}", d) for k, d in enumerate(briefs_data, start=1))]
+        )
+        if before
+        else None,
     )

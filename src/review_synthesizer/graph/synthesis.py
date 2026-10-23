@@ -2,7 +2,7 @@
 
 The model's answer is validated against a schema first; these functions then apply the
 checks a schema cannot: every cited review must be in the verified set, every quoted
-phrase must appear in a cited review, every score must be on the 1 to 5 scale. What fails
+phrase must appear in a cited review, a theme needs two verified reviews. What fails
 is left out and counted in a note, never repaired by guessing. Ranking is done here, not
 by the model, so the same items always come out in the same order.
 
@@ -17,23 +17,14 @@ from collections.abc import Sequence
 
 from review_synthesizer.authenticity import Review, ReviewId
 
-from .schemas import ActionOut, AspectScoreOut, ThemeOut
-from .state import Action, AspectScore, Theme
+from .schemas import ActionOut, AspectEvidenceOut, SeriousIssueOut, ThemeOut
+from .state import Action, SeriousIssue, Theme
 
-ASPECT_ORDER = (
-    "cleanliness",
-    "service",
-    "breakfast",
-    "room comfort",
-    "value",
-    "location",
-    "noise",
-    "parking",
-    "wifi",
-    "amenities",
-    "other",
-)
-"""Scorecard order: the capstone scorecard's six aspects first, then the v2 additions."""
+MIN_THEME_REVIEWS = 2
+"""Verified reviews a theme must cite; one review is an anecdote, not a theme. Design choice."""
+
+MAX_THEMES = 8
+"""Themes kept, largest first. A design choice for a one page brief, not measured."""
 
 MAX_ACTIONS = 5
 """Length of the action list. A design choice for a one page brief, not measured."""
@@ -83,58 +74,84 @@ def _unknown_note(n: int, where: str) -> list[str]:
 def clean_themes(
     raw: Sequence[ThemeOut], verified: Sequence[Review]
 ) -> tuple[list[Theme], list[str]]:
-    """Themes with verified support only, quotes checked, ranked by supporting reviews."""
+    """Themes about one aspect, each with at least two verified supporting reviews and quotes
+    checked, ranked by supporting reviews, at most eight."""
     ids = _Ids(verified)
     themes: list[Theme] = []
-    dropped_quotes = dropped_themes = 0
+    dropped_quotes = too_thin = 0
     for t in raw:
         review_ids = ids.resolve(t.review_ids)
-        if not review_ids or not t.name.strip():
-            dropped_themes += 1
+        if len(review_ids) < MIN_THEME_REVIEWS or not t.name.strip():
+            too_thin += 1
             continue
         texts = ids.texts(review_ids)
         evidence = [q.strip() for q in t.evidence if _quoted_in(q, texts)]
         dropped_quotes += len(t.evidence) - len(evidence)
-        themes.append(Theme(t.name.strip(), len(review_ids), t.sentiment, evidence, review_ids))
+        themes.append(
+            Theme(t.name.strip(), len(review_ids), t.sentiment, evidence, review_ids, t.aspect)
+        )
     themes.sort(key=lambda t: -t.count)  # stable: the model's order breaks ties
+    extra = max(0, len(themes) - MAX_THEMES)
 
     notes = _unknown_note(ids.unknown, "themes")
-    if dropped_themes:
+    if too_thin:
         notes.append(
-            f"{dropped_themes} theme(s) had no verified supporting review and were left out."
+            f"{too_thin} theme(s) cited fewer than {MIN_THEME_REVIEWS} verified reviews and "
+            "were left out."
         )
+    if extra:
+        notes.append(f"{extra} smaller theme(s) beyond the first {MAX_THEMES} were left out.")
     if dropped_quotes:
         notes.append(
             f"{dropped_quotes} quoted phrase(s) did not appear in the cited reviews and were "
             "left out of the theme evidence."
         )
-    return themes, notes
+    return themes[:MAX_THEMES], notes
 
 
-def clean_scores(
-    raw: Sequence[AspectScoreOut], verified: Sequence[Review]
-) -> tuple[list[AspectScore], list[str]]:
-    """One score per aspect on the 1 to 5 scale, with verified support, in scorecard order."""
+def clean_aspect_evidence(
+    raw: Sequence[AspectEvidenceOut], verified: Sequence[Review]
+) -> tuple[dict[str, str], list[str]]:
+    """One evidence line per scored aspect, kept only if it cites a verified review."""
     ids = _Ids(verified)
-    by_aspect: dict[str, AspectScore] = {}
+    lines: dict[str, str] = {}
     dropped = 0
-    for s in raw:
-        review_ids = ids.resolve(s.review_ids)
-        if s.aspect in by_aspect or not 1 <= s.score <= 5 or not review_ids:
+    for e in raw:
+        if e.aspect == "other" or e.aspect in lines or not ids.resolve(e.review_ids):
             dropped += 1
             continue
-        by_aspect[s.aspect] = AspectScore(
-            s.aspect, s.score, len(review_ids), s.evidence.strip(), review_ids
-        )
-    scores = [by_aspect[a] for a in ASPECT_ORDER if a in by_aspect]
-
-    notes = _unknown_note(ids.unknown, "aspect scorecard")
+        lines[e.aspect] = e.evidence.strip()
+    notes = _unknown_note(ids.unknown, "aspect evidence")
     if dropped:
         notes.append(
-            f"{dropped} aspect score(s) were left out: off the 1 to 5 scale, repeated, or "
-            "without a verified supporting review."
+            f"{dropped} aspect evidence line(s) were left out: repeated, about 'other', or "
+            "without a verified review."
         )
-    return scores, notes
+    return lines, notes
+
+
+def clean_serious_issues(
+    raw: Sequence[SeriousIssueOut], verified: Sequence[Review]
+) -> tuple[list[SeriousIssue], list[str]]:
+    """Serious issues whose review is verified and whose quote appears in it, once each."""
+    ids = _Ids(verified)
+    issues: list[SeriousIssue] = []
+    dropped = 0
+    for i in raw:
+        found = ids.resolve([i.review_id])
+        if not found or not _quoted_in(i.quote, ids.texts(found)):
+            dropped += 1
+            continue
+        issue = SeriousIssue(i.kind, found[0], i.quote.strip())
+        if issue not in issues:
+            issues.append(issue)
+    notes = _unknown_note(ids.unknown, "serious issues")
+    if dropped:
+        notes.append(
+            f"{dropped} serious issue report(s) were left out: the review was not verified or "
+            "the quote did not appear in it."
+        )
+    return issues, notes
 
 
 def clean_actions(
