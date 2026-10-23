@@ -95,6 +95,12 @@ language model step. The 0.85 threshold was set with the margin observed on synt
 it must be re-checked on operator data, where honest reviews of one property will be more
 alike than these.
 
+Known behaviour, visible in the report: the rating burst rule is timing only, so a genuine
+review posted within four days of a planted cluster is flagged with it. That is the Module
+6 false positive risk, and it is why every flag goes to a person with its reason attached
+rather than acting on its own. The v1 rule also merged every burst of one rating into a
+single entry; v2 reports separate bursts separately, with the golden result unchanged.
+
 ## Claim duplicates: extraction plus a pairwise model judgment (step 5)
 
 Same set, same pair level ground truth (18 true pairs, 258 negatives). The signal has two
@@ -186,8 +192,8 @@ of specific claims shared by the pairs judged the same (1 is low, 2 medium, 3 or
 
 Standing requirement: any held out set for this signal must include honest reviews of one
 property that mention the same features, and must be prompted exactly as the graph prompts.
-The signal finds two to four in ten rewritten pairs on this set; it is a partial signal whose
-joins still go to a person.
+At the default the signal joins 3 of the 18 rewritten pairs on this set, in each of two runs;
+it is a partial signal whose joins still go to a person.
 
 ## Synthesis stability on one input (step 5)
 
@@ -206,17 +212,15 @@ on the same verified set (`evals/results/run_graph_harbor_light.md`, "Synthesis 
 
 Result: aspect scores equal in 10 of 10 aspects between the two after runs, against 8 of 10
 between the two before runs (other 3 vs 4, parking 2 vs 1). The serious issue (mold, review 5)
-was found in both after runs. Theme counts were 8 and 8, against 9 and 10. Themes with
-identical review id sets fell from 8 to 3 per pair: the constrained themes are broader (7 to
-10 reviews each), and an exact id set of that size repeats less often than a small one; this
-reading is not tested. Action titles were reworded in every run, before and after; the topics
-held. Two runs per condition show what moves; they are not a distribution.
+was found in both after runs. Theme counts were 8 and 8, against 9 and 10. Action titles
+were reworded in every run, before and after; the topics held. Two runs per condition show
+what moves; they are not a distribution.
 
-Known behaviour, visible in the report: the rating burst rule is timing only, so a genuine
-review posted within four days of a planted cluster is flagged with it. That is the Module
-6 false positive risk, and it is why every flag goes to a person with its reason attached
-rather than acting on its own. The v1 rule also merged every burst of one rating into a
-single entry; v2 reports separate bursts separately, with the golden result unchanged.
+Limit: theme membership is less stable after the change. Themes with identical review id sets
+fell from 8 per pair of runs to 3. The likely cause, untested: the constrained themes are
+broader (7 to 10 reviews each), and an exact set of that size repeats less often than a small
+one. Theme topics held across runs; names and exact membership moved. No further tuning in
+step 5.
 
 ## What a good number does not mean
 
@@ -237,5 +241,5 @@ there is an operator.
 - A held out set for the claim duplicate signal, written separately from the detector, with
   rewritten duplicates and honest reviews of one property that mention the same features,
   prompted exactly as the graph prompts.
-- End to end evals of the graph: a golden set of batches with expected flags, themes and
-  actions, scored on every run and traced in LangSmith.
+- End to end evals of the graph traced in LangSmith (step 7): a golden set of batches with
+  expected flags, themes and actions, scored on every run.

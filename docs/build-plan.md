@@ -9,13 +9,31 @@ is added, a measured result under `evals/results/`.
 | 2 | Repository and git | done |
 | 3 | Port the detector rules to Python with golden tests | done |
 | 4 | Ott corpus, deceptive language classifier, embedding similarity, composite detector, evals | done |
-| 5 | LangGraph graph: claims, verified set, themes, actions, human approval | next |
-| 6 | FastAPI service, Postgres with migrations, Docker Compose, MCP server for the detector | |
+| 5 | LangGraph graph: claims, verified set, themes, actions, human approval | done |
+| 6 | FastAPI service, Postgres with migrations, Docker Compose, MCP server for the detector | next |
 | 7 | LangSmith tracing, GitHub Actions CI running tests and fixture evals | |
 | 8 | Deployment: container on a cloud host, production database on a new Supabase org | |
 | 9 | Operator UI: upload a batch, review flags with reasons, approve, read the brief | |
 
 ## Step 5: the graph
+
+**Done** (October 2026). What was built differs from this plan in measured ways, each recorded
+in `docs/evaluation.md`: the embedding threshold rose to 0.85 after the end to end run; the
+claim duplicate default (2 shared claims, strict judge) is an author decision over the
+ablation's recall rule; aspect scores are computed from claims rather than chosen by the
+model, with serious issues listed apart; the API rejects sampling parameters, so stability
+is measured by repeated runs rather than temperature 0. Migration 0002 came with this step.
+
+Commits, in order: 8ecc288 graph skeleton; 97d4c69 lint for current ruff; 82f13e0 commit
+trailer rule; 1be1df6 batch validation and authenticity node; cc00784 claim extraction;
+8de1ab8 claim duplicates and migration 0002; aab3a24 verified set and human review
+interrupt; 6838c62 themes, scores and actions; 5439497 compose_brief and run_brief;
+7654db0 live claim evaluation; 61ab971 first claim ablation; e2526dd first end to end run
+(verified 3.4); 99c081d embedding threshold 0.85, negative control, margin bands; 8173b18
+end to end re-run; 1666e25 ablation with the Harbor Light control; 0cb0733 end to end
+re-run; 91ceaaa claim default by decision, prompts matching the graph; 7a2b779 end to end
+at the new default (verified 3.5); edfd3fc scorecard from claims, serious issues, constrained
+themes; then the README and documentation commit that closes the step.
 
 Package `src/review_synthesizer/graph/`. Framework: LangGraph with `langchain-anthropic`.
 Model names come from the environment (`ANTHROPIC_MODEL` for the main calls,

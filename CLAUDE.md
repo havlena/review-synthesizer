@@ -7,11 +7,16 @@ measured and reported.
 ## What this is
 
 An operator brief from guest reviews for independent lodging, with an authenticity layer
-that flags coordinated review manipulation. Started as an M.S. capstone (ASU, CIS 576,
-summer 2026); v2 is a production style rebuild. Steps 1 to 4 are done: the detector
+that flags coordinated review manipulation. Started as an ASU CIS 576 project (summer
+2026); v2 is a production style rebuild. Steps 1 to 5 are done: the detector
 (`src/review_synthesizer/authenticity/`) runs four signals through one `detect()` call,
-each measured, each flag carrying a score, a band and a written reason. Step 5 onward is
-the LangGraph graph, the API, Docker, tracing, CI, deployment and the operator UI.
+each measured, each flag carrying a score, a band and a written reason; the LangGraph graph
+(`src/review_synthesizer/graph/`) adds claim extraction, claim duplicates, a scorecard
+computed from claims, themes and actions, and a human interrupt before the brief, all
+behind `run_brief()`. Step 6 onward is the API, Docker, tracing, CI, deployment and the
+operator UI. Settings changed by measurement or decision in step 5 are recorded in
+`docs/evaluation.md`; the claim duplicate signal is not to be tuned further without a held
+out set.
 
 ## Environment
 
